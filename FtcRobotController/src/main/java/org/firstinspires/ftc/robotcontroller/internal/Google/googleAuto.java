@@ -161,14 +161,14 @@ public class googleAuto extends LinearOpMode {
     }
 
     public void doImageL() {
-        Log.i("Hi", "JHewre");
+        Log.i("Hi", "Heee");
     }
 
     public void doImageC() {
-        Log.i("Hi", "JHee");
+        Log.i("Hi", "Hee");
     }
 
     public void doImageR() {
-        Log.i("Hi", "JHe");
+        Log.i("Hi", "He");
     }
 }
