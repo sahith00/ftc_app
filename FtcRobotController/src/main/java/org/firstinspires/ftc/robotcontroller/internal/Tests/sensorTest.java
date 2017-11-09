@@ -17,9 +17,9 @@ public class sensorTest extends LinearOpMode {
         String move = "NONE";
         waitForStart();
         while(opModeIsActive()) {
-            if (sensor.red() > 11 || sensor.blue() < 2) {
+            if (sensor.red() > sensor.blue()) {
                 move = "RIGHT";
-            } else if (sensor.blue() > 11 || sensor.red() < 2) {
+            } else if (sensor.blue() > sensor.red()) {
                 move = "LEFT";
             } else {
                 move = "NONE";

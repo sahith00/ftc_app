@@ -23,7 +23,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 /**
  * Created by sahith on 11/2/17.
  */
-public class googleAuto extends LinearOpMode {
+public class googleAutoRed extends LinearOpMode {
     Servo cat, knock;
     ColorSensor jewelSensor;
     DcMotor fr, fl, br, bl;
@@ -41,6 +41,13 @@ public class googleAuto extends LinearOpMode {
 
     String imageDetected;
 
+    double CAT_STOW = 0.34;
+    double CAT_EXTEND = 0.61;
+
+    double KNOCK_CENTER = 0.38;
+    double KNOCK_LEFT = 0.33;
+    double KNOCK_RIGHT = 0.43;
+
     @Override
     public void runOpMode() throws InterruptedException {
         cat = hardwareMap.servo.get("cat");
@@ -48,62 +55,65 @@ public class googleAuto extends LinearOpMode {
 
         jewelSensor = hardwareMap.colorSensor.get("jewelSensor");
 
-        fr = hardwareMap.dcMotor.get("frdrive");
-        fl = hardwareMap.dcMotor.get("fldrive");
-        br = hardwareMap.dcMotor.get("brdrive");
-        bl = hardwareMap.dcMotor.get("bldrive");
+        //fr = hardwareMap.dcMotor.get("frdrive");
+        //fl = hardwareMap.dcMotor.get("fldrive");
+        //br = hardwareMap.dcMotor.get("brdrive");
+        //bl = hardwareMap.dcMotor.get("bldrive");
 
-        fr.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        fl.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        br.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        bl.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        //fr.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        //fl.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        //br.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        //bl.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        cat.setPosition(0.0);                                           //FILL IN WITH CORRECT POSITION
-        knock.setPosition(0.3);                                         //FILL IN WITH CORRECT POSITION
+        cat.setPosition(CAT_STOW);    //stow
+        knock.setPosition(KNOCK_CENTER);    //center
 
-        setupVuforia(0);
+        //setupVuforia(0);
 
-        lastKnownLocation = createMatrix(0, 0, 0, 0, 0, 0);             // Coordinates are in millimeters and are based off of the center of the robot
+        //lastKnownLocation = createMatrix(0, 0, 0, 0, 0, 0);             // Coordinates are in millimeters and are based off of the center of the robot
 
         waitForStart();
 
-        cat.setPosition(1.0);                                           //FILL IN WITH CORRECT POSITION
+        cat.setPosition(CAT_EXTEND);      //extend
+        sleep(1000);
         jewelAuto(jewelSensor, knock);
-        cat.setPosition(0.0);                                           //FILL IN WITH CORRECT POSITION
+        cat.setPosition(CAT_STOW);     //stow
+        sleep(1000);
 
-        drive();
-        imageDetected = doVuforia();
-        if(imageDetected == "L") {
-            doImageL();
-        }
-        else if(imageDetected == "R") {
-            doImageR();
-        }
-        else if(imageDetected == "C") {
-            doImageC();
-        }
+//        drive();
+//        imageDetected = doVuforia();
+//        if(imageDetected == "L") {
+//            doImageL();
+//        }
+//        else if(imageDetected == "R") {
+//            doImageR();
+//        }
+//        else if(imageDetected == "C") {
+//            doImageC();
+//        }
 
         telemetry.update();
     }
 
     public void jewelAuto(ColorSensor sensor, Servo servo) {
-        servo.setPosition(0.3);                                         //FILL IN WITH CORRECT POSITION
-        if (sensor.red() > 11 || sensor.blue() < 2) {
-            servo.setPosition(0);                                       //FILL IN WITH CORRECT POSITION
-        } else if (sensor.blue() > 11 || sensor.red() < 2) {
-            servo.setPosition(1);                                       //FILL IN WITH CORRECT POSITION
-        } else {
-            servo.setPosition(0.3);                                     //FILL IN WITH CORRECT POSITION
+        if (sensor.red() > sensor.blue()) {
+            servo.setPosition(KNOCK_LEFT);    //left
+            sleep(1000);
+        } else if (sensor.blue() > sensor.red()) {
+            servo.setPosition(KNOCK_RIGHT);      //right
+            sleep(1000);
         }
+        servo.setPosition(KNOCK_CENTER);
+        sleep(1000);
         telemetry.addData("Red value", sensor.red());
         telemetry.addData("Blue value", sensor.blue());
     }
 
     public void drive(/*for a certain distance*/) {
-        fr.setPower(1.0);
-        fl.setPower(1.0);
-        br.setPower(1.0);
-        bl.setPower(1.0);
+//        fr.setPower(1.0);
+//        fl.setPower(1.0);
+//        br.setPower(1.0);
+//        bl.setPower(1.0);
     }
 
     public void setupVuforia(int image) {
