@@ -31,15 +31,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
 package org.firstinspires.ftc.robotcontroller.internal;
 
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpModeManager;
 import com.qualcomm.robotcore.eventloop.opmode.OpModeRegister;
-import com.qualcomm.robotcore.hardware.configuration.UserConfigurationType;
 
 import org.firstinspires.ftc.robotcontroller.external.samples.ConceptNullOp;
 import org.firstinspires.ftc.robotcontroller.internal.Google.googleAutoBlue;
 import org.firstinspires.ftc.robotcontroller.internal.Google.googleAutoRed;
-import org.firstinspires.ftc.robotcontroller.internal.Tests.tempTest;
 import org.firstinspires.ftc.robotcore.internal.opmode.OpModeMeta;
 
 /**
@@ -74,6 +71,5 @@ public class FtcOpModeRegister implements OpModeRegister {
          */
         manager.register(new OpModeMeta("Google Auto Blue", OpModeMeta.Flavor.AUTONOMOUS), googleAutoBlue.class);
         manager.register(new OpModeMeta("Google Auto Red", OpModeMeta.Flavor.AUTONOMOUS), googleAutoRed.class);
-        manager.register(new OpModeMeta("temp", OpModeMeta.Flavor.AUTONOMOUS), tempTest.class);
     }
 }
