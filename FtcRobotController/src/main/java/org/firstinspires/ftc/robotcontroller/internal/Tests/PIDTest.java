@@ -5,6 +5,8 @@ import android.util.Log;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
@@ -14,6 +16,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 public class PIDTest extends LinearOpMode {
+    DcMotor fr, fl, br, bl;
 
     ElapsedTime runtime = new ElapsedTime();
 
@@ -28,6 +31,22 @@ public class PIDTest extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
+        fr = hardwareMap.dcMotor.get("frdrive");
+        fl = hardwareMap.dcMotor.get("fldrive");
+        br = hardwareMap.dcMotor.get("brdrive");
+        bl = hardwareMap.dcMotor.get("bldrive");
+
+        fr.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        fl.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        br.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        bl.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        fr.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        fl.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        br.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        bl.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        fl.setDirection(DcMotorSimple.Direction.REVERSE);
+        bl.setDirection(DcMotorSimple.Direction.REVERSE);
+
         parameters = new BNO055IMU.Parameters();
         parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
         parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
@@ -44,9 +63,9 @@ public class PIDTest extends LinearOpMode {
 
         waitForStart();
 
-        startDegreeController();
-
         temp = degreeController(orientation.firstAngle);
+        sleep(1000);
+        turn(180, 5);
     }
 
     public void update(){
@@ -109,5 +128,40 @@ public class PIDTest extends LinearOpMode {
         tE = Range.clip(tE * i_turn, -.15, 0.15);///i_turn;
         ans = Range.clip(ans, 0, .7);
         return ans;
+    }
+
+    public void turn(double degree, double margin) {
+        startDegreeController();
+        double pYaw = yaw;
+        while (Math.abs(getDifference(yaw, degree)) > margin || Math.abs(pYaw - yaw) > .05) {
+            Log.i("debug: ", "yaw: " + yaw);
+            Log.i("debug: ", "difference: " + getDifference(yaw, degree));
+            Log.i("debug", "target: " + degree + " cur: " + yaw);
+            double change = degreeController(degree);
+            double forwardPower = Range.clip(change, -1, 1);
+            double backPower = Range.clip(-change, -1, 1);
+            Log.i("powers", "forward: " + forwardPower);
+            Log.i("powers", "backward: " + backPower);
+            Log.i("debug: ", "difference: " + getDifference(yaw, degree));
+            if (getDifference(yaw, degree) > 0) {
+                fr.setPower(backPower);
+                br.setPower(backPower);
+                fl.setPower(forwardPower);
+                bl.setPower(forwardPower);
+            } else {
+                fr.setPower(forwardPower);
+                br.setPower(forwardPower);
+                fl.setPower(backPower);
+                bl.setPower(backPower);
+            }
+            Log.i("hey", "yaw: " + yaw);
+            Log.i("degree", "degree: " + degree);
+            pYaw = yaw;
+            update();
+        }
+        fr.setPower(0);
+        br.setPower(0);
+        fl.setPower(0);
+        bl.setPower(0);
     }
 }
