@@ -41,6 +41,13 @@ public class googleAutoBlue extends LinearOpMode {
 
     String imageDetected;
 
+    double CAT_STOW = 0.34;
+    double CAT_EXTEND = 0.61;
+
+    double KNOCK_CENTER = 0.38;
+    double KNOCK_LEFT = 0.33;
+    double KNOCK_RIGHT = 0.43;
+
     @Override
     public void runOpMode() throws InterruptedException {
         cat = hardwareMap.servo.get("cat");
@@ -58,8 +65,8 @@ public class googleAutoBlue extends LinearOpMode {
         br.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         bl.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        cat.setPosition(0.345);    //stow
-        knock.setPosition(0.38);    //center
+        cat.setPosition(CAT_STOW);    //stow
+        knock.setPosition(KNOCK_CENTER);    //center
 
         setupVuforia(0);
 
@@ -67,9 +74,11 @@ public class googleAutoBlue extends LinearOpMode {
 
         waitForStart();
 
-        cat.setPosition(0.6);      //extend
+        cat.setPosition(CAT_EXTEND);      //extend
+        sleep(1000);
         jewelAuto(jewelSensor, knock);
-        cat.setPosition(0.35);     //stow
+        cat.setPosition(CAT_STOW);     //stow
+        sleep(1000);
 
         drive();
         imageDetected = doVuforia();
@@ -87,14 +96,15 @@ public class googleAutoBlue extends LinearOpMode {
     }
 
     public void jewelAuto(ColorSensor sensor, Servo servo) {
-        servo.setPosition(0.38);      //center
-        if (sensor.red() > 11 || sensor.blue() < 2) {
-            servo.setPosition(0.43);    //left
-        } else if (sensor.blue() > 11 || sensor.red() < 2) {
-            servo.setPosition(0.33);      //right
-        } else {
-            servo.setPosition(0.38);    //center
+        if (sensor.red() > sensor.blue()) {
+            servo.setPosition(KNOCK_RIGHT);    //right
+            sleep(1000);
+        } else if (sensor.blue() > sensor.red()) {
+            servo.setPosition(KNOCK_LEFT);      //left
+            sleep(1000);
         }
+        servo.setPosition(KNOCK_CENTER);
+        sleep(1000);
         telemetry.addData("Red value", sensor.red());
         telemetry.addData("Blue value", sensor.blue());
     }

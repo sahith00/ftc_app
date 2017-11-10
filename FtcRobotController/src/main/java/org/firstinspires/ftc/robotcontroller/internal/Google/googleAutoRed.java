@@ -55,22 +55,22 @@ public class googleAutoRed extends LinearOpMode {
 
         jewelSensor = hardwareMap.colorSensor.get("jewelSensor");
 
-        //fr = hardwareMap.dcMotor.get("frdrive");
-        //fl = hardwareMap.dcMotor.get("fldrive");
-        //br = hardwareMap.dcMotor.get("brdrive");
-        //bl = hardwareMap.dcMotor.get("bldrive");
+        fr = hardwareMap.dcMotor.get("frdrive");
+        fl = hardwareMap.dcMotor.get("fldrive");
+        br = hardwareMap.dcMotor.get("brdrive");
+        bl = hardwareMap.dcMotor.get("bldrive");
 
-        //fr.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        //fl.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        //br.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        //bl.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        fr.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        fl.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        br.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        bl.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         cat.setPosition(CAT_STOW);    //stow
         knock.setPosition(KNOCK_CENTER);    //center
 
-        //setupVuforia(0);
+        setupVuforia(0);
 
-        //lastKnownLocation = createMatrix(0, 0, 0, 0, 0, 0);             // Coordinates are in millimeters and are based off of the center of the robot
+        lastKnownLocation = createMatrix(0, 0, 0, 0, 0, 0);             // Coordinates are in millimeters and are based off of the center of the robot
 
         waitForStart();
 
@@ -80,17 +80,17 @@ public class googleAutoRed extends LinearOpMode {
         cat.setPosition(CAT_STOW);     //stow
         sleep(1000);
 
-//        drive();
-//        imageDetected = doVuforia();
-//        if(imageDetected == "L") {
-//            doImageL();
-//        }
-//        else if(imageDetected == "R") {
-//            doImageR();
-//        }
-//        else if(imageDetected == "C") {
-//            doImageC();
-//        }
+        drive();
+        imageDetected = doVuforia();
+        if(imageDetected == "L") {
+            doImageL();
+        }
+        else if(imageDetected == "R") {
+            doImageR();
+        }
+        else if(imageDetected == "C") {
+            doImageC();
+        }
 
         telemetry.update();
     }
@@ -110,10 +110,10 @@ public class googleAutoRed extends LinearOpMode {
     }
 
     public void drive(/*for a certain distance*/) {
-//        fr.setPower(1.0);
-//        fl.setPower(1.0);
-//        br.setPower(1.0);
-//        bl.setPower(1.0);
+        fr.setPower(1.0);
+        fl.setPower(1.0);
+        br.setPower(1.0);
+        bl.setPower(1.0);
     }
 
     public void setupVuforia(int image) {
