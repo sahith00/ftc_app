@@ -28,6 +28,8 @@ public class googleAutoRed extends LinearOpMode {
     ColorSensor jewelSensor;
     DcMotor fr, fl, br, bl;
 
+
+
     VuforiaLocalizer vuforiaLocalizer;
     VuforiaLocalizer.Parameters parameters;
     VuforiaTrackables trackables;
