@@ -42,112 +42,20 @@ public class encoderCountTest extends LinearOpMode{
         waitForStart();
 
         sleep(1000);
-        testMotorTicks2(frdrive, fldrive, brdrive, bldrive);
+        testMotorTicks(frdrive, fldrive, brdrive, bldrive);
         sleep(22000);
 
         telemetry.update();
     }
 
     public void testMotorTicks(DcMotor motor1, DcMotor motor2, DcMotor motor3, DcMotor motor4) {
-        double t1, t2, t3, t4, t5, t6;
-        motor1.setPower(0.8);
-        motor2.setPower(-0.8);
-        motor3.setPower(0.8);
-        motor4.setPower(-0.8);
-        while(motor1.getCurrentPosition() < 1000) {
-            telemetry.addData("flmotore", fldrive.getCurrentPosition());
-            telemetry.addData("frmotore", frdrive.getCurrentPosition());
-            telemetry.addData("blmotore", bldrive.getCurrentPosition());
-            telemetry.addData("brmotore", brdrive.getCurrentPosition());
-            telemetry.addData("flmotorp", fldrive.getPower());
-            telemetry.addData("frmotorp", frdrive.getPower());
-            telemetry.addData("blmotorp", bldrive.getPower());
-            telemetry.addData("brmotorp", brdrive.getPower());
-
-            telemetry.update();
-        }
-        t1 = t.time();
-        telemetry.addData("1st Time: ", t1);
-        telemetry.addData("2nd Time: ", 0);
-        telemetry.addData("3rd Time: ", 0);
-        telemetry.addData("4th Time: ", 0);
-        telemetry.addData("5th Time: ", 0);
-        telemetry.addData("6th Time: ", 0);
-        telemetry.update();
-        motor1.setPower(0.6);
-        motor2.setPower(-0.6);
-        motor3.setPower(0.6);
-        motor4.setPower(-0.6);
-        while(motor1.getCurrentPosition() < 1500 && motor1.getCurrentPosition() >= 1000) {
-            telemetry.addData("flmotore", fldrive.getCurrentPosition());
-            telemetry.addData("frmotore", frdrive.getCurrentPosition());
-            telemetry.addData("blmotore", bldrive.getCurrentPosition());
-            telemetry.addData("brmotore", brdrive.getCurrentPosition());
-            telemetry.addData("flmotorp", fldrive.getPower());
-            telemetry.addData("frmotorp", frdrive.getPower());
-            telemetry.addData("blmotorp", bldrive.getPower());
-            telemetry.addData("brmotorp", brdrive.getPower());
-            telemetry.update();
-        }
-        t2 = t.time();
-        telemetry.addData("1st Time: ", t1);
-        telemetry.addData("2nd Time: ", t2);
-        telemetry.addData("3rd Time: ", 0);
-        telemetry.addData("4th Time: ", 0);
-        telemetry.addData("5th Time: ", 0);
-        telemetry.addData("6th Time: ", 0);
-        telemetry.update();
-        motor1.setPower(0.5);
-        motor2.setPower(-0.5);
-        motor3.setPower(0.5);
-        motor4.setPower(-0.5);
-        while(motor1.getCurrentPosition() < 1750 && motor1.getCurrentPosition() >= 1500) {
-            telemetry.addData("flmotore", fldrive.getCurrentPosition());
-            telemetry.addData("frmotore", frdrive.getCurrentPosition());
-            telemetry.addData("blmotore", bldrive.getCurrentPosition());
-            telemetry.addData("brmotore", brdrive.getCurrentPosition());
-            telemetry.addData("flmotorp", fldrive.getPower());
-            telemetry.addData("frmotorp", frdrive.getPower());
-            telemetry.addData("blmotorp", bldrive.getPower());
-            telemetry.addData("brmotorp", brdrive.getPower());
-            telemetry.update();
-        }
-        t3 = t.time();
-        telemetry.addData("1st Time: ", t1);
-        telemetry.addData("2nd Time: ", t2);
-        telemetry.addData("3rd Time: ", t3);
-        telemetry.addData("4th Time: ", 0);
-        telemetry.addData("5th Time: ", 0);
-        telemetry.addData("6th Time: ", 0);
-        telemetry.update();
-        motor1.setPower(0.3);
-        motor2.setPower(-0.3);
-        motor3.setPower(0.3);
-        motor4.setPower(-0.3);
-        while(motor1.getCurrentPosition() < 1880 && motor1.getCurrentPosition() >= 1750) {
-            telemetry.addData("flmotore", fldrive.getCurrentPosition());
-            telemetry.addData("frmotore", frdrive.getCurrentPosition());
-            telemetry.addData("blmotore", bldrive.getCurrentPosition());
-            telemetry.addData("brmotore", brdrive.getCurrentPosition());
-            telemetry.addData("flmotorp", fldrive.getPower());
-            telemetry.addData("frmotorp", frdrive.getPower());
-            telemetry.addData("blmotorp", bldrive.getPower());
-            telemetry.addData("brmotorp", brdrive.getPower());
-            telemetry.update();
-        }
-        t4 = t.time();
-        telemetry.addData("1st Time: ", t1);
-        telemetry.addData("2nd Time: ", t2);
-        telemetry.addData("3rd Time: ", t3);
-        telemetry.addData("4th Time: ", t4);
-        telemetry.addData("5th Time: ", 0);
-        telemetry.addData("6th Time: ", 0);
-        telemetry.update();
+        double multi, old_multi;
         motor1.setPower(0.2);
         motor2.setPower(-0.2);
         motor3.setPower(0.2);
         motor4.setPower(-0.2);
-        while(motor1.getCurrentPosition() < 2000 && motor1.getCurrentPosition() >= 1880) {
+        multi = 0.1;
+        while(motor1.getCurrentPosition() < (ENCODER_TICKS * multi)) {
             telemetry.addData("flmotore", fldrive.getCurrentPosition());
             telemetry.addData("frmotore", frdrive.getCurrentPosition());
             telemetry.addData("blmotore", bldrive.getCurrentPosition());
@@ -158,14 +66,142 @@ public class encoderCountTest extends LinearOpMode{
             telemetry.addData("brmotorp", brdrive.getPower());
             telemetry.update();
         }
-        t5 = t.time();
-        telemetry.addData("1st Time: ", t1);
-        telemetry.addData("2nd Time: ", t2);
-        telemetry.addData("3rd Time: ", t3);
-        telemetry.addData("4th Time: ", t4);
-        telemetry.addData("5th Time: ", t5);
-        telemetry.addData("6th Time: ", 0);
-        telemetry.update();
+        motor1.setPower(0.35);
+        motor2.setPower(-0.35);
+        motor3.setPower(0.35);
+        motor4.setPower(-0.35);
+        old_multi = multi;
+        multi = 0.2;
+        while(motor1.getCurrentPosition() < (ENCODER_TICKS * multi) && motor1.getCurrentPosition() >= (ENCODER_TICKS * old_multi)) {
+            telemetry.addData("flmotore", fldrive.getCurrentPosition());
+            telemetry.addData("frmotore", frdrive.getCurrentPosition());
+            telemetry.addData("blmotore", bldrive.getCurrentPosition());
+            telemetry.addData("brmotore", brdrive.getCurrentPosition());
+            telemetry.addData("flmotorp", fldrive.getPower());
+            telemetry.addData("frmotorp", frdrive.getPower());
+            telemetry.addData("blmotorp", bldrive.getPower());
+            telemetry.addData("brmotorp", brdrive.getPower());
+            telemetry.update();
+        }
+        motor1.setPower(0.5);
+        motor2.setPower(-0.5);
+        motor3.setPower(0.5);
+        motor4.setPower(-0.5);
+        old_multi = multi;
+        multi = 0.3;
+        while(motor1.getCurrentPosition() < (ENCODER_TICKS * multi) && motor1.getCurrentPosition() >= (ENCODER_TICKS * old_multi)) {
+            telemetry.addData("flmotore", fldrive.getCurrentPosition());
+            telemetry.addData("frmotore", frdrive.getCurrentPosition());
+            telemetry.addData("blmotore", bldrive.getCurrentPosition());
+            telemetry.addData("brmotore", brdrive.getCurrentPosition());
+            telemetry.addData("flmotorp", fldrive.getPower());
+            telemetry.addData("frmotorp", frdrive.getPower());
+            telemetry.addData("blmotorp", bldrive.getPower());
+            telemetry.addData("brmotorp", brdrive.getPower());
+            telemetry.update();
+        }
+        motor1.setPower(0.65);
+        motor2.setPower(-0.65);
+        motor3.setPower(0.65);
+        motor4.setPower(-0.65);
+        old_multi = multi;
+        multi = 0.4;
+        while(motor1.getCurrentPosition() < (ENCODER_TICKS * multi) && motor1.getCurrentPosition() >= (ENCODER_TICKS * old_multi)) {
+            telemetry.addData("flmotore", fldrive.getCurrentPosition());
+            telemetry.addData("frmotore", frdrive.getCurrentPosition());
+            telemetry.addData("blmotore", bldrive.getCurrentPosition());
+            telemetry.addData("brmotore", brdrive.getCurrentPosition());
+            telemetry.addData("flmotorp", fldrive.getPower());
+            telemetry.addData("frmotorp", frdrive.getPower());
+            telemetry.addData("blmotorp", bldrive.getPower());
+            telemetry.addData("brmotorp", brdrive.getPower());
+            telemetry.update();
+        }
+        motor1.setPower(0.8);
+        motor2.setPower(-0.8);
+        motor3.setPower(0.8);
+        motor4.setPower(-0.8);
+        old_multi = multi;
+        multi = 0.5;
+        while(motor1.getCurrentPosition() < (ENCODER_TICKS * multi) && motor1.getCurrentPosition() >= (ENCODER_TICKS * old_multi)) {
+            telemetry.addData("flmotore", fldrive.getCurrentPosition());
+            telemetry.addData("frmotore", frdrive.getCurrentPosition());
+            telemetry.addData("blmotore", bldrive.getCurrentPosition());
+            telemetry.addData("brmotore", brdrive.getCurrentPosition());
+            telemetry.addData("flmotorp", fldrive.getPower());
+            telemetry.addData("frmotorp", frdrive.getPower());
+            telemetry.addData("blmotorp", bldrive.getPower());
+            telemetry.addData("brmotorp", brdrive.getPower());
+            telemetry.update();
+        }
+        motor1.setPower(0.65);
+        motor2.setPower(-0.65);
+        motor3.setPower(0.65);
+        motor4.setPower(-0.65);
+        old_multi = multi;
+        multi = 0.6;
+        while(motor1.getCurrentPosition() < (ENCODER_TICKS * multi) && motor1.getCurrentPosition() >= (ENCODER_TICKS * old_multi)) {
+            telemetry.addData("flmotore", fldrive.getCurrentPosition());
+            telemetry.addData("frmotore", frdrive.getCurrentPosition());
+            telemetry.addData("blmotore", bldrive.getCurrentPosition());
+            telemetry.addData("brmotore", brdrive.getCurrentPosition());
+            telemetry.addData("flmotorp", fldrive.getPower());
+            telemetry.addData("frmotorp", frdrive.getPower());
+            telemetry.addData("blmotorp", bldrive.getPower());
+            telemetry.addData("brmotorp", brdrive.getPower());
+            telemetry.update();
+        }
+        motor1.setPower(0.5);
+        motor2.setPower(-0.5);
+        motor3.setPower(0.5);
+        motor4.setPower(-0.5);
+        old_multi = multi;
+        multi = 0.7;
+        while(motor1.getCurrentPosition() < (ENCODER_TICKS * multi) && motor1.getCurrentPosition() >= (ENCODER_TICKS * old_multi)) {
+            telemetry.addData("flmotore", fldrive.getCurrentPosition());
+            telemetry.addData("frmotore", frdrive.getCurrentPosition());
+            telemetry.addData("blmotore", bldrive.getCurrentPosition());
+            telemetry.addData("brmotore", brdrive.getCurrentPosition());
+            telemetry.addData("flmotorp", fldrive.getPower());
+            telemetry.addData("frmotorp", frdrive.getPower());
+            telemetry.addData("blmotorp", bldrive.getPower());
+            telemetry.addData("brmotorp", brdrive.getPower());
+            telemetry.update();
+        }
+        motor1.setPower(0.35);
+        motor2.setPower(-0.35);
+        motor3.setPower(0.35);
+        motor4.setPower(-0.35);
+        old_multi = multi;
+        multi = 0.85;
+        while(motor1.getCurrentPosition() < (ENCODER_TICKS * multi) && motor1.getCurrentPosition() >= (ENCODER_TICKS * old_multi)) {
+            telemetry.addData("flmotore", fldrive.getCurrentPosition());
+            telemetry.addData("frmotore", frdrive.getCurrentPosition());
+            telemetry.addData("blmotore", bldrive.getCurrentPosition());
+            telemetry.addData("brmotore", brdrive.getCurrentPosition());
+            telemetry.addData("flmotorp", fldrive.getPower());
+            telemetry.addData("frmotorp", frdrive.getPower());
+            telemetry.addData("blmotorp", bldrive.getPower());
+            telemetry.addData("brmotorp", brdrive.getPower());
+            telemetry.update();
+        }
+        motor1.setPower(0.2);
+        motor2.setPower(-0.2);
+        motor3.setPower(0.2);
+        motor4.setPower(-0.2);
+        old_multi = multi;
+        multi = 1.0;
+        while(motor1.getCurrentPosition() < (ENCODER_TICKS * multi) && motor1.getCurrentPosition() >= (ENCODER_TICKS * old_multi)) {
+            telemetry.addData("flmotore", fldrive.getCurrentPosition());
+            telemetry.addData("frmotore", frdrive.getCurrentPosition());
+            telemetry.addData("blmotore", bldrive.getCurrentPosition());
+            telemetry.addData("brmotore", brdrive.getCurrentPosition());
+            telemetry.addData("flmotorp", fldrive.getPower());
+            telemetry.addData("frmotorp", frdrive.getPower());
+            telemetry.addData("blmotorp", bldrive.getPower());
+            telemetry.addData("brmotorp", brdrive.getPower());
+            telemetry.update();
+        }
         motor1.setPower(0);
         motor2.setPower(0);
         motor3.setPower(0);
@@ -178,14 +214,6 @@ public class encoderCountTest extends LinearOpMode{
         telemetry.addData("frmotorp", frdrive.getPower());
         telemetry.addData("blmotorp", bldrive.getPower());
         telemetry.addData("brmotorp", brdrive.getPower());
-        t6 = t.time();
-        telemetry.addData("1st Time: ", t1);
-        telemetry.addData("2nd Time: ", t2);
-        telemetry.addData("3rd Time: ", t3);
-        telemetry.addData("4th Time: ", t4);
-        telemetry.addData("5th Time: ", t5);
-        telemetry.addData("6th Time: ", t6);
-        telemetry.update();
     }
 
     public void testMotorTicks2(DcMotor motor1, DcMotor motor2, DcMotor motor3, DcMotor motor4) {

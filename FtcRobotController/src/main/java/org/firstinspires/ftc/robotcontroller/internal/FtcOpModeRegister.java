@@ -40,6 +40,7 @@ import org.firstinspires.ftc.robotcontroller.internal.Google.googleAutoRed;
 import org.firstinspires.ftc.robotcontroller.internal.Google.googleTeleOp;
 import org.firstinspires.ftc.robotcontroller.internal.Tests.PIDTest;
 import org.firstinspires.ftc.robotcontroller.internal.Tests.encoderCountTest;
+import org.firstinspires.ftc.robotcontroller.internal.Tests.grabberTest;
 import org.firstinspires.ftc.robotcontroller.internal.Tests.teleOpTest;
 import org.firstinspires.ftc.robotcore.internal.opmode.OpModeMeta;
 
@@ -79,5 +80,6 @@ public class FtcOpModeRegister implements OpModeRegister {
         manager.register("pid test", PIDTest.class);
         manager.register("Google TeleOp", googleTeleOp.class);
         manager.register("test Tele", teleOpTest.class);
+        manager.register("grabber test", grabberTest.class);
     }
 }
