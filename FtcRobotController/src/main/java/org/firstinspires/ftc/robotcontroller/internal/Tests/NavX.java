@@ -1,4 +1,4 @@
-/*package org.firstinspires.ftc.robotcontroller.opmodes.subsystems;
+package org.firstinspires.ftc.robotcontroller.internal.Tests;
 
 import android.util.Log;
 
@@ -10,15 +10,15 @@ import org.firstinspires.ftc.robotcontroller.com.kauailabs.navx.ftc.*;
 /**
  * Created by vulcanrobotics8375 on 11/30/16.
  */
-/*public class NavX {
-    private final int NAVX_DIM_I2C_PORT = 5;
+public class NavX {
+    private final int NAVX_DIM_I2C_PORT = 3;
     public AHRS navx_device;
     private final byte NAVX_DEVICE_UPDATE_RATE_HZ = 50;
 
     public double roll, yaw, pitch;
 
     public NavX(HardwareMap hM){
-        navx_device = AHRS.getInstance(hM.deviceInterfaceModule.get("Device Interface Module 3"),
+        navx_device = AHRS.getInstance(hM.deviceInterfaceModule.get("Device Interface Module 1"),
                 NAVX_DIM_I2C_PORT,
                 AHRS.DeviceDataType.kProcessedData,
                 NAVX_DEVICE_UPDATE_RATE_HZ);
@@ -33,7 +33,7 @@ import org.firstinspires.ftc.robotcontroller.com.kauailabs.navx.ftc.*;
         pitch = navx_device.getPitch();
         Log.i("yaw", "" + yaw);
         Log.i("accelx", ""+navx_device.getWorldLinearAccelX());
-        Log.i("accely", ""+navx_device.getWorldLinearAccelY());
+        Log.i("accely", "" + navx_device.getWorldLinearAccelY());
 
 
     }
@@ -41,4 +41,4 @@ import org.firstinspires.ftc.robotcontroller.com.kauailabs.navx.ftc.*;
         return yaw;
     }
     public AHRS getNavx_device() { return navx_device; };
-}*/
+}

@@ -20,17 +20,13 @@ public class PIDTest extends LinearOpMode {
 
     ElapsedTime runtime = new ElapsedTime();
 
-    BNO055IMU imu;
-    BNO055IMU.Parameters parameters;
+    NavX navX;
 
-    Orientation orientation;
-
-    float roll, pitch, yaw;
-
-    double temp;
+    final static int MARGIN = 1;
 
     @Override
     public void runOpMode() throws InterruptedException {
+        navX = new NavX(hardwareMap);
         fr = hardwareMap.dcMotor.get("frdrive");
         fl = hardwareMap.dcMotor.get("fldrive");
         br = hardwareMap.dcMotor.get("brdrive");
@@ -44,52 +40,49 @@ public class PIDTest extends LinearOpMode {
         fl.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         br.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         bl.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        fl.setDirection(DcMotorSimple.Direction.REVERSE);
-        bl.setDirection(DcMotorSimple.Direction.REVERSE);
+        fr.setDirection(DcMotorSimple.Direction.REVERSE);
+        br.setDirection(DcMotorSimple.Direction.REVERSE);
+        fl.setDirection(DcMotorSimple.Direction.FORWARD);
+        bl.setDirection(DcMotorSimple.Direction.FORWARD);
 
-        parameters = new BNO055IMU.Parameters();
-        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
-        parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-        parameters.calibrationDataFile = "BNO055IMUCalibration.json"; // see the calibration sample opmode
-        parameters.loggingEnabled      = true;
-        parameters.loggingTag          = "IMU";
-
-        imu = hardwareMap.get(BNO055IMU.class, "imu");
-        imu.initialize(parameters);
-        orientation = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-        yaw = orientation.firstAngle;
-        roll = orientation.secondAngle;
-        pitch = orientation.thirdAngle;
-
+        navX.start();
         waitForStart();
 
-        temp = degreeController(orientation.firstAngle);
+        telemetry.addData("initial yaw:", navX.getYaw());
         sleep(1000);
-        turn(180, 5);
-    }
+        turn(90, MARGIN);
+        telemetry.addData("final yaw:", navX.getYaw());
 
-    public void update(){
-        roll = orientation.secondAngle;
-        yaw = orientation.firstAngle;
-        if (yaw > 180){
-            yaw = -(360-yaw);
-        }
-        pitch = orientation.thirdAngle;
-        Log.i("yaw", "" + yaw);
-    }
-
-    public double getDifference(double beg, double end) {
-        if (end > beg) {
-            if (Math.abs(end - beg) < Math.abs((end - 360) - beg)) {
-                return end - beg;
-            } else {
-                return (end - 360) - beg;
+        while (opModeIsActive()) {
+            if(gamepad1.a) {
+                turn(90, MARGIN);
             }
-        } else if (end <= beg) {
-            if (Math.abs(end - beg) < Math.abs((end + 360) - beg)) {
+            if(gamepad1.b) {
+                turn(-90, MARGIN);
+            }
+            if(gamepad1.x) {
+                turn(180, MARGIN);
+            }
+            if(gamepad1.y) {
+                turn(0, MARGIN);
+            }
+            telemetry.addData("yaw", navX.getYaw());
+            telemetry.update();
+        }
+    }
+
+    public double getDifference(double beg, double end){
+        if (end > beg){
+            if (Math.abs(end - beg) < Math.abs((end - 360) - beg)){
                 return end - beg;
-            } else {
-                return (end + 360) - beg;
+            } else{
+                return  (end-360)-beg;
+            }
+        } else if(end <= beg){
+            if (Math.abs(end - beg) < Math.abs((end + 360) - beg)){
+                return end-beg;
+            } else{
+                return (end+360)-beg;
             }
         }
         return 0;
@@ -103,25 +96,25 @@ public class PIDTest extends LinearOpMode {
     double pE = 0;
     double tE = 0;
 
-    public void startDegreeController() {
+    public void startDegreeController(){
         pT = runtime.time();
         pE = 0;
         tE = 0;
     }
 
-    public double degreeController(double degree) {
+    public double degreeController(double degree, NavX navX){
         double ans = 0;
-        double e = Math.abs(getDifference(yaw, degree));
-        double dE = e - pE;
+        double e = Math.abs(getDifference(navX.getYaw(), degree));
+        double dE = e-pE;
         double dT = runtime.time() - pT;
         Log.i("PID turn", "e: " + e);
         Log.i("PID Turn", "i: " + i_turn * tE);
         Log.i("PID Turn", "d: " + d_turn * dE / dT);
         Log.i("PID Turn", "p: " + p_turn * e);
-        ans = p_turn * e + i_turn * tE + d_turn * dE / dT;// +f_turn* Math.signum(e);
+        ans = p_turn*e+ i_turn*tE + d_turn*dE/dT;// +f_turn* Math.signum(e);
         pT = runtime.time();
         pE = e;
-        tE += e * dT;
+        tE += e*dT;
 //        if (Math.signum(e) != Math.signum(pE)){
 //            tE = 0;
 //        }
@@ -132,18 +125,18 @@ public class PIDTest extends LinearOpMode {
 
     public void turn(double degree, double margin) {
         startDegreeController();
-        double pYaw = yaw;
-        while (Math.abs(getDifference(yaw, degree)) > margin || Math.abs(pYaw - yaw) > .05) {
-            Log.i("debug: ", "yaw: " + yaw);
-            Log.i("debug: ", "difference: " + getDifference(yaw, degree));
-            Log.i("debug", "target: " + degree + " cur: " + yaw);
-            double change = degreeController(degree);
+        double pYaw = navX.yaw;
+        while (Math.abs(getDifference(navX.yaw, degree)) > margin || Math.abs(pYaw - navX.yaw) > .05) {
+            Log.i("debug: ", "yaw: " + navX.yaw);
+            Log.i("debug: ", "difference: " + getDifference(navX.yaw, degree));
+            Log.i("debug", "target: " + degree + " cur: " + navX.yaw);
+            double change = degreeController(degree, navX);
             double forwardPower = Range.clip(change, -1, 1);
             double backPower = Range.clip(-change, -1, 1);
             Log.i("powers", "forward: " + forwardPower);
             Log.i("powers", "backward: " + backPower);
-            Log.i("debug: ", "difference: " + getDifference(yaw, degree));
-            if (getDifference(yaw, degree) > 0) {
+            Log.i("debug: ", "difference: " + getDifference(navX.yaw, degree));
+            if (getDifference(navX.yaw, degree) > 0) {
                 fr.setPower(backPower);
                 br.setPower(backPower);
                 fl.setPower(forwardPower);
@@ -154,10 +147,10 @@ public class PIDTest extends LinearOpMode {
                 fl.setPower(backPower);
                 bl.setPower(backPower);
             }
-            Log.i("hey", "yaw: " + yaw);
+            Log.i("hey", "yaw: " + navX.yaw);
             Log.i("degree", "degree: " + degree);
-            pYaw = yaw;
-            update();
+            pYaw = navX.yaw;
+            navX.update();
         }
         fr.setPower(0);
         br.setPower(0);

@@ -76,7 +76,7 @@ public class FtcOpModeRegister implements OpModeRegister {
         manager.register(new OpModeMeta("Google Auto Blue", OpModeMeta.Flavor.AUTONOMOUS), googleAutoBlue.class);
         manager.register(new OpModeMeta("Google Auto Red", OpModeMeta.Flavor.AUTONOMOUS), googleAutoRed.class);
         manager.register(new OpModeMeta("encoder test", OpModeMeta.Flavor.AUTONOMOUS), encoderCountTest.class);
-        manager.register(new OpModeMeta("pid test", OpModeMeta.Flavor.AUTONOMOUS), PIDTest.class);
+        manager.register("pid test", PIDTest.class);
         manager.register("Google TeleOp", googleTeleOp.class);
         manager.register("test Tele", teleOpTest.class);
     }
