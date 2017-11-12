@@ -2,8 +2,10 @@ package org.firstinspires.ftc.robotcontroller.internal.Google;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.Range;
 
 /**
  * Created by sahith on 10/9/17.
@@ -12,26 +14,45 @@ public class googleTeleOp extends LinearOpMode{
     DcMotor frdrive, fldrive, brdrive, bldrive;
     //DcMotor lift, reliclift;
     Servo cat, knock;
-    Servo lgrab, rgrab;
     Servo relicgrab;
+    CRServo lgrab, rgrab, lbrush, rbrush, grablift;
 
     @Override
     public void runOpMode() throws InterruptedException {
-        fldrive = hardwareMap.dcMotor.get("fl");
-        frdrive = hardwareMap.dcMotor.get("fr");
-        bldrive = hardwareMap.dcMotor.get("bl");
-        brdrive = hardwareMap.dcMotor.get("br");
+        fldrive = hardwareMap.dcMotor.get("fldrive");
+        frdrive = hardwareMap.dcMotor.get("frdrive");
+        bldrive = hardwareMap.dcMotor.get("bldrive");
+        brdrive = hardwareMap.dcMotor.get("brdrive");
         //lift = hardwareMap.dcMotor.get("lift");
         //reliclift = hardwareMap.dcMotor.get("reliclift");
-        lgrab = hardwareMap.servo.get("lgrab");
-        rgrab = hardwareMap.servo.get("rgrab");
         relicgrab = hardwareMap.servo.get("relicgrab");
-        boolean grab = false;
+        lgrab = hardwareMap.crservo.get("lservo");
+        rgrab = hardwareMap.crservo.get("rservo");
+        lbrush = hardwareMap.crservo.get("lbrush");
+        rbrush = hardwareMap.crservo.get("rbrush");
+        grablift = hardwareMap.crservo.get("grablift");
+
+        boolean forward = true, reverse = false;
         boolean grabrelic = false;
-        lgrab.setPosition(0);
-        rgrab.setPosition(0.9);
-        relicgrab.setPosition(0);
+
+        fldrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        frdrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bldrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        brdrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        fldrive.setPower(0);
+        frdrive.setPower(0);
+        bldrive.setPower(0);
+        brdrive.setPower(0);
         //lift.setPower(0);
+        //reliclift.setPower(0);
+        relicgrab.setPosition(0);
+        lgrab.setPower(-0.08);
+        rgrab.setPower(0);
+        lbrush.setPower(0.05);
+        rbrush.setPower(0);
+        grablift.setPower(0);
+
 
         int count = 0;
         double multipliers[] = new double[3];
@@ -40,7 +61,11 @@ public class googleTeleOp extends LinearOpMode{
         multipliers[2] = 0.4;
 
         waitForStart();
+
         while(opModeIsActive()) {
+
+            //-----------------------------------------------------------------------------
+            // DRIVE ROBOT
             if (gamepad1.x) {
                 sleep(250);
                 count++;
@@ -48,29 +73,21 @@ public class googleTeleOp extends LinearOpMode{
                     count = 0;
                 }
             }
+            if (gamepad1.y) {
+                sleep(250);
+                count--;
+                if (count < 0) {
+                    count = 2;
+                }
+            }
             mecanum(fldrive, frdrive, bldrive, brdrive, multipliers[count]);
+            //-----------------------------------------------------------------------------
 
-            //lift.setPower(gamepad2.right_stick_y);
+
+            //-----------------------------------------------------------------------------
+            // GRAB RELIC AND DEPOSIT
             //reliclift.setPower(gamepad2.left_trigger - gamepad2.right_trigger);
-
-            if (gamepad2.a) {
-                grab = true;
-            }
-            if (gamepad2.b) {
-                lgrab.setPosition(0.35);
-                rgrab.setPosition(0.55);
-                grab = false;
-            }
-            if (gamepad2.y) {
-                lgrab.setPosition(0.0);
-                rgrab.setPosition(0.9);
-            }
-            if (grab) {
-                lgrab.setPosition(0.45);
-                rgrab.setPosition(0.45);
-            }
-
-            if (gamepad2.x) {
+            if (gamepad1.a) {
                 sleep(250);
                 grabrelic = !grabrelic;
             }
@@ -80,11 +97,49 @@ public class googleTeleOp extends LinearOpMode{
             if(!grabrelic) {
                 relicgrab.setPosition(0);
             }
+            //-----------------------------------------------------------------------------
 
-            telemetry.addData("Position", lgrab.getPosition());
-            telemetry.addData("RPosition", rgrab.getPosition());
-            telemetry.addData("Grab", grab);
+
+            //-----------------------------------------------------------------------------
+            // GRAB GLYPH AND DEPOSIT
+            if (gamepad2.x) {
+                forward = true;
+                reverse = false;
+            }
+            if (gamepad2.y) {
+                reverse = true;
+                forward = false;
+            }
+            if(gamepad2.a) {
+                rgrab.setPower(0);
+                rbrush.setPower(0);
+            }
+            if(gamepad2.b) {
+                lgrab.setPower(-0.08);
+                lbrush.setPower(0.05);
+            }
+            if(forward) {
+                rgrab.setPower((double)(gamepad2.right_trigger));
+                rbrush.setPower((double)(gamepad2.right_trigger));
+                lgrab.setPower(Range.clip((double) (-gamepad2.left_trigger), -1, -0.08));
+                lbrush.setPower((double) (-gamepad2.left_trigger) + 0.05);
+            }
+            if(reverse) {
+                rgrab.setPower((double)(-gamepad2.right_trigger));
+                rbrush.setPower((double)(-gamepad2.right_trigger));
+                lgrab.setPower((double)(gamepad2.left_trigger)-0.08);
+                lbrush.setPower(Range.clip((double) (gamepad2.left_trigger), 0.05, 1));
+            }
+            grablift.setPower(-gamepad2.right_stick_y);
+            //lift.setPower(gamepad2.left_stick_y);
+            //-----------------------------------------------------------------------------
+
+
+            //-----------------------------------------------------------------------------
+            // TELEMETRY
+
             telemetry.update();
+            //-----------------------------------------------------------------------------
         }
     }
 
