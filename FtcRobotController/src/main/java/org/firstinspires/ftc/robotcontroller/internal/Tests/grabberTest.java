@@ -2,7 +2,6 @@ package org.firstinspires.ftc.robotcontroller.internal.Tests;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
 
 /**
@@ -25,7 +24,7 @@ public class grabberTest extends LinearOpMode{
         rbrush.setPower(0);
         glift.setPower(0);
 
-        boolean forward = false, reverse = false;
+        boolean forward = true, reverse = false, brush = false;
 
         waitForStart();
         while (opModeIsActive()) {
@@ -45,17 +44,33 @@ public class grabberTest extends LinearOpMode{
                 lservo.setPower(-0.08);
                 lbrush.setPower(0.05);
             }
-            if(forward) {
-                rservo.setPower((double)(gamepad1.right_trigger));
-                rbrush.setPower((double)(gamepad1.right_trigger));
-                lservo.setPower(Range.clip((double)(-gamepad1.left_trigger), -1, -0.08));
-                lbrush.setPower((double)(-gamepad1.left_trigger)+0.05);
+            if(gamepad1.left_bumper) {
+                sleep(250);
+                brush = !brush;
             }
-            if(reverse) {
-                rservo.setPower((double)(-gamepad1.right_trigger));
-                rbrush.setPower((double)(-gamepad1.right_trigger));
-                lservo.setPower((double)(gamepad1.left_trigger)-0.08);
-                lbrush.setPower(Range.clip((double)(gamepad1.left_trigger), 0.05, 1));
+            if (brush) {
+                if (forward) {
+                    rbrush.setPower((double) (gamepad1.right_trigger));
+                    lbrush.setPower((double) (-gamepad1.left_trigger) + 0.05);
+                }
+                if (reverse) {
+                    rbrush.setPower((double)(-gamepad1.right_trigger));
+                    lbrush.setPower(Range.clip((double)(gamepad1.left_trigger), 0.05, 1));
+                }
+            }
+            else {
+                if (forward) {
+                    rservo.setPower((double) (gamepad1.right_trigger));
+                    rbrush.setPower((double) (gamepad1.right_trigger));
+                    lservo.setPower(Range.clip((double) (-gamepad1.left_trigger), -1, -0.08));
+                    lbrush.setPower((double) (-gamepad1.left_trigger) + 0.05);
+                }
+                if (reverse) {
+                    rservo.setPower((double) (-gamepad1.right_trigger));
+                    rbrush.setPower((double) (-gamepad1.right_trigger));
+                    lservo.setPower((double) (gamepad1.left_trigger) - 0.08);
+                    lbrush.setPower(Range.clip((double) (gamepad1.left_trigger), 0.05, 1));
+                }
             }
             glift.setPower(-gamepad1.right_stick_y);
             telemetry.update();
