@@ -12,10 +12,9 @@ import com.qualcomm.robotcore.util.Range;
  */
 public class googleTeleOp extends LinearOpMode{
     DcMotor frdrive, fldrive, brdrive, bldrive;
-    //DcMotor lift, reliclift;
-    Servo cat, knock;
-    Servo relicgrab;
-    CRServo lgrab, rgrab, lbrush, rbrush, grablift;
+    DcMotor lift1, lift2, grablift;
+    Servo body, arm;
+    CRServo lgrab, rgrab, lbrush, rbrush;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -23,35 +22,43 @@ public class googleTeleOp extends LinearOpMode{
         frdrive = hardwareMap.dcMotor.get("frdrive");
         bldrive = hardwareMap.dcMotor.get("bldrive");
         brdrive = hardwareMap.dcMotor.get("brdrive");
-        //lift = hardwareMap.dcMotor.get("lift");
+        lift1 = hardwareMap.dcMotor.get("lift1");
+        lift2 = hardwareMap.dcMotor.get("lift2");
+        grablift = hardwareMap.dcMotor.get("grablift");
         //reliclift = hardwareMap.dcMotor.get("reliclift");
-        relicgrab = hardwareMap.servo.get("relicgrab");
-        lgrab = hardwareMap.crservo.get("lservo");
-        rgrab = hardwareMap.crservo.get("rservo");
+        //body = hardwareMap.servo.get("body");
+        //arm = hardwareMap.servo.get("arm");
+        lgrab = hardwareMap.crservo.get("lgrab");
+        rgrab = hardwareMap.crservo.get("rgrab");
         lbrush = hardwareMap.crservo.get("lbrush");
         rbrush = hardwareMap.crservo.get("rbrush");
-        grablift = hardwareMap.crservo.get("grablift");
 
         boolean forward = true, reverse = false;
         boolean grabrelic = false;
+        boolean mode = true;
 
         fldrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         frdrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         bldrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         brdrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        lift1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        lift2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        grablift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         fldrive.setPower(0);
         frdrive.setPower(0);
         bldrive.setPower(0);
         brdrive.setPower(0);
-        //lift.setPower(0);
+        lift1.setPower(0);
+        lift2.setPower(0);
+        grablift.setPower(0);
         //reliclift.setPower(0);
-        relicgrab.setPosition(0);
+        //body.setPosition(0);
+        //arm.setPosition(0);
         lgrab.setPower(-0.08);
         rgrab.setPower(0);
         lbrush.setPower(0.05);
         rbrush.setPower(0);
-        grablift.setPower(0);
 
 
         int count = 0;
@@ -87,7 +94,7 @@ public class googleTeleOp extends LinearOpMode{
             //-----------------------------------------------------------------------------
             // GRAB RELIC AND DEPOSIT
             //reliclift.setPower(gamepad2.left_trigger - gamepad2.right_trigger);
-            if (gamepad1.a) {
+            /*if (gamepad1.a) {
                 sleep(250);
                 grabrelic = !grabrelic;
             }
@@ -96,7 +103,7 @@ public class googleTeleOp extends LinearOpMode{
             }
             if(!grabrelic) {
                 relicgrab.setPosition(0);
-            }
+            }*/
             //-----------------------------------------------------------------------------
 
 
@@ -118,20 +125,52 @@ public class googleTeleOp extends LinearOpMode{
                 lgrab.setPower(-0.08);
                 lbrush.setPower(0.05);
             }
-            if(forward) {
-                rgrab.setPower((double)(gamepad2.right_trigger));
-                rbrush.setPower((double)(gamepad2.right_trigger));
-                lgrab.setPower(Range.clip((double) (-gamepad2.left_trigger), -1, -0.08));
-                lbrush.setPower((double) (-gamepad2.left_trigger) + 0.05);
+
+            if (mode) {
+                if (forward) {
+                    rgrab.setPower((double)(gamepad2.right_trigger));
+                    rbrush.setPower((double)(gamepad2.right_trigger));
+                    lgrab.setPower(Range.clip((double) (-gamepad2.left_trigger), -1, -0.08));
+                    lbrush.setPower((double) (-gamepad2.left_trigger) + 0.05);
+                }
+                if(reverse) {
+                    rgrab.setPower((double)(-gamepad2.right_trigger));
+                    rbrush.setPower((double)(-gamepad2.right_trigger));
+                    lgrab.setPower((double)(gamepad2.left_trigger)-0.08);
+                    lbrush.setPower(Range.clip((double) (gamepad2.left_trigger), 0.05, 1));
+                }
+            } else {
+                if(forward) {
+                    if (gamepad2.left_bumper) {
+                        lgrab.setPower(1.0);
+                    }
+                    if (gamepad2.right_bumper) {
+                        rgrab.setPower(1.0);
+                    }
+                    rbrush.setPower((double)(gamepad2.right_trigger));
+                    lbrush.setPower((double) (-gamepad2.left_trigger) + 0.05);
+                }
+                if(reverse) {
+                    if (gamepad2.left_bumper) {
+                        lgrab.setPower(-1.0);
+                    }
+                    if (gamepad2.right_bumper) {
+                        rgrab.setPower(-1.0);
+                    }
+                    rbrush.setPower((double)(-gamepad2.right_trigger));
+                    lbrush.setPower(Range.clip((double) (gamepad2.left_trigger), 0.05, 1));
+                }
             }
-            if(reverse) {
-                rgrab.setPower((double)(-gamepad2.right_trigger));
-                rbrush.setPower((double)(-gamepad2.right_trigger));
-                lgrab.setPower((double)(gamepad2.left_trigger)-0.08);
-                lbrush.setPower(Range.clip((double) (gamepad2.left_trigger), 0.05, 1));
+            if (gamepad2.dpad_down) {
+                mode = false;
             }
+            if (gamepad2.dpad_up) {
+                mode = true;
+            }
+
             grablift.setPower(-gamepad2.right_stick_y);
-            //lift.setPower(gamepad2.left_stick_y);
+            lift1.setPower(Math.signum(gamepad2.left_stick_y));
+            lift2.setPower(Math.signum(gamepad2.left_stick_y));
             //-----------------------------------------------------------------------------
 
 
