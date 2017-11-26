@@ -120,7 +120,7 @@ public class googleAutoBlue extends LinearOpMode {
         parameters = new VuforiaLocalizer.Parameters(R.id.cameraMonitorViewId);
         Log.i("setup", "workss");
         parameters.vuforiaLicenseKey = V_KEY;
-        parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
+        parameters.cameraDirection = VuforiaLocalizer.CameraDirection.FRONT;
         vuforiaLocalizer = ClassFactory.createVuforiaLocalizer(parameters);
         Log.i("test", "works");
         trackables = vuforiaLocalizer.loadTrackablesFromAsset("RelicVuMark");

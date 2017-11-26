@@ -12,7 +12,7 @@ import com.qualcomm.robotcore.util.Range;
  */
 public class googleTeleOp extends LinearOpMode{
     DcMotor frdrive, fldrive, brdrive, bldrive;
-    DcMotor lift1, lift2, grablift;
+    DcMotor lift1, lift2, grablift, reliclift;
     Servo body, arm;
     CRServo lgrab, rgrab, lbrush, rbrush;
 
@@ -25,16 +25,16 @@ public class googleTeleOp extends LinearOpMode{
         lift1 = hardwareMap.dcMotor.get("lift1");
         lift2 = hardwareMap.dcMotor.get("lift2");
         grablift = hardwareMap.dcMotor.get("grablift");
-        //reliclift = hardwareMap.dcMotor.get("reliclift");
-        //body = hardwareMap.servo.get("body");
-        //arm = hardwareMap.servo.get("arm");
+        reliclift = hardwareMap.dcMotor.get("reliclift");
+        body = hardwareMap.servo.get("body");
+        arm = hardwareMap.servo.get("arm");
         lgrab = hardwareMap.crservo.get("lgrab");
         rgrab = hardwareMap.crservo.get("rgrab");
         lbrush = hardwareMap.crservo.get("lbrush");
         rbrush = hardwareMap.crservo.get("rbrush");
 
         boolean forward = true, reverse = false;
-        boolean grabrelic = false;
+        boolean grabrelic = false, droprelic = false, stowrelic = false;
         boolean mode = true;
 
         fldrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -44,6 +44,7 @@ public class googleTeleOp extends LinearOpMode{
         lift1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         lift2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         grablift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        reliclift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         fldrive.setPower(0);
         frdrive.setPower(0);
@@ -52,9 +53,9 @@ public class googleTeleOp extends LinearOpMode{
         lift1.setPower(0);
         lift2.setPower(0);
         grablift.setPower(0);
-        //reliclift.setPower(0);
-        //body.setPosition(0);
-        //arm.setPosition(0);
+        reliclift.setPower(0);
+        body.setPosition(0);
+        arm.setPosition(0);
         lgrab.setPower(-0.08);
         rgrab.setPower(0);
         lbrush.setPower(0.05);
@@ -80,30 +81,41 @@ public class googleTeleOp extends LinearOpMode{
                     count = 0;
                 }
             }
-            if (gamepad1.y) {
-                sleep(250);
-                count--;
-                if (count < 0) {
-                    count = 2;
-                }
-            }
             mecanum(fldrive, frdrive, bldrive, brdrive, multipliers[count]);
             //-----------------------------------------------------------------------------
 
 
             //-----------------------------------------------------------------------------
             // GRAB RELIC AND DEPOSIT
-            //reliclift.setPower(gamepad2.left_trigger - gamepad2.right_trigger);
-            /*if (gamepad1.a) {
-                sleep(250);
-                grabrelic = !grabrelic;
+            reliclift.setPower(gamepad1.left_trigger - gamepad1.right_trigger);
+            if (gamepad1.a) {
+                grabrelic = true;
+                droprelic = false;
+                stowrelic = false;
             }
-            if(grabrelic) {
-                relicgrab.setPosition(0.5);
+            if (gamepad1.b) {
+                grabrelic = false;
+                droprelic = true;
+                stowrelic = false;
             }
-            if(!grabrelic) {
-                relicgrab.setPosition(0);
-            }*/
+            if (gamepad1.y) {
+                grabrelic = false;
+                droprelic = false;
+                stowrelic = true;
+            }
+            if (grabrelic) {
+                body.setPosition(0.5);
+                arm.setPosition(1);
+            }
+            else if (droprelic){
+                body.setPosition(1);
+                arm.setPosition(1);
+            }
+            else if (stowrelic) {
+                body.setPosition(0);
+                arm.setPosition(0);
+            }
+
             //-----------------------------------------------------------------------------
 
 
