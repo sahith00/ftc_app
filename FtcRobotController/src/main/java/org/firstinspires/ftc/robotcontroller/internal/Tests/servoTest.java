@@ -13,8 +13,8 @@ public class servoTest extends LinearOpMode{
     public void runOpMode() throws InterruptedException {
         servo1 = hardwareMap.servo.get("body");
         servo2 = hardwareMap.servo.get("arm");
-        servo1.setPosition(0);
-        servo2.setPosition(1);
+        servo1.setPosition(0.5);
+        servo2.setPosition(0.5);
         double lchange = 0.1, rchange = 0.1;
 
         waitForStart();
