@@ -15,31 +15,37 @@ public class servoTest extends LinearOpMode{
         servo2 = hardwareMap.servo.get("arm");
         servo1.setPosition(0.5);
         servo2.setPosition(0.5);
-        double lchange = 0.1, rchange = 0.1;
+        double lchange = 0.01, rchange = 0.01;
+        double cchange[] = new double[2];
+        cchange[0] = 0.01;
+        cchange[1] = 0.1;
+        int count = 0;
 
         waitForStart();
 
         while(opModeIsActive()) {
             if (gamepad1.x) {
-                sleep(500);
-                lchange += 0.1;
+                sleep(250);
+                lchange += cchange[count];
                 if (lchange >= 1.0) {
-                    lchange = 0.1;
+                    lchange = 0.01;
                 }
             }
 
             if(gamepad1.y) {
-                sleep(500);
-                rchange += 0.1;
+                sleep(250);
+                rchange += cchange[count];
                 if (rchange >= 1.0) {
-                    rchange = 0.1;
+                    rchange = 0.01;
                 }
             }
 
             if(gamepad1.right_bumper) {
                 sleep(500);
-                lchange = 0.1;
-                rchange = 0.1;
+                count++;
+                if (count==2) {
+                    count = 0;
+                }
             }
 
             if (gamepad1.dpad_down) {
@@ -76,6 +82,7 @@ public class servoTest extends LinearOpMode{
                 servo2.setPosition(rtemp);
             }
 
+            telemetry.addData("cchange", cchange[count]);
             telemetry.addData("lchange", lchange);
             telemetry.addData("rchange", rchange);
             telemetry.addData("servo1", servo1.getPosition());

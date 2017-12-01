@@ -13,8 +13,8 @@ import com.qualcomm.robotcore.util.Range;
  */
 public class googleTeleOp extends LinearOpMode{
     DcMotor frdrive, fldrive, brdrive, bldrive;
-    DcMotor lift1, lift2, grablift;
-    //Servo body, arm;
+    DcMotor lift1, lift2, grablift, reliclift;
+    Servo body, arm;
     Servo cat, knock;
     CRServo lgrab, rgrab, lbrush, rbrush;
 
@@ -27,9 +27,9 @@ public class googleTeleOp extends LinearOpMode{
         lift1 = hardwareMap.dcMotor.get("lift1");
         lift2 = hardwareMap.dcMotor.get("lift2");
         grablift = hardwareMap.dcMotor.get("grablift");
-        //reliclift = hardwareMap.dcMotor.get("reliclift");
-        //body = hardwareMap.servo.get("body");
-        //arm = hardwareMap.servo.get("arm");
+        reliclift = hardwareMap.dcMotor.get("reliclift");
+        body = hardwareMap.servo.get("body");
+        arm = hardwareMap.servo.get("arm");
         cat = hardwareMap.servo.get("cat");
         knock = hardwareMap.servo.get("knock");
         lgrab = hardwareMap.crservo.get("lgrab");
@@ -50,7 +50,7 @@ public class googleTeleOp extends LinearOpMode{
         lift1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         lift2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         grablift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        //reliclift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        reliclift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         fldrive.setPower(0);
         frdrive.setPower(0);
@@ -59,12 +59,12 @@ public class googleTeleOp extends LinearOpMode{
         lift1.setPower(0);
         lift2.setPower(0);
         grablift.setPower(0);
-        //reliclift.setPower(0);
-        //body.setPosition(0);
-        //arm.setPosition(0);
-        cat.setPosition(0.34);
+        reliclift.setPower(0);
+        body.setPosition(1.0);
+        arm.setPosition(0.63);
+        cat.setPosition(0.66);
         knock.setPosition(0.38);
-        lgrab.setPower(-0.08);
+        lgrab.setPower(0);
         rgrab.setPower(0);
         lbrush.setPower(0.05);
         rbrush.setPower(0);
@@ -79,7 +79,7 @@ public class googleTeleOp extends LinearOpMode{
         waitForStart();
 
         while(opModeIsActive()) {
-            cat.setPosition(0.34);
+            cat.setPosition(0.66);
             knock.setPosition(0.38);
             //-----------------------------------------------------------------------------
             // DRIVE ROBOT
@@ -90,13 +90,20 @@ public class googleTeleOp extends LinearOpMode{
                     count = 0;
                 }
             }
+            if (gamepad1.y) {
+                sleep(250);
+                count--;
+                if (count < 0) {
+                    count = 2;
+                }
+            }
             mecanum(fldrive, frdrive, bldrive, brdrive, multipliers[count]);
             //-----------------------------------------------------------------------------
 
 
             //-----------------------------------------------------------------------------
             // GRAB RELIC AND DEPOSIT
-            /*reliclift.setPower(gamepad1.left_trigger - gamepad1.right_trigger);
+            reliclift.setPower(gamepad1.left_trigger - gamepad1.right_trigger);
             if (gamepad1.a) {
                 grabrelic = true;
                 droprelic = false;
@@ -114,17 +121,16 @@ public class googleTeleOp extends LinearOpMode{
             }
             if (grabrelic) {
                 body.setPosition(0.5);
-                arm.setPosition(1);
+                arm.setPosition(0.54);
             }
             else if (droprelic){
-                body.setPosition(1);
-                arm.setPosition(1);
+                body.setPosition(0.0);
+                arm.setPosition(0.3);
             }
             else if (stowrelic) {
-                body.setPosition(0);
-                arm.setPosition(0);
+                body.setPosition(1.0);
+                arm.setPosition(0.63);
             }
-            */
             //-----------------------------------------------------------------------------
 
 
@@ -143,7 +149,7 @@ public class googleTeleOp extends LinearOpMode{
                 rbrush.setPower(0);
             }
             if(gamepad2.b) {
-                lgrab.setPower(-0.08);
+                lgrab.setPower(0);
                 lbrush.setPower(0.05);
             }
 
@@ -151,13 +157,13 @@ public class googleTeleOp extends LinearOpMode{
                 if (forward) {
                     rgrab.setPower((double)(gamepad2.right_trigger));
                     rbrush.setPower((double)(gamepad2.right_trigger));
-                    lgrab.setPower(Range.clip((double) (-gamepad2.left_trigger), -1, -0.08));
+                    lgrab.setPower((double) (-gamepad2.left_trigger));
                     lbrush.setPower((double) (-gamepad2.left_trigger) + 0.05);
                 }
                 if(reverse) {
                     rgrab.setPower((double)(-gamepad2.right_trigger));
                     rbrush.setPower((double)(-gamepad2.right_trigger));
-                    lgrab.setPower((double)(gamepad2.left_trigger)-0.08);
+                    lgrab.setPower((double)(gamepad2.left_trigger));
                     lbrush.setPower(Range.clip((double) (gamepad2.left_trigger), 0.05, 1));
                 }
             } else {
@@ -205,8 +211,8 @@ public class googleTeleOp extends LinearOpMode{
             }
 
             grablift.setPower(gamepad2.right_stick_y);
-            lift1.setPower(Math.signum(gamepad2.left_stick_y));
-            lift2.setPower(Math.signum(gamepad2.left_stick_y));
+            lift1.setPower(.8 * Math.signum(gamepad2.left_stick_y));
+            lift2.setPower(.8 * Math.signum(gamepad2.left_stick_y));
             //-----------------------------------------------------------------------------
 
 

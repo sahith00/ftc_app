@@ -38,6 +38,7 @@ import org.firstinspires.ftc.robotcontroller.external.samples.ConceptNullOp;
 import org.firstinspires.ftc.robotcontroller.internal.Google.googleAutoBlue;
 import org.firstinspires.ftc.robotcontroller.internal.Google.googleAutoRed;
 import org.firstinspires.ftc.robotcontroller.internal.Google.googleTeleOp;
+import org.firstinspires.ftc.robotcontroller.internal.Tests.NavXCalib;
 import org.firstinspires.ftc.robotcontroller.internal.Tests.PIDTest;
 import org.firstinspires.ftc.robotcontroller.internal.Tests.Vuforia;
 import org.firstinspires.ftc.robotcontroller.internal.Tests.encoderCountTest;
@@ -80,6 +81,7 @@ public class FtcOpModeRegister implements OpModeRegister {
         manager.register(new OpModeMeta("Google Auto Red", OpModeMeta.Flavor.AUTONOMOUS), googleAutoRed.class);
         manager.register(new OpModeMeta("encoder test", OpModeMeta.Flavor.AUTONOMOUS), encoderCountTest.class);
         manager.register(new OpModeMeta("Vuforia", OpModeMeta.Flavor.AUTONOMOUS), Vuforia.class);
+        manager.register("nav x calib test", NavXCalib.class);
         manager.register("pid test", PIDTest.class);
         manager.register("Google TeleOp", googleTeleOp.class);
         manager.register("test Tele", teleOpTest.class);
