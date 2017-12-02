@@ -210,6 +210,7 @@ public class googleAutoRed extends LinearOpMode {
         turn(-90, 2);
         drive(3, "FORWARD", 0.4);
         outtake();
+        sleep(2500);
         drive(3, "BACKWARD", 0.4);
     }
 
@@ -219,6 +220,7 @@ public class googleAutoRed extends LinearOpMode {
         drive(3, "FORWARD", 0.55);
         turn(-90, 2);
         outtake();
+        sleep(2500);
         drive(3, "BACKWARD", 0.4);
     }
 
@@ -227,6 +229,7 @@ public class googleAutoRed extends LinearOpMode {
         turn(-90, 2);
         drive(3, "FORWARD", 0.4);
         outtake();
+        sleep(2500);
         drive(3, "BACKWARD", 0.4);
     }
     //---------------------------------------------------------------------------------------------

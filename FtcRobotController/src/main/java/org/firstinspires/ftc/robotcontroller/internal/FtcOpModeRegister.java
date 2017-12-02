@@ -39,6 +39,7 @@ import org.firstinspires.ftc.robotcontroller.internal.Google.googleAutoBlue;
 import org.firstinspires.ftc.robotcontroller.internal.Google.googleAutoRed;
 import org.firstinspires.ftc.robotcontroller.internal.Google.googleTeleOp;
 import org.firstinspires.ftc.robotcontroller.internal.Tests.NavXCalib;
+import org.firstinspires.ftc.robotcontroller.internal.Tests.NavX_Zero;
 import org.firstinspires.ftc.robotcontroller.internal.Tests.PIDTest;
 import org.firstinspires.ftc.robotcontroller.internal.Tests.Vuforia;
 import org.firstinspires.ftc.robotcontroller.internal.Tests.encoderCountTest;
@@ -87,5 +88,6 @@ public class FtcOpModeRegister implements OpModeRegister {
         manager.register("test Tele", teleOpTest.class);
         manager.register("grabber test", grabberTest.class);
         manager.register("servo test", servoTest.class);
+        manager.register("NavX Zero", NavX_Zero.class);
     }
 }
