@@ -89,15 +89,12 @@ public class googleTeleOp extends LinearOpMode{
             //-----------------------------------------------------------------------------
             // DRIVE ROBOT
             if (gamepad1.x) {
-                sleep(250);
                 multiplier = 0.5;
             }
             if (gamepad1.y) {
-                sleep(250);
                 multiplier = 0.3;
             }
             if (gamepad1.a) {
-                sleep(250);
                 multiplier = 0.8;
             }
 
@@ -185,8 +182,8 @@ public class googleTeleOp extends LinearOpMode{
             }
 
             grablift.setPower(gamepad2.right_stick_y);
-            lift1.setPower(Range.clip(Math.signum(gamepad2.left_stick_y), -0.6, 0.9));
-            lift2.setPower(Range.clip(Math.signum(gamepad2.left_stick_y), -0.6, 0.9));
+            lift1.setPower(Range.clip(Math.signum(gamepad2.left_stick_y), -0.9, 0.6));
+            lift2.setPower(Range.clip(Math.signum(gamepad2.left_stick_y), -0.9, 0.6));
             //-----------------------------------------------------------------------------
 
 

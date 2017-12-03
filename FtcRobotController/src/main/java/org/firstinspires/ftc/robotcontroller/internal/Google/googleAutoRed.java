@@ -104,7 +104,7 @@ public class googleAutoRed extends LinearOpMode {
 
         lastKnownLocation = createMatrix(0, 0, 0, 0, 0, 0);             // Coordinates are in millimeters and are based off of the center of the robot
 
-        //navX.start();
+        navX.start();
 
         waitForStart();
 
@@ -206,31 +206,34 @@ public class googleAutoRed extends LinearOpMode {
     }
 
     public void doImageL() {
-        drive(38, "BACKWARD", 0.7);
+        drive(37, "BACKWARD", 0.7);
         turn(-90, 2);
         drive(3, "FORWARD", 0.4);
         outtake();
+        drive(1, "BACKWARD", 0.4);
+        stop();
         sleep(2500);
-        drive(3, "BACKWARD", 0.4);
     }
 
     public void doImageC() {
-        drive(34, "BACKWARD", 0.7);
+        drive(33, "BACKWARD", 0.7);
         turn(-90, 2);
         drive(3, "FORWARD", 0.55);
         turn(-90, 2);
         outtake();
+        drive(1, "BACKWARD", 0.4);
+        stop();
         sleep(2500);
-        drive(3, "BACKWARD", 0.4);
     }
 
     public void doImageR() {
-        drive(30, "BACKWARD", 0.7);
+        drive(29, "BACKWARD", 0.7);
         turn(-90, 2);
         drive(3, "FORWARD", 0.4);
         outtake();
+        drive(1, "BACKWARD", 0.4);
+        stop();
         sleep(2500);
-        drive(3, "BACKWARD", 0.4);
     }
     //---------------------------------------------------------------------------------------------
 
@@ -868,10 +871,6 @@ public class googleAutoRed extends LinearOpMode {
         lgrab.setPower(1);
         lbrush.setPower(1);
         sleep(4000);
-        rgrab.setPower(0);
-        rbrush.setPower(0);
-        lgrab.setPower(0);
-        lbrush.setPower(0);
     }
 
     public void intake() {
@@ -880,6 +879,9 @@ public class googleAutoRed extends LinearOpMode {
         lgrab.setPower(-1);
         lbrush.setPower(-1);
         sleep(4000);
+    }
+
+    public void stopGrab() {
         rgrab.setPower(0);
         rbrush.setPower(0);
         lgrab.setPower(0);

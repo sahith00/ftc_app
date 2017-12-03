@@ -104,7 +104,7 @@ public class googleAutoBlue extends LinearOpMode {
 
         lastKnownLocation = createMatrix(0, 0, 0, 0, 0, 0);             // Coordinates are in millimeters and are based off of the center of the robot
 
-        //navX.start();
+        navX.start();
 
         waitForStart();
 
@@ -206,31 +206,85 @@ public class googleAutoBlue extends LinearOpMode {
     }
 
     public void doImageL() {
-        drive(26, "FORWARD", 0.7);
+        drive(18, "FORWARD", 0.4);
         turn(-90, 2);
         drive(10, "FORWARD", 0.4);
         outtake();
         sleep(2500);
-        drive(3, "BACKWARD", 0.4);
+        fr.setPower(-0.4);
+        fl.setPower(-0.4);
+        br.setPower(-0.4);
+        bl.setPower(-0.4);
+        sleep(1000);
+        fr.setPower(0);
+        fl.setPower(0);
+        br.setPower(0);
+        bl.setPower(0);
+        sleep(500);
+        fr.setPower(0.4);
+        fl.setPower(0.4);
+        br.setPower(0.4);
+        bl.setPower(0.4);
+        sleep(500);
+        fr.setPower(0);
+        fl.setPower(0);
+        br.setPower(0);
+        bl.setPower(0);
     }
 
     public void doImageC() {
-        drive(30, "FORWARD", 0.7);
+        drive(22, "FORWARD", 0.4);
         turn(-90, 2);
-        drive(10, "FORWARD", 0.55);
+        drive(10, "FORWARD", 0.4);
         turn(-90, 2);
         outtake();
         sleep(2500);
-        drive(3, "BACKWARD", 0.4);
+        fr.setPower(-0.4);
+        fl.setPower(-0.4);
+        br.setPower(-0.4);
+        bl.setPower(-0.4);
+        sleep(1000);
+        fr.setPower(0);
+        fl.setPower(0);
+        br.setPower(0);
+        bl.setPower(0);
+        sleep(500);
+        fr.setPower(0.4);
+        fl.setPower(0.4);
+        br.setPower(0.4);
+        bl.setPower(0.4);
+        sleep(500);
+        fr.setPower(0);
+        fl.setPower(0);
+        br.setPower(0);
+        bl.setPower(0);
     }
 
     public void doImageR() {
-        drive(34, "FORWARD", 0.7);
+        drive(26, "FORWARD", 0.4);
         turn(-90, 2);
         drive(10, "FORWARD", 0.4);
         outtake();
         sleep(2500);
-        drive(3, "BACKWARD", 0.4);
+        fr.setPower(-0.4);
+        fl.setPower(-0.4);
+        br.setPower(-0.4);
+        bl.setPower(-0.4);
+        sleep(1000);
+        fr.setPower(0);
+        fl.setPower(0);
+        br.setPower(0);
+        bl.setPower(0);
+        sleep(500);
+        fr.setPower(0.4);
+        fl.setPower(0.4);
+        br.setPower(0.4);
+        bl.setPower(0.4);
+        sleep(500);
+        fr.setPower(0);
+        fl.setPower(0);
+        br.setPower(0);
+        bl.setPower(0);
     }
     //---------------------------------------------------------------------------------------------
 
