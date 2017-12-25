@@ -99,7 +99,7 @@ import java.util.Locale;
  * @see <a href="https://ae-bst.resource.bosch.com/media/_tech/media/datasheets/BST_BNO055_DS000_14.pdf">BNO055 specification</a>
  */
 @TeleOp(name = "Sensor: BNO055 IMU Calibration", group = "Sensor")
-@Disabled                            // Uncomment this to add to the opmode list
+//@Disabled                            // Uncomment this to add to the opmode list
 public class SensorBNO055IMUCalibration extends LinearOpMode
     {
     //----------------------------------------------------------------------------------------------
@@ -118,17 +118,6 @@ public class SensorBNO055IMUCalibration extends LinearOpMode
 
     @Override public void runOpMode() {
 
-        telemetry.log().setCapacity(12);
-        telemetry.log().add("");
-        telemetry.log().add("Please refer to the calibration instructions");
-        telemetry.log().add("contained in the Adafruit IMU calibration");
-        telemetry.log().add("sample opmode.");
-        telemetry.log().add("");
-        telemetry.log().add("When sufficient calibration has been reached,");
-        telemetry.log().add("press the 'A' button to write the current");
-        telemetry.log().add("calibration data to a file.");
-        telemetry.log().add("");
-
         // We are expecting the IMU to be attached to an I2C port on a Core Device Interface Module and named "imu".
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.loggingEnabled = true;
@@ -144,8 +133,6 @@ public class SensorBNO055IMUCalibration extends LinearOpMode
             telemetry.update();
             idle();
         }
-
-        telemetry.log().add("...started...");
 
         while (opModeIsActive()) {
 

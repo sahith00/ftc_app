@@ -42,8 +42,11 @@ import org.firstinspires.ftc.robotcontroller.internal.Tests.NavXCalib;
 import org.firstinspires.ftc.robotcontroller.internal.Tests.NavX_Zero;
 import org.firstinspires.ftc.robotcontroller.internal.Tests.PIDTest;
 import org.firstinspires.ftc.robotcontroller.internal.Tests.Vuforia;
+import org.firstinspires.ftc.robotcontroller.internal.Tests.colorSensorTest;
 import org.firstinspires.ftc.robotcontroller.internal.Tests.encoderCountTest;
 import org.firstinspires.ftc.robotcontroller.internal.Tests.grabberTest;
+import org.firstinspires.ftc.robotcontroller.internal.Tests.lineFollowingTest;
+import org.firstinspires.ftc.robotcontroller.internal.Tests.revIMUTest;
 import org.firstinspires.ftc.robotcontroller.internal.Tests.servoTest;
 import org.firstinspires.ftc.robotcontroller.internal.Tests.teleOpTest;
 import org.firstinspires.ftc.robotcore.internal.opmode.OpModeMeta;
@@ -81,6 +84,7 @@ public class FtcOpModeRegister implements OpModeRegister {
         manager.register(new OpModeMeta("Google Auto Blue", OpModeMeta.Flavor.AUTONOMOUS), googleAutoBlue.class);
         manager.register(new OpModeMeta("Google Auto Red", OpModeMeta.Flavor.AUTONOMOUS), googleAutoRed.class);
         manager.register(new OpModeMeta("encoder test", OpModeMeta.Flavor.AUTONOMOUS), encoderCountTest.class);
+        manager.register(new OpModeMeta("line following test", OpModeMeta.Flavor.AUTONOMOUS), lineFollowingTest.class);
         manager.register(new OpModeMeta("Vuforia", OpModeMeta.Flavor.AUTONOMOUS), Vuforia.class);
         manager.register("nav x calib test", NavXCalib.class);
         manager.register("pid test", PIDTest.class);
@@ -89,5 +93,8 @@ public class FtcOpModeRegister implements OpModeRegister {
         manager.register("grabber test", grabberTest.class);
         manager.register("servo test", servoTest.class);
         manager.register("NavX Zero", NavX_Zero.class);
+        manager.register("Rev IMU test", revIMUTest.class);
+        manager.register("drive test", teleOpTest.class);
+        manager.register("color test", colorSensorTest.class);
     }
 }
