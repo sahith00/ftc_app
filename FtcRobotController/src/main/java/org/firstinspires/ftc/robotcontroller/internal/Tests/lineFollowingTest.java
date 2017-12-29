@@ -26,7 +26,8 @@ public class lineFollowingTest extends LinearOpMode {
     ColorSensor lineSensor;
     DcMotor fr, fl, br, bl;
     int firstBlue;
-    int[] firstBlueRange;
+    int[] firstBlueRange, notBlueRange;
+    double firstAngle;
 
     BNO055IMU imu;
     Orientation lastAngles;
@@ -67,10 +68,23 @@ public class lineFollowingTest extends LinearOpMode {
 
         showPID();
         firstBlue = lineSensor.blue();
-        firstBlueRange = new int[3];
-        firstBlueRange[0] = firstBlue-1;
-        firstBlueRange[1] = firstBlue;
-        firstBlueRange[2] = firstBlue+1;
+        firstBlueRange = new int[5];
+        firstBlueRange[0] = firstBlue-2;
+        firstBlueRange[1] = firstBlue-1;
+        firstBlueRange[2] = firstBlue;
+        firstBlueRange[3] = firstBlue+1;
+        firstBlueRange[4] = firstBlue+2;
+        notBlueRange = new int[7];
+        notBlueRange[0] = 2;
+        notBlueRange[1] = 3;
+        notBlueRange[2] = 4;
+        notBlueRange[3] = 5;
+        notBlueRange[4] = 6;
+        notBlueRange[5] = 7;
+        notBlueRange[6] = 8;
+
+
+        telemetry.addData("First Blue", firstBlue);
 
         while (!isStarted()) {
             telemetry.update();
@@ -78,8 +92,16 @@ public class lineFollowingTest extends LinearOpMode {
         }
 
         while(opModeIsActive()) {
+            int n = 0;
             resetAngles();
-            followLine();
+            firstAngle = lastAngles.firstAngle;
+            while (n < 100) {            //change to distance-based
+                followLine();
+                n++;
+                telemetry.addData("dsfhai", "Did follow line");
+                telemetry.update();
+            }
+            telemetry.addData("dsfhai", "Did follow line 100 times");
             fl.setPower(0.0);
             fr.setPower(0.0);
             bl.setPower(0.0);
@@ -89,38 +111,30 @@ public class lineFollowingTest extends LinearOpMode {
         }
     }
 
-    public boolean findLine() {
-        boolean found;
-        if (listIncludesElement(firstBlueRange, lineSensor.blue())) {
-            found = true;
-        }
-        else {
-            found = false;
-        }
-        return found;
-    }
-
     public void followLine() {
-        if (listIncludesElement(firstBlueRange, findBlue())) {
+        if (listIncludesElement(firstBlueRange, lineSensor.blue())) {
             fl.setPower(0.1);
             fr.setPower(0.1);
             bl.setPower(0.1);
             br.setPower(0.1);
-        } else if (listIncludesElement(changeAllElements(firstBlueRange, -3), findBlue())) {
-            while (!findLine()) {
-                turn(5, 0.5);
-            }
-            followLine();
-        } else if (findBlue() < firstBlue - 1) {
-            while (!findLine()) {
-                turn(-5, 0.5);
-            }
-            followLine();
+            telemetry.addData("HI", "Correct blue detected");
+            telemetry.update();
         }
-    }
-
-    public int findBlue() {
-        return lineSensor.blue();
+        while (lineSensor.blue() > firstBlueRange[4] + 3) {
+            turn(5, 0.5);
+            telemetry.addData("HI", "Turned 5");
+            telemetry.update();
+            sleep(1000);
+            //followLine();
+        }
+        while (lineSensor.blue() < firstBlueRange[0] - 3) {
+            turn(-5, 0.5);
+            telemetry.addData("HI", "Turned -5");
+            telemetry.update();
+            sleep(1000);
+            //followLine();
+        }
+        telemetry.update();
     }
 
     String formatAngle(AngleUnit angleUnit, double angle) {
@@ -187,15 +201,9 @@ public class lineFollowingTest extends LinearOpMode {
         startDegreeController();
         double pYaw = lastAngles.firstAngle;
         while (Math.abs(getDifference(lastAngles.firstAngle, degree)) > margin || Math.abs(pYaw - lastAngles.firstAngle) > .05) {
-            Log.i("debug: ", "yaw: " + lastAngles.firstAngle);
-            Log.i("debug: ", "difference: " + getDifference(lastAngles.firstAngle, degree));
-            Log.i("debug", "target: " + degree + " cur: " + lastAngles.firstAngle);
             double change = degreeController(degree);
             double forwardPower = Range.clip(change, -1, 1);
             double backPower = Range.clip(-change, -1, 1);
-            Log.i("powers", "forward: " + forwardPower);
-            Log.i("powers", "backward: " + backPower);
-            Log.i("debug: ", "difference: " + getDifference(lastAngles.firstAngle, degree));
             if (getDifference(lastAngles.firstAngle, degree) > 0) {
                 fr.setPower(0.5 * backPower);
                 br.setPower(0.5 * backPower);
@@ -218,10 +226,12 @@ public class lineFollowingTest extends LinearOpMode {
         bl.setPower(0.0);
         br.setPower(0.0);
         telemetry.addData("Reached", degree);
+        telemetry.update();
     }
 
     void resetAngles() {
         lastAngles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        lastAngles.firstAngle = 0;
     }
 
     void showPID() {
@@ -268,12 +278,5 @@ public class lineFollowingTest extends LinearOpMode {
             }
         }
         return false;
-    }
-
-    public int[] changeAllElements(int[] l, int x) {
-        for (int i = 0; i < l.length; i++) {
-            l[i] += x;
-        }
-        return l;
     }
 }

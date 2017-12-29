@@ -14,18 +14,9 @@ import com.qualcomm.robotcore.util.Range;
 public class ciscoTeleOp extends LinearOpMode{
 
     DcMotor frdrive, fldrive, brdrive, bldrive;
-    DcMotor lift1, lift2, grablift, reliclift;
-    Servo body, arm;
+    DcMotor lift;
     Servo cat, knock;
-    CRServo lgrab, rgrab, lbrush, rbrush;
 
-    final static double GRAB_BODY = 0.5;
-    final static double DROP_BODY = 0.0;
-    final static double STOW_BODY = 1.0;
-    final static double EXTEND_ARM = 0.0;
-    final static double GRAB_ARM = 0.54;
-    final static double DROP_ARM = 0.3;
-    final static double STOW_ARM = 0.63;
     final static double CAT_STOW = 0.66;
     final static double KNOCK_CENTER = 0.38;
 
@@ -35,21 +26,9 @@ public class ciscoTeleOp extends LinearOpMode{
         frdrive = hardwareMap.dcMotor.get("frdrive");
         bldrive = hardwareMap.dcMotor.get("bldrive");
         brdrive = hardwareMap.dcMotor.get("brdrive");
-        lift1 = hardwareMap.dcMotor.get("lift1");
-        lift2 = hardwareMap.dcMotor.get("lift2");
-        grablift = hardwareMap.dcMotor.get("grablift");
-        reliclift = hardwareMap.dcMotor.get("reliclift");
-        body = hardwareMap.servo.get("body");
-        arm = hardwareMap.servo.get("arm");
+        lift = hardwareMap.dcMotor.get("lift");
         cat = hardwareMap.servo.get("cat");
         knock = hardwareMap.servo.get("knock");
-        lgrab = hardwareMap.crservo.get("lgrab");
-        rgrab = hardwareMap.crservo.get("rgrab");
-        lbrush = hardwareMap.crservo.get("lbrush");
-        rbrush = hardwareMap.crservo.get("rbrush");
-
-        boolean forward = true, reverse = false;
-        boolean extendarm = false, grabrelic = false, droprelic = false, stowrelic = true;
 
         fldrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         frdrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -57,28 +36,15 @@ public class ciscoTeleOp extends LinearOpMode{
         frdrive.setDirection(DcMotorSimple.Direction.REVERSE);
         bldrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         brdrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        lift1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        lift2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        grablift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        reliclift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         fldrive.setPower(0);
         frdrive.setPower(0);
         bldrive.setPower(0);
         brdrive.setPower(0);
-        lift1.setPower(0);
-        lift2.setPower(0);
-        grablift.setPower(0);
-        reliclift.setPower(0);
-        body.setPosition(STOW_BODY);
-        arm.setPosition(STOW_ARM);
+        lift.setPower(0);
         cat.setPosition(CAT_STOW);
         knock.setPosition(KNOCK_CENTER);
-        lgrab.setPower(0);
-        rgrab.setPower(0);
-        lbrush.setPower(0.05);
-        rbrush.setPower(0);
-
 
         double multiplier = 1.0;
 
@@ -106,86 +72,13 @@ public class ciscoTeleOp extends LinearOpMode{
 
             //-----------------------------------------------------------------------------
             // GRAB RELIC AND DEPOSIT
-            if (gamepad2.dpad_right) {
-                reliclift.setPower(-0.4);
-            }
-            if (gamepad2.dpad_left) {
-                reliclift.setPower(0.4);
-            }
-            if (gamepad2.dpad_up) {
-                reliclift.setPower(0);
-            }
 
-            if (gamepad2.a) {
-                extendarm = false;
-                grabrelic = true;
-                droprelic = false;
-                stowrelic = false;
-            }
-            if (gamepad2.b) {
-                extendarm = false;
-                grabrelic = false;
-                droprelic = false;
-                stowrelic = true;
-            }
-            if (gamepad2.x) {
-                extendarm = false;
-                grabrelic = false;
-                droprelic = true;
-                stowrelic = false;
-            }
-            if (gamepad2.y) {
-                extendarm = true;
-                grabrelic = false;
-                droprelic = false;
-                stowrelic = false;
-            }
-            if(extendarm) {
-                body.setPosition(GRAB_BODY);
-                arm.setPosition(EXTEND_ARM);
-            }
-            if (grabrelic) {
-                body.setPosition(GRAB_BODY);
-                arm.setPosition(GRAB_ARM);
-            }
-            else if (droprelic){
-                body.setPosition(DROP_BODY);
-                arm.setPosition(DROP_ARM);
-            }
-            else if (stowrelic) {
-                body.setPosition(STOW_BODY);
-                arm.setPosition(STOW_ARM);
-            }
             //-----------------------------------------------------------------------------
 
 
             //-----------------------------------------------------------------------------
             // GRAB GLYPH AND DEPOSIT
-            if (gamepad2.right_bumper) {
-                forward = true;
-                reverse = false;
-            }
-            if (gamepad2.left_bumper) {
-                reverse = true;
-                forward = false;
-            }
-
-            if (forward) {
-                rgrab.setPower((double)(gamepad2.right_trigger));
-                rbrush.setPower((double)(gamepad2.right_trigger));
-                lgrab.setPower((double) (-gamepad2.left_trigger));
-                lbrush.setPower((double) (-gamepad2.left_trigger) + 0.05);
-            }
-            if(reverse) {
-                rgrab.setPower((double)(-gamepad2.right_trigger));
-                rbrush.setPower((double)(-gamepad2.right_trigger));
-                lgrab.setPower((double)(gamepad2.left_trigger));
-                lbrush.setPower(Range.clip((double) (gamepad2.left_trigger), 0.05, 1));
-            }
-
-            grablift.setPower(gamepad2.right_stick_y);
-            lift1.setPower(Range.clip(Math.signum(gamepad2.left_stick_y), -0.9, 0.6));
-            lift2.setPower(Range.clip(Math.signum(gamepad2.left_stick_y), -0.9, 0.6));
+            lift.setPower(Range.clip(gamepad2.right_stick_y + 0.5, -0.5, 1));
             //-----------------------------------------------------------------------------
 
 
