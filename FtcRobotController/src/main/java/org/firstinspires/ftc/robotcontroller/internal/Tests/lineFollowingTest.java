@@ -86,6 +86,9 @@ public class lineFollowingTest extends LinearOpMode {
 
         telemetry.addData("First Blue", firstBlue);
 
+        resetAngles();
+        firstAngle = lastAngles.firstAngle;
+
         while (!isStarted()) {
             telemetry.update();
             idle();
@@ -93,8 +96,6 @@ public class lineFollowingTest extends LinearOpMode {
 
         while(opModeIsActive()) {
             int n = 0;
-            resetAngles();
-            firstAngle = lastAngles.firstAngle;
             while (n < 100) {            //change to distance-based
                 followLine();
                 n++;
@@ -120,19 +121,21 @@ public class lineFollowingTest extends LinearOpMode {
             telemetry.addData("HI", "Correct blue detected");
             telemetry.update();
         }
-        while (lineSensor.blue() > firstBlueRange[4] + 3) {
-            turn(5, 0.5);
-            telemetry.addData("HI", "Turned 5");
-            telemetry.update();
-            sleep(1000);
-            //followLine();
+        else if (lineSensor.blue() > firstBlueRange[4] + 4) {
+            turn(1, 0.5);
+            while (lineSensor.blue() > firstBlueRange[4] + 4) {telemetry.addData("hi", "Hi");}
+            fl.setPower(0.1);
+            fr.setPower(0.1);
+            bl.setPower(0.1);
+            br.setPower(0.1);
         }
-        while (lineSensor.blue() < firstBlueRange[0] - 3) {
-            turn(-5, 0.5);
-            telemetry.addData("HI", "Turned -5");
-            telemetry.update();
-            sleep(1000);
-            //followLine();
+        else if (lineSensor.blue() < firstBlueRange[0] - 4) {
+            turn(-1, 0.5);
+            while (lineSensor.blue() > firstBlueRange[0] - 4) {telemetry.addData("hi", "Hi");}
+            fl.setPower(0.1);
+            fr.setPower(0.1);
+            bl.setPower(0.1);
+            br.setPower(0.1);
         }
         telemetry.update();
     }
@@ -176,9 +179,8 @@ public class lineFollowingTest extends LinearOpMode {
         tE = 0;
     }
 
-    public double degreeController(double degree){
+    public double degreeController(double degree, double e){
         double ans = 0;
-        double e = Math.abs(getDifference(lastAngles.firstAngle, degree));
         double dE = e-pE;
         double dT = runtime.time() - pT;
         Log.i("PID turn", "e: " + e);
@@ -200,8 +202,9 @@ public class lineFollowingTest extends LinearOpMode {
     public void turn(double degree, double margin) {
         startDegreeController();
         double pYaw = lastAngles.firstAngle;
+        double e = Math.abs(getDifference(lastAngles.firstAngle, degree));
         while (Math.abs(getDifference(lastAngles.firstAngle, degree)) > margin || Math.abs(pYaw - lastAngles.firstAngle) > .05) {
-            double change = degreeController(degree);
+            double change = degreeController(degree, e);
             double forwardPower = Range.clip(change, -1, 1);
             double backPower = Range.clip(-change, -1, 1);
             if (getDifference(lastAngles.firstAngle, degree) > 0) {
@@ -221,10 +224,6 @@ public class lineFollowingTest extends LinearOpMode {
             resetAngles();
             telemetry.update();
         }
-        fl.setPower(0.0);
-        fr.setPower(0.0);
-        bl.setPower(0.0);
-        br.setPower(0.0);
         telemetry.addData("Reached", degree);
         telemetry.update();
     }

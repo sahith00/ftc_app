@@ -14,7 +14,7 @@ import com.qualcomm.robotcore.util.Range;
 public class ciscoTeleOp extends LinearOpMode{
 
     DcMotor frdrive, fldrive, brdrive, bldrive;
-    DcMotor lift;
+    DcMotor lift, rgrab, lgrab;
     Servo cat, knock;
 
     final static double CAT_STOW = 0.66;
@@ -27,6 +27,8 @@ public class ciscoTeleOp extends LinearOpMode{
         bldrive = hardwareMap.dcMotor.get("bldrive");
         brdrive = hardwareMap.dcMotor.get("brdrive");
         lift = hardwareMap.dcMotor.get("lift");
+        rgrab = hardwareMap.dcMotor.get("rgrab");
+        lgrab = hardwareMap.dcMotor.get("lgrab");
         cat = hardwareMap.servo.get("cat");
         knock = hardwareMap.servo.get("knock");
 
@@ -43,6 +45,8 @@ public class ciscoTeleOp extends LinearOpMode{
         bldrive.setPower(0);
         brdrive.setPower(0);
         lift.setPower(0);
+        rgrab.setPower(0);
+        lgrab.setPower(0);
         cat.setPosition(CAT_STOW);
         knock.setPosition(KNOCK_CENTER);
 
@@ -78,6 +82,17 @@ public class ciscoTeleOp extends LinearOpMode{
 
             //-----------------------------------------------------------------------------
             // GRAB GLYPH AND DEPOSIT
+            rgrab.setPower(0.8 * Math.signum(gamepad2.right_trigger));
+            lgrab.setPower(-0.8 * Math.signum(gamepad2.left_trigger));
+            if (gamepad2.x) {
+                rgrab.setPower(0);
+                lgrab.setPower(0);
+                sleep(100);
+                rgrab.setPower(0.4);
+                sleep(500);
+                rgrab.setPower(0);
+            }
+
             lift.setPower(Range.clip(gamepad2.right_stick_y + 0.5, -0.5, 1));
             //-----------------------------------------------------------------------------
 
