@@ -82,15 +82,19 @@ public class ciscoTeleOp extends LinearOpMode{
 
             //-----------------------------------------------------------------------------
             // GRAB GLYPH AND DEPOSIT
-            rgrab.setPower(0.8 * Math.signum(gamepad2.right_trigger));
-            lgrab.setPower(-0.8 * Math.signum(gamepad2.left_trigger));
+            rgrab.setPower(0.7 * Math.signum(gamepad2.right_trigger));
+            lgrab.setPower(-0.7 * Math.signum(gamepad2.left_trigger));
+            if (gamepad2.a) {
+                rgrab.setPower(0.32);
+                lgrab.setPower(0.8);
+            }
+            if (gamepad2.b) {
+                rgrab.setPower(0.7);
+                lgrab.setPower(0.7);
+            }
             if (gamepad2.x) {
-                rgrab.setPower(0);
-                lgrab.setPower(0);
-                sleep(100);
-                rgrab.setPower(0.4);
-                sleep(500);
-                rgrab.setPower(0);
+                rgrab.setPower(0.0);
+                rgrab.setPower(0.0);
             }
 
             lift.setPower(Range.clip(gamepad2.right_stick_y + 0.5, -0.5, 1));
