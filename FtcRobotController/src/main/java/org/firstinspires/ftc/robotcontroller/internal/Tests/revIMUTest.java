@@ -37,6 +37,9 @@ public class revIMUTest extends LinearOpMode {
 
     ElapsedTime runtime = new ElapsedTime();
 
+    int count = 0;
+    double degrees[] = new double[7];
+
     @Override
     public void runOpMode() throws InterruptedException {
         fr = hardwareMap.dcMotor.get("frdrive");
@@ -65,6 +68,14 @@ public class revIMUTest extends LinearOpMode {
 
         showPID();
 
+        degrees[0] = 90;
+        degrees[1] = -90;
+        degrees[2] = 0;
+        degrees[3] = 180;
+        degrees[4] = 270;
+        degrees[5] = 360;
+        degrees[6] = -180;
+
         while (!isStarted()) {
             telemetry.update();
             idle();
@@ -74,7 +85,20 @@ public class revIMUTest extends LinearOpMode {
             showPID();
             telemetry.addData("last angles", formatAngle(AngleUnit.DEGREES, lastAngles.firstAngle));
 
-            turn(90, 5);
+            if (gamepad1.a) {
+                if (count > 6) {
+                    count = 0;
+                }
+                turn(degrees[count], 3);
+                count += 1;
+            }
+            if (gamepad1.b) {
+                if (count > 6) {
+                    count = 0;
+                }
+                turn(degrees[count], 3);
+                count += 2;
+            }
 
             telemetry.addData("last angles", formatAngle(AngleUnit.DEGREES, lastAngles.firstAngle));
             telemetry.addData("finished", "done");

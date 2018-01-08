@@ -38,6 +38,7 @@ import org.firstinspires.ftc.robotcontroller.external.samples.ConceptNullOp;
 import org.firstinspires.ftc.robotcontroller.internal.Google.googleAutoBlue;
 import org.firstinspires.ftc.robotcontroller.internal.Google.googleAutoRed;
 import org.firstinspires.ftc.robotcontroller.internal.Google.googleTeleOp;
+import org.firstinspires.ftc.robotcontroller.internal.Tests.BasicLineFollowing;
 import org.firstinspires.ftc.robotcontroller.internal.Tests.NavXCalib;
 import org.firstinspires.ftc.robotcontroller.internal.Tests.NavX_Zero;
 import org.firstinspires.ftc.robotcontroller.internal.Tests.PIDTest;
@@ -87,6 +88,7 @@ public class FtcOpModeRegister implements OpModeRegister {
         manager.register(new OpModeMeta("Google Auto Red", OpModeMeta.Flavor.AUTONOMOUS), googleAutoRed.class);
         manager.register(new OpModeMeta("encoder test", OpModeMeta.Flavor.AUTONOMOUS), encoderCountTest.class);
         manager.register(new OpModeMeta("line following test", OpModeMeta.Flavor.AUTONOMOUS), lineFollowingTest.class);
+        manager.register(new OpModeMeta("basic line following test", OpModeMeta.Flavor.AUTONOMOUS), BasicLineFollowing.class);
         manager.register(new OpModeMeta("line following test 2.0", OpModeMeta.Flavor.AUTONOMOUS), lineFollowingTest2.class);
         manager.register(new OpModeMeta("Vuforia", OpModeMeta.Flavor.AUTONOMOUS), Vuforia.class);
         manager.register("nav x calib test", NavXCalib.class);

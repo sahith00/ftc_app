@@ -62,15 +62,46 @@ public class lineFollowingTest2 extends LinearOpMode {
         fr.setPower(0.0);
         bl.setPower(0.0);
         br.setPower(0.0);
-        setConstants(.005, .0, .05);
+        setConstants(.0059, .0, .1);
         error = 0;
         lasterror = 0;
         lasttime = 0;
-        desiredblue = 18;
+        desiredblue = 23;
         dE = 0.0;
         dT = 0.0;
         integral = .0;
-        waitForStart();
+
+        while (!isStarted()) {
+            if (gamepad1.a) {
+                sleep(250);
+                kd += 0.005;
+            }
+            if (gamepad1.b) {
+                sleep(250);
+                kd -= 0.005;
+            }
+            if (gamepad1.y) {
+                sleep(250);
+                kp += 0.0001;
+            }
+            if (gamepad1.x) {
+                sleep(250);
+                kp -= 0.0001;
+            }
+            if (gamepad1.dpad_up) {
+                sleep(250);
+                kp += 0.01;
+            }
+            if (gamepad1.dpad_down) {
+                sleep(250);
+                kp -= 0.01;
+            }
+            telemetry.addData("KD", kd);
+            telemetry.addData("KP", kp);
+            telemetry.addData("KI", ki);
+            telemetry.update();
+            idle();
+        }
         while (opModeIsActive()) {
             error = 0.5 * (lineSensor.blue() - desiredblue);
             dE = error - lasterror;

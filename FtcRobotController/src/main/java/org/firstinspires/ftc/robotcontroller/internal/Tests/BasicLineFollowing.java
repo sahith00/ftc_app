@@ -21,12 +21,10 @@ import java.util.Locale;
  * Created by sahith on 1/3/18.
  */
 
-public class lineFollowingTest extends LinearOpMode {
+public class BasicLineFollowing extends LinearOpMode {
     ColorSensor lineSensor;
     DcMotor fr, fl, br, bl;
-    final static int DESIREDBLUE = 23;
-    int error;
-    double leftPower, rightPower, addedPower;
+    int desiredblue, currentblue, counter;
 
     ElapsedTime runtime = new ElapsedTime();
 
@@ -48,54 +46,34 @@ public class lineFollowingTest extends LinearOpMode {
         br.setDirection(DcMotorSimple.Direction.FORWARD);
         fl.setDirection(DcMotorSimple.Direction.REVERSE);
         bl.setDirection(DcMotorSimple.Direction.REVERSE);
-        fr.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        fl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        br.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        bl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         fl.setPower(0.0);
         fr.setPower(0.0);
         bl.setPower(0.0);
         br.setPower(0.0);
+        desiredblue = 23;
+        currentblue = 6;
+        counter = 0;
 
         while (!isStarted()) {
             telemetry.update();
             idle();
         }
         while (opModeIsActive()) {
-            setBack(0.0);
-            error = DESIREDBLUE - lineSensor.blue();
-            addedPower = Range.clip(convertColorToPower(error), -0.075, 0.075);
-            if (addedPower <= 0) {
-                leftPower = 0.075 - addedPower;
-                rightPower = 0.075;
+            if (lineSensor.blue() > desiredblue) {
+                setRight(.09);
+                setLeft(.0);
+            } else {
+                setRight(.0);
+                setLeft(.09);
             }
-            else {
-                leftPower = 0.075;
-                rightPower = 0.075 + addedPower;
-            }
-            fl.setPower(leftPower);
-            fr.setPower(rightPower);
-
-            telemetry.addData("fr", fr.getPower());
-            telemetry.addData("fl", fl.getPower());
-            telemetry.addData("br", br.getPower());
-            telemetry.addData("bl", bl.getPower());
-            telemetry.addData("blue", lineSensor.blue());
-            telemetry.addData("error", addedPower);
-            telemetry.update();
         }
     }
-    public void setForward(double lpower) {
+    public void setLeft(double lpower) {
         fl.setPower(lpower);
-        fr.setPower(lpower);
+        bl.setPower(lpower);
     }
-    public void setBack(double rpower) {
-        bl.setPower(rpower);
+    public void setRight(double rpower) {
+        fr.setPower(rpower);
         br.setPower(rpower);
-    }
-
-    public double convertColorToPower(int color) {
-        double temp = (double) (color);
-        return .00441176 * temp;
     }
 }
