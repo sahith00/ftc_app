@@ -35,6 +35,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpModeManager;
 import com.qualcomm.robotcore.eventloop.opmode.OpModeRegister;
 
 import org.firstinspires.ftc.robotcontroller.external.samples.ConceptNullOp;
+import org.firstinspires.ftc.robotcontroller.internal.Cisco.ciscoTeleOp;
 import org.firstinspires.ftc.robotcontroller.internal.Google.googleAutoBlue;
 import org.firstinspires.ftc.robotcontroller.internal.Google.googleAutoRed;
 import org.firstinspires.ftc.robotcontroller.internal.Google.googleTeleOp;
@@ -49,6 +50,7 @@ import org.firstinspires.ftc.robotcontroller.internal.Tests.grabberTest;
 import org.firstinspires.ftc.robotcontroller.internal.Tests.intakeTest;
 import org.firstinspires.ftc.robotcontroller.internal.Tests.lineFollowingTest;
 import org.firstinspires.ftc.robotcontroller.internal.Tests.lineFollowingTest2;
+import org.firstinspires.ftc.robotcontroller.internal.Tests.lineFollowingTest3;
 import org.firstinspires.ftc.robotcontroller.internal.Tests.revIMUTest;
 import org.firstinspires.ftc.robotcontroller.internal.Tests.servoTest;
 import org.firstinspires.ftc.robotcontroller.internal.Tests.teleOpTest;
@@ -90,10 +92,11 @@ public class FtcOpModeRegister implements OpModeRegister {
         manager.register(new OpModeMeta("line following test", OpModeMeta.Flavor.AUTONOMOUS), lineFollowingTest.class);
         manager.register(new OpModeMeta("basic line following test", OpModeMeta.Flavor.AUTONOMOUS), BasicLineFollowing.class);
         manager.register(new OpModeMeta("line following test 2.0", OpModeMeta.Flavor.AUTONOMOUS), lineFollowingTest2.class);
+        manager.register(new OpModeMeta("line following test 3.0", OpModeMeta.Flavor.AUTONOMOUS), lineFollowingTest3.class);
         manager.register(new OpModeMeta("Vuforia", OpModeMeta.Flavor.AUTONOMOUS), Vuforia.class);
         manager.register("nav x calib test", NavXCalib.class);
         manager.register("pid test", PIDTest.class);
-        manager.register("Google TeleOp", googleTeleOp.class);
+        manager.register("Cisco TeleOp", ciscoTeleOp.class);
         manager.register("test Tele", teleOpTest.class);
         manager.register("grabber test", grabberTest.class);
         manager.register("servo test", servoTest.class);

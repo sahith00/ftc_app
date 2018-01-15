@@ -7,14 +7,12 @@ import com.qualcomm.robotcore.hardware.Servo;
  * Created by sahith on 10/12/17.
  */
 public class servoTest extends LinearOpMode{
-    Servo servo1, servo2;
+    Servo servo1;
 
     @Override
     public void runOpMode() throws InterruptedException {
-        servo1 = hardwareMap.servo.get("body");
-        servo2 = hardwareMap.servo.get("arm");
+        servo1 = hardwareMap.servo.get("flipper");
         servo1.setPosition(0.5);
-        servo2.setPosition(0.5);
         double lchange = 0.01, rchange = 0.01;
         double cchange[] = new double[2];
         cchange[0] = 0.01;
@@ -65,28 +63,10 @@ public class servoTest extends LinearOpMode{
                 servo1.setPosition(ltemp);
             }
 
-            if (gamepad1.a) {
-                sleep(500);
-                double rtemp = servo2.getPosition() - rchange;
-                if (rtemp <= 0.0) {
-                    rtemp = 0.0;
-                }
-                servo2.setPosition(rtemp);
-            }
-            if (gamepad1.b) {
-                sleep(500);
-                double rtemp = servo2.getPosition() + rchange;
-                if (rtemp >= 1.0) {
-                    rtemp = 1.0;
-                }
-                servo2.setPosition(rtemp);
-            }
-
             telemetry.addData("cchange", cchange[count]);
             telemetry.addData("lchange", lchange);
             telemetry.addData("rchange", rchange);
             telemetry.addData("servo1", servo1.getPosition());
-            telemetry.addData("servo2", servo2.getPosition());
             telemetry.update();
         }
     }
