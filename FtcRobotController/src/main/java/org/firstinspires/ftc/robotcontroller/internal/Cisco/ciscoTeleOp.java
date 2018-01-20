@@ -4,6 +4,7 @@ import android.util.Log;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
@@ -19,17 +20,18 @@ public class ciscoTeleOp extends LinearOpMode{
     Servo rflip, lflip;
     final static double CAT_STOW = 0.66;
     final static double KNOCK_CENTER = 0.38;
-    final static double RFLIP_DEPOSIT = 0.195; //0.47
-    final static double RFLIP_ZERO = 0.485; //0.74
-    final static double RFLIP_GRAB = 0.555;
-    final static double LFLIP_DEPOSIT = 0.8795; //0.53
+    final static double RFLIP_DEPOSIT = 0.215; //0.47
+    final static double RFLIP_ZERO = 0.505; //0.74
+    final static double RFLIP_GRAB = 0.575;
+    final static double LFLIP_DEPOSIT = 0.87995; //0.53
     final static double LFLIP_ZERO = 0.3495; //0.26
     final static double LFLIP_GRAB = 0.2395;
     final static double LEVEL_ONE = 0;
-    final static double LEVEL_TWO = 372;
-    final static double LEVEL_THREE = 770;
+    final static double LEVEL_TWO = -372;
+    final static double LEVEL_THREE = -770;
     double intakep;
     boolean lift_zero;
+    double multiplier = 1.0;
 
     double p_turn = .03;//0.008;
     double i_turn = .00; //.0045; //.003;
@@ -63,7 +65,7 @@ public class ciscoTeleOp extends LinearOpMode{
         lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE); //so that lift can hold its position
-        zero(); //inits flipper parallel to the ground
+        grab(); //inits flipper to grab position to prepare for grabbing
         fldrive.setPower(0);
         frdrive.setPower(0);
         bldrive.setPower(0);
@@ -73,7 +75,6 @@ public class ciscoTeleOp extends LinearOpMode{
         lgrab.setPower(0);
 /*        cat.setPosition(CAT_STOW);
         knock.setPosition(KNOCK_CENTER);*/
-        double multiplier = 1.0;
         intakep = .0;
         lift_zero = true;
 
@@ -111,55 +112,13 @@ public class ciscoTeleOp extends LinearOpMode{
                 mecanum(fldrive, frdrive, bldrive, brdrive, multiplier);
             }
             //-----------------------------------------------------------------------------
-            //-----------------------------------------------------------------------------
             // GRAB RELIC AND DEPOSIT
             //-----------------------------------------------------------------------------
             // GRAB GLYPH AND DEPOSIT
-            if (gamepad2.right_bumper) {
-                intakep = 1.0;
-            }
-            if (gamepad2.left_bumper) {
-                intakep = .0;
-            }
-            if (gamepad1.y) {
-                sleep(250);
-                intakep += 0.1;
-            }
-            if (gamepad1.a) {
-                sleep(250);
-                intakep -= 0.1;
-            }
-            if (intakep == .0) {// we can only use triggers to fix cubes when the intake is not running
-                rgrab.setPower(-.5*Math.signum(gamepad2.right_trigger));
-                lgrab.setPower(-.5*Math.signum(gamepad2.left_trigger));
-            } else {
-                rgrab.setPower(Range.clip(intakep, -1, 1));
-                lgrab.setPower(Range.clip(intakep, -1, 1));
-            }
-
-            if (lift_zero) {
-                lift.setPower(Range.clip(gamepad2.right_stick_y, -.6, .5));
-            }
-
-            if (gamepad2.y) {
-                moveLevels(LEVEL_THREE, lift_zero);
-            }
-            if (gamepad2.x) {
-                moveLevels(LEVEL_TWO, lift_zero);
-            }
-            if (gamepad2.a) {
-                moveLevels(LEVEL_ONE, lift_zero);
-            }
-
-            if (gamepad2.dpad_left) { //zero position, when flipper is parallel to ground
-                zero();
-            }
-            if (gamepad2.dpad_down) { //grab position, when we're picking up cubes
-                grab();
-            }
-            if (gamepad2.dpad_up) { //deposit position, when we're depositing cubes
-                deposit();
-            }
+            grabGlyph();
+            liftGlyph();
+            useFlipper(gamepad1);         //Driver 1
+            useFlipper(gamepad2);         //Driver 2
             //-----------------------------------------------------------------------------
             // TELEMETRY
             telemetry.addData("Lift Encoder Count: ", lift.getCurrentPosition());
@@ -210,16 +169,28 @@ public class ciscoTeleOp extends LinearOpMode{
     }
 
     public void movePID(double distance, double margin) {
-        startDegreeController();
-        double pYaw = lift.getCurrentPosition();
-        while (Math.abs(lift.getCurrentPosition() - distance) > margin || Math.abs(pYaw - lift.getCurrentPosition()) > .05) {
-            double change = tickController(distance);
-            lift.setPower(Range.clip(change, -1, 1));
-            pYaw = lift.getCurrentPosition();
-            telemetry.addData("In While loop", lift.getCurrentPosition());
-            if (gamepad2.back) {
-                break;
-            }
+//        startDegreeController();
+//        double pYaw = lift.getCurrentPosition();
+//        while (Math.abs(lift.getCurrentPosition() - distance) > margin || Math.abs(pYaw - lift.getCurrentPosition()) > .05) {
+//            double change = tickController(distance);
+//            lift.setPower(Range.clip(change, -1, 1));
+//            pYaw = lift.getCurrentPosition();
+//            telemetry.addData("In While loop", lift.getCurrentPosition());
+//            if (gamepad2.back) {
+//                break;
+//            }
+//        }
+        if (lift.getCurrentPosition() - distance < 0) {
+            lift.setPower(0.5);
+        }
+        else {
+            lift.setPower(-0.5);
+        }
+        while (Math.abs(lift.getCurrentPosition() - distance) > margin ) {
+            mecanum(fldrive, frdrive, bldrive, brdrive, multiplier);
+            useFlipper(gamepad1);
+            useFlipper(gamepad2);
+            grabGlyph();
         }
         lift.setPower(0.0);
     }
@@ -251,9 +222,54 @@ public class ciscoTeleOp extends LinearOpMode{
         return ans;
     }
 
-    public void moveLevels(double level, boolean lift_zero) {
+    public void moveLevels(double level) {
         lift_zero = false;
         movePID(level, 30);
         lift_zero = true;
+    }
+
+    public void grabGlyph() {
+        if (gamepad2.right_bumper) {
+            intakep = 1.0;
+        }
+        if (gamepad2.left_bumper) {
+            intakep = .0;
+        }
+        if (gamepad2.right_trigger > 0 || gamepad2.left_trigger > 0) {
+            rgrab.setPower(-0.5 * Math.signum(gamepad2.right_trigger));
+            lgrab.setPower(-0.5 * Math.signum(gamepad2.left_trigger));
+        }
+        else {
+            rgrab.setPower(Range.clip(intakep, -1, 1));
+            lgrab.setPower(Range.clip(intakep, -1, 1));
+        }
+    }
+
+    public void useFlipper(Gamepad gamepad) {
+        if (gamepad.dpad_left) { //zero position, when flipper is parallel to ground
+            zero();
+        }
+        if (gamepad.dpad_down) { //grab position, when we're picking up cubes
+            grab();
+        }
+        if (gamepad.dpad_up) { //deposit position, when we're depositing cubes
+            deposit();
+        }
+    }
+
+    public void liftGlyph() {
+        if (lift_zero) {
+            lift.setPower(Range.clip(gamepad2.right_stick_y, -.6, .5));
+        }
+
+        if (gamepad2.y) {
+            moveLevels(LEVEL_THREE);
+        }
+        if (gamepad2.x) {
+            moveLevels(LEVEL_TWO);
+        }
+        if (gamepad2.a) {
+            moveLevels(LEVEL_ONE);
+        }
     }
 }

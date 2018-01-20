@@ -1,64 +1,34 @@
-package org.firstinspires.ftc.robotcontroller.internal.Cisco;
+package org.firstinspires.ftc.robotcontroller.internal.Tests;
 
 import android.util.Log;
 
-import com.qualcomm.ftcrobotcontroller.R;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
-import org.firstinspires.ftc.robotcore.external.ClassFactory;
+
 import org.firstinspires.ftc.robotcore.external.Func;
-import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-import org.firstinspires.ftc.robotcore.external.navigation.RelicRecoveryVuMark;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 
 import java.util.Locale;
 
 /**
- * Created by sahith on 12/10/17.
+ * Created by sahith on 1/19/18.
  */
 
-public class ciscoAutoBlue extends LinearOpMode {
-    Servo cat, knock;
-    ColorSensor jewelSensor, lineSensor;
+public class glyphAutoTest extends LinearOpMode {
     DcMotor fr, fl, br, bl;
     DcMotor rgrab, lgrab;
     Servo rflip, lflip;
 
     BNO055IMU imu;
     Orientation lastAngles;
-
-    VuforiaLocalizer vuforiaLocalizer;
-    VuforiaLocalizer.Parameters parameters;
-    VuforiaTrackables trackables;
-    VuforiaTrackable trackable;
-    VuforiaTrackableDefaultListener listener;
-
-    OpenGLMatrix lastKnownLocation;
-    OpenGLMatrix phoneLocation;
-
-    public static final String V_KEY = "Aelee1z/////AAAAGSOzCHm55k0ymtB98J5uxqsJ3VZ0L7SyL2P9mkwAcASPo5jphdOuL+kEucaxbqfA3GfMKZbO9/7zChpv5oYcZ+yc/T6cl7LjsJVETcd2kf+6W1cby1xBzFBwuHi0wHKvxx+PmsKhwA0dLReiaVIkev7aJ8CrAhDfPfkeT8HMXNRvoJ3tkiAkfc9ONcNxNt4XzbXTcslg8/+xgHw/q7yhnuWy1hgPizTCcIQr+oWRuukFDC228GuWhTiHDGFqHWMd0dublyymuEgSxpSByagvaHJ73/mJbfRCTcBJgmvLmAzv86N6vyycC4pReQxHn8djz8QCicZnEbz9CM10HcaRxqftMFNv0iKnlDH85NJrnyMw";
-
-    String imageDetected;
-
-    final static double CAT_STOW = 0.66;
-    final static double CAT_EXTEND = 0.35;
-
-    final static double KNOCK_CENTER = 0.38;
-    final static double KNOCK_LEFT = 0.32;
-    final static double KNOCK_RIGHT = 0.44;
 
     final static double STRAIGHT_TICKS_PER_INCH = 49.23;
     final static double SIDE_TICKS_PER_INCH = 51.51;
@@ -82,11 +52,6 @@ public class ciscoAutoBlue extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        cat = hardwareMap.servo.get("cat");
-        knock = hardwareMap.servo.get("knock");
-
-        jewelSensor = hardwareMap.colorSensor.get("jewelSensor");
-        lineSensor = hardwareMap.colorSensor.get("lineSensor");
 
         fr = hardwareMap.dcMotor.get("frdrive");
         fl = hardwareMap.dcMotor.get("fldrive");
@@ -116,14 +81,7 @@ public class ciscoAutoBlue extends LinearOpMode {
         rgrab.setPower(0);
         lgrab.setPower(0);
 
-        cat.setPosition(CAT_STOW);    //stow
-        knock.setPosition(KNOCK_CENTER);    //center
-
         grab();
-
-        setupVuforia(0);
-
-        lastKnownLocation = createMatrix(0, 0, 0, 0, 0, 0);             //Coordinates are in millimeters and are based off of the center of the robot
 
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.loggingEnabled = true;
@@ -138,49 +96,13 @@ public class ciscoAutoBlue extends LinearOpMode {
             idle();
         }
 
-        cat.setPosition(CAT_EXTEND);      //extend
-        sleep(1000);
-        jewelAuto(jewelSensor, knock);
-        cat.setPosition(CAT_STOW);     //stow
-        sleep(1000);
-
-        imageDetected = doVuforia();
-        drive(3, "FORWARD", 0.4);
-        drive(17, "FORWARD", 0.8);
-        // findLine and followline until top of the triangle, or turn towards glyphs
-        doImage(imageDetected);
+        turn(90, 3);
+        grabGlyph(-0.7);
+        drive(15, "FORWARD", 0.8);
+        grabGlyph(0);
+        drive(5, "BACKWARD", 0.8);
         turn(-90, 3);
-//        turn(90, 3);
-//        grab(-0.7);
-//        drive(15, "FORWARD", 0.8);
-//        grab(0);
-//        drive(5, "BACKWARD", 0.8);
-//        turn(-90, 3);
-        //doNextGlyphs(imageDetected);
-    }
-
-    public void setupVuforia(int image) {
-        parameters = new VuforiaLocalizer.Parameters(R.id.cameraMonitorViewId);
-        Log.i("setup", "workss");
-        parameters.vuforiaLicenseKey = V_KEY;
-        parameters.cameraDirection = VuforiaLocalizer.CameraDirection.FRONT;
-        vuforiaLocalizer = ClassFactory.createVuforiaLocalizer(parameters);
-        Log.i("test", "works");
-        trackables = vuforiaLocalizer.loadTrackablesFromAsset("RelicVuMark");
-
-        trackable = trackables.get(image);
-        trackable.setName("Relic Images");
-        trackable.setLocation(createMatrix(0, 500, 0, 0, 0, 0));
-
-        phoneLocation = createMatrix(0, 0, 0, 0, 0, 0);
-
-        listener = (VuforiaTrackableDefaultListener) trackable.getListener();
-        listener.setPhoneInformation(phoneLocation, parameters.cameraDirection);
-        Log.i("setup", "works");
-    }
-
-    public OpenGLMatrix createMatrix(float x, float y, float z, float u, float v, float w){
-        return OpenGLMatrix.translation(x, y, z).multiplied(Orientation.getRotationMatrix(AxesReference.EXTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES, u, v, w));
+        outtake();
     }
 
     void showPID() {
@@ -310,72 +232,11 @@ public class ciscoAutoBlue extends LinearOpMode {
         return 0;
     }
 
-    public void jewelAuto(ColorSensor sensor, Servo servo) {
-        if (sensor.red() > sensor.blue()) {
-            servo.setPosition(KNOCK_LEFT);
-            sleep(1000);
-        } else if (sensor.blue() > sensor.red()) {
-            servo.setPosition(KNOCK_RIGHT);
-            sleep(1000);
-        }
-        servo.setPosition(KNOCK_CENTER);
-        sleep(1000);
-        telemetry.addData("Red value", sensor.red());
-        telemetry.addData("Blue value", sensor.blue());
-        telemetry.update();
+
+    public void grabGlyph(double power) {
+        rgrab.setPower(power);
+        lgrab.setPower(power);
     }
-
-    public String doVuforia() {
-        String image = "none";
-
-        trackables.activate();
-
-        while (image == "none") {
-            OpenGLMatrix currentLocation = listener.getUpdatedRobotLocation();
-
-            if (currentLocation != null) {
-                lastKnownLocation = currentLocation;
-            }
-
-            RelicRecoveryVuMark detector = RelicRecoveryVuMark.from(trackable);
-
-            if (listener.isVisible()) {
-                if (detector == RelicRecoveryVuMark.LEFT) {
-                    image = "L";
-                } else if (detector == RelicRecoveryVuMark.CENTER) {
-                    image = "C";
-                } else if (detector == RelicRecoveryVuMark.RIGHT) {
-                    image = "R";
-                }
-                else {
-                    image = "none";
-                }
-            }
-        }
-
-        return image;
-    }
-
-    public void doImage(String image) {
-        // check for robot at the top of the triangle
-        if (image.equals("R")) {
-            turn(-60, 3);
-            drive(4, "FORWARD", 0.4);
-            outtake();
-        } else if (image.equals("L")) {
-            turn(-120, 3);
-            drive(4, "FORWARD", 0.4);
-            outtake();
-        } else {
-            drive(4, "FORWARD", 0.4);
-            outtake();
-        }
-    }
-
-//    public void grab(double power) {
-//        rgrab.setPower(power);
-//        lgrab.setPower(power);
-//    }
 
     public void outtake() {
         zero();
@@ -398,37 +259,6 @@ public class ciscoAutoBlue extends LinearOpMode {
         rflip.setPosition(RFLIP_DEPOSIT);
         lflip.setPosition(LFLIP_DEPOSIT);
     }
-
-//    public void doNextGlyphs(String image) {
-//        // check for robot at the top of the triangle
-//        if (image.equals("L")) {
-//            drive(4, "FORWARD", 0.4);
-//            outtake();
-//            drive(1, "BACKWARD", 0.1);
-//            drive(2, "RIGHT", 0.1);
-//            drive(1, "FORWARD", 0.1);
-//            outtake();
-//            drive(1, "BACKWARD", 0.1);
-//        } else if (image.equals("R")) {
-//            drive(4, "FORWARD", 0.4);
-//            outtake();
-//            drive(1, "BACKWARD", 0.1);
-//            drive(2, "LEFT", 0.1);
-//            drive(1, "FORWARD", 0.1);
-//            outtake();
-//            drive(1, "BACKWARD", 0.1);
-//        } else {
-//            turn(-60, 3);
-//            drive(4, "FORWARD", 0.4);
-//            outtake();
-//            drive(1, "BACKWARD", 0.1);
-//            turn(-90, 3);
-//            drive(4, "LEFT", 0.2);
-//            drive(1, "FORWARD", 0.1);
-//            outtake();
-//            drive(1, "BACKWARD", 0.1);
-//        }
-//    }
 
     public void drive(double distance, String direction, double maxpower) {
         int ticks;
