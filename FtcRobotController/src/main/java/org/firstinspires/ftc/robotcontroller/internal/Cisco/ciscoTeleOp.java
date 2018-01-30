@@ -16,22 +16,25 @@ public class ciscoTeleOp extends LinearOpMode{
     DcMotor frdrive, fldrive, brdrive, bldrive;
     DcMotor rgrab, lgrab;
     DcMotor lift;
-    //    Servo cat, knock;
-    Servo rflip, lflip;
-    final static double CAT_STOW = 0.66;
-    final static double KNOCK_CENTER = 0.38;
-    final static double RFLIP_DEPOSIT = 0.215; //0.47
-    final static double RFLIP_ZERO = 0.505; //0.74
-    final static double RFLIP_GRAB = 0.575;
-    final static double LFLIP_DEPOSIT = 0.87995; //0.53
-    final static double LFLIP_ZERO = 0.3495; //0.26
-    final static double LFLIP_GRAB = 0.2395;
+    Servo cat;
+    Servo rflip, lflip, stopper;
+    final static double CAT_STOW = 0.79;
+    final static double STOPPER_STOP = 0.959444444444444445;
+    final static double STOPPER_DEPOSIT = 0.62000000000000001;
+    final static double STOPPER_ZERO = 0.16944444444444452;
+    final static double RFLIP_DEPOSIT = 0.7794444444444446;
+    final static double RFLIP_ZERO = 0.199444444444444444448;
+    final static double RFLIP_GRAB = 0.0500000000000000000044;
+    final static double LFLIP_DEPOSIT = 0.040000000000000036;
+    final static double LFLIP_ZERO = 0.59000000000000000001;
+    final static double LFLIP_GRAB = 0.719444444444444444446;
     final static double LEVEL_ONE = 0;
     final static double LEVEL_TWO = -372;
     final static double LEVEL_THREE = -770;
     double intakep;
     boolean lift_zero;
     double multiplier = 1.0;
+    double zero_encoder = 0.0;
 
     double p_turn = .03;//0.008;
     double i_turn = .00; //.0045; //.003;
@@ -52,10 +55,10 @@ public class ciscoTeleOp extends LinearOpMode{
         lift = hardwareMap.dcMotor.get("lift");
         rgrab = hardwareMap.dcMotor.get("rintake");
         lgrab = hardwareMap.dcMotor.get("lintake");
-//        cat = hardwareMap.servo.get("cat");
-//        knock = hardwareMap.servo.get("knock");
+        cat = hardwareMap.servo.get("cat");
         rflip = hardwareMap.servo.get("rflip");
         lflip = hardwareMap.servo.get("lflip");
+        stopper = hardwareMap.servo.get("stopper");
         fldrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         frdrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         fldrive.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -73,15 +76,13 @@ public class ciscoTeleOp extends LinearOpMode{
         lift.setPower(0);
         rgrab.setPower(0);
         lgrab.setPower(0);
-/*        cat.setPosition(CAT_STOW);
-        knock.setPosition(KNOCK_CENTER);*/
+        cat.setPosition(CAT_STOW);
         intakep = .0;
         lift_zero = true;
 
         waitForStart();
         while(opModeIsActive()) {
-          /*  cat.setPosition(CAT_STOW);
-            knock.setPosition(KNOCK_CENTER);*/
+            cat.setPosition(CAT_STOW);
             // DRIVE ROBOT
             if (gamepad1.dpad_left || gamepad1.dpad_right || gamepad1.dpad_up || gamepad1.dpad_down) {
                 if (gamepad1.dpad_up) {
@@ -119,6 +120,9 @@ public class ciscoTeleOp extends LinearOpMode{
             liftGlyph();
             useFlipper(gamepad1);         //Driver 1
             useFlipper(gamepad2);         //Driver 2
+            if (gamepad2.b) {
+                zero_encoder = lift.getCurrentPosition();
+            }
             //-----------------------------------------------------------------------------
             // TELEMETRY
             telemetry.addData("Lift Encoder Count: ", lift.getCurrentPosition());
@@ -158,14 +162,17 @@ public class ciscoTeleOp extends LinearOpMode{
     public void grab() {
         rflip.setPosition(RFLIP_GRAB);
         lflip.setPosition(LFLIP_GRAB);
+        stopper.setPosition(STOPPER_STOP);
     }
     public void zero() {
         rflip.setPosition(RFLIP_ZERO);
         lflip.setPosition(LFLIP_ZERO);
+        stopper.setPosition(STOPPER_ZERO);
     }
     public void deposit() {
         rflip.setPosition(RFLIP_DEPOSIT);
         lflip.setPosition(LFLIP_DEPOSIT);
+        stopper.setPosition(STOPPER_DEPOSIT);
     }
 
     public void movePID(double distance, double margin) {
@@ -195,36 +202,9 @@ public class ciscoTeleOp extends LinearOpMode{
         lift.setPower(0.0);
     }
 
-    public void startDegreeController(){
-        pT = runtime.time();
-        pE = 0;
-        tE = 0;
-    }
-
-    public double tickController(double ticks){
-        double ans = 0;
-        double e = -(lift.getCurrentPosition() - ticks);
-        double dE = e-pE;
-        double dT = runtime.time() - pT;
-        Log.i("PID turn", "e: " + e);
-        Log.i("PID Turn", "i: " + i_turn * tE);
-        Log.i("PID Turn", "d: " + d_turn * dE / dT);
-        Log.i("PID Turn", "p: " + p_turn * e);
-        ans = p_turn*e+ i_turn*tE + d_turn*dE/dT;// +f_turn* Math.signum(e);
-        pT = runtime.time();
-        pE = e;
-        tE += e*dT;
-//        if (Math.signum(e) != Math.signum(pE)){
-//            tE = 0;
-//        }
-        tE = Range.clip(tE * i_turn, -.15, 0.15);///i_turn;
-        ans = Range.clip(ans, 0, .7);
-        return ans;
-    }
-
     public void moveLevels(double level) {
         lift_zero = false;
-        movePID(level, 30);
+        movePID(zero_encoder + level, 30);
         lift_zero = true;
     }
 
@@ -236,8 +216,8 @@ public class ciscoTeleOp extends LinearOpMode{
             intakep = .0;
         }
         if (gamepad2.right_trigger > 0 || gamepad2.left_trigger > 0) {
-            rgrab.setPower(-0.5 * Math.signum(gamepad2.right_trigger));
-            lgrab.setPower(-0.5 * Math.signum(gamepad2.left_trigger));
+            rgrab.setPower(-0.65 * Math.signum(gamepad2.right_trigger));
+            lgrab.setPower(-0.65 * Math.signum(gamepad2.left_trigger));
         }
         else {
             rgrab.setPower(Range.clip(intakep, -1, 1));

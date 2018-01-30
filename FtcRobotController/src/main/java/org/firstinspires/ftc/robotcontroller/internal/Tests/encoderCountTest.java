@@ -2,6 +2,7 @@ package org.firstinspires.ftc.robotcontroller.internal.Tests;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 /**
@@ -11,7 +12,7 @@ public class encoderCountTest extends LinearOpMode{
     DcMotor frdrive, fldrive, brdrive, bldrive;
 
     final static double FORWARD_POWER = 0.28;
-    int ENCODER_TICKS = 1700;
+    int ENCODER_TICKS = 2500;
     ElapsedTime t = new ElapsedTime();
 
     @Override
@@ -21,13 +22,14 @@ public class encoderCountTest extends LinearOpMode{
         bldrive = hardwareMap.dcMotor.get("bldrive");
         brdrive = hardwareMap.dcMotor.get("brdrive");
         fldrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        frdrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        bldrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        brdrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        fldrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        frdrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        bldrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        brdrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        fldrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        frdrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bldrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        brdrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        fldrive.setDirection(DcMotorSimple.Direction.REVERSE);
+        bldrive.setDirection(DcMotorSimple.Direction.REVERSE);
+        frdrive.setDirection(DcMotorSimple.Direction.FORWARD);
+        brdrive.setDirection(DcMotorSimple.Direction.FORWARD);
         fldrive.setPower(0.0);
         frdrive.setPower(0.0);
         bldrive.setPower(0.0);
@@ -40,7 +42,7 @@ public class encoderCountTest extends LinearOpMode{
         waitForStart();
 
         sleep(3000);
-        testSideTicks(frdrive, fldrive, brdrive, bldrive);
+        //testSideTicks(frdrive, fldrive, brdrive, bldrive);
         sleep(1000);
         while (opModeIsActive()) {
             if(gamepad1.dpad_down) {
@@ -51,21 +53,26 @@ public class encoderCountTest extends LinearOpMode{
                 sleep(250);
                 ENCODER_TICKS += change;
             }
+            if (gamepad1.b) {
+                sleep(250);
+                ENCODER_TICKS = -ENCODER_TICKS;
+            }
             if (gamepad1.a) {
                 sleep(1000);
-                testMotorTicks(frdrive, fldrive, brdrive, bldrive);
+                testMotorTicks(fldrive, frdrive, brdrive, bldrive);
             }
+            telemetry.addData("Encoder count:", frdrive.getCurrentPosition());
+            telemetry.update();
         }
 
-        telemetry.update();
     }
 
     public void testMotorTicks(DcMotor motor1, DcMotor motor2, DcMotor motor3, DcMotor motor4) {
         double multi, old_multi;
-        motor1.setPower(0.2);
-        motor2.setPower(-0.2);
-        motor3.setPower(0.2);
-        motor4.setPower(-0.2);
+        motor1.setPower(0.3);
+        motor2.setPower(0.3);
+        motor3.setPower(0.3);
+        motor4.setPower(0.3);
         multi = 0.1;
         while(motor1.getCurrentPosition() < (ENCODER_TICKS * multi)) {
             telemetry.addData("flmotore", fldrive.getCurrentPosition());
@@ -78,10 +85,10 @@ public class encoderCountTest extends LinearOpMode{
             telemetry.addData("brmotorp", brdrive.getPower());
             telemetry.update();
         }
-        motor1.setPower(0.35);
-        motor2.setPower(-0.35);
-        motor3.setPower(0.35);
-        motor4.setPower(-0.35);
+        motor1.setPower(0.45);
+        motor2.setPower(0.45);
+        motor3.setPower(0.45);
+        motor4.setPower(0.45);
         old_multi = multi;
         multi = 0.2;
         while(motor1.getCurrentPosition() < (ENCODER_TICKS * multi) && motor1.getCurrentPosition() >= (ENCODER_TICKS * old_multi)) {
@@ -95,10 +102,10 @@ public class encoderCountTest extends LinearOpMode{
             telemetry.addData("brmotorp", brdrive.getPower());
             telemetry.update();
         }
-        motor1.setPower(0.5);
-        motor2.setPower(-0.5);
-        motor3.setPower(0.5);
-        motor4.setPower(-0.5);
+        motor1.setPower(0.55);
+        motor2.setPower(0.55);
+        motor3.setPower(0.55);
+        motor4.setPower(0.55);
         old_multi = multi;
         multi = 0.3;
         while(motor1.getCurrentPosition() < (ENCODER_TICKS * multi) && motor1.getCurrentPosition() >= (ENCODER_TICKS * old_multi)) {
@@ -113,9 +120,9 @@ public class encoderCountTest extends LinearOpMode{
             telemetry.update();
         }
         motor1.setPower(0.65);
-        motor2.setPower(-0.65);
+        motor2.setPower(0.65);
         motor3.setPower(0.65);
-        motor4.setPower(-0.65);
+        motor4.setPower(0.65);
         old_multi = multi;
         multi = 0.4;
         while(motor1.getCurrentPosition() < (ENCODER_TICKS * multi) && motor1.getCurrentPosition() >= (ENCODER_TICKS * old_multi)) {
@@ -130,9 +137,9 @@ public class encoderCountTest extends LinearOpMode{
             telemetry.update();
         }
         motor1.setPower(0.8);
-        motor2.setPower(-0.8);
+        motor2.setPower(0.8);
         motor3.setPower(0.8);
-        motor4.setPower(-0.8);
+        motor4.setPower(0.8);
         old_multi = multi;
         multi = 0.5;
         while(motor1.getCurrentPosition() < (ENCODER_TICKS * multi) && motor1.getCurrentPosition() >= (ENCODER_TICKS * old_multi)) {
@@ -147,9 +154,9 @@ public class encoderCountTest extends LinearOpMode{
             telemetry.update();
         }
         motor1.setPower(0.65);
-        motor2.setPower(-0.65);
+        motor2.setPower(0.65);
         motor3.setPower(0.65);
-        motor4.setPower(-0.65);
+        motor4.setPower(0.65);
         old_multi = multi;
         multi = 0.6;
         while(motor1.getCurrentPosition() < (ENCODER_TICKS * multi) && motor1.getCurrentPosition() >= (ENCODER_TICKS * old_multi)) {
@@ -163,10 +170,10 @@ public class encoderCountTest extends LinearOpMode{
             telemetry.addData("brmotorp", brdrive.getPower());
             telemetry.update();
         }
-        motor1.setPower(0.5);
-        motor2.setPower(-0.5);
-        motor3.setPower(0.5);
-        motor4.setPower(-0.5);
+        motor1.setPower(0.55);
+        motor2.setPower(0.55);
+        motor3.setPower(0.55);
+        motor4.setPower(0.55);
         old_multi = multi;
         multi = 0.7;
         while(motor1.getCurrentPosition() < (ENCODER_TICKS * multi) && motor1.getCurrentPosition() >= (ENCODER_TICKS * old_multi)) {
@@ -180,10 +187,10 @@ public class encoderCountTest extends LinearOpMode{
             telemetry.addData("brmotorp", brdrive.getPower());
             telemetry.update();
         }
-        motor1.setPower(0.35);
-        motor2.setPower(-0.35);
-        motor3.setPower(0.35);
-        motor4.setPower(-0.35);
+        motor1.setPower(0.45);
+        motor2.setPower(0.45);
+        motor3.setPower(0.45);
+        motor4.setPower(0.45);
         old_multi = multi;
         multi = 0.85;
         while(motor1.getCurrentPosition() < (ENCODER_TICKS * multi) && motor1.getCurrentPosition() >= (ENCODER_TICKS * old_multi)) {
@@ -197,10 +204,10 @@ public class encoderCountTest extends LinearOpMode{
             telemetry.addData("brmotorp", brdrive.getPower());
             telemetry.update();
         }
-        motor1.setPower(0.2);
-        motor2.setPower(-0.2);
-        motor3.setPower(0.2);
-        motor4.setPower(-0.2);
+        motor1.setPower(0.3);
+        motor2.setPower(0.3);
+        motor3.setPower(0.3);
+        motor4.setPower(0.3);
         old_multi = multi;
         multi = 1.0;
         while(motor1.getCurrentPosition() < (ENCODER_TICKS * multi) && motor1.getCurrentPosition() >= (ENCODER_TICKS * old_multi)) {

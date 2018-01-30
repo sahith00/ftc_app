@@ -11,10 +11,10 @@ public class servoTest extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        servo1 = hardwareMap.servo.get("rflip");
+        servo1 = hardwareMap.servo.get("cat");
         servo2 = hardwareMap.servo.get("lflip");
         servo1.setPosition(0.5);
-        servo2.setPosition(0.5);
+        servo2.setPosition(0.2395);
         double lchange = 0.01, rchange = 0.01;
         double cchange[] = new double[2];
         cchange[0] = 0.01;

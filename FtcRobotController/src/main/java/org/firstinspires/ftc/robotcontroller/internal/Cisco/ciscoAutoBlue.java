@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.robotcontroller.internal.Cisco;
 
 import android.util.Log;
-
 import com.qualcomm.ftcrobotcontroller.R;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -23,7 +22,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
-
 import java.util.Locale;
 
 /**
@@ -31,11 +29,11 @@ import java.util.Locale;
  */
 
 public class ciscoAutoBlue extends LinearOpMode {
-    Servo cat, knock;
-    ColorSensor jewelSensor, lineSensor;
+    Servo cat;
+    ColorSensor jewelSensor;
     DcMotor fr, fl, br, bl;
     DcMotor rgrab, lgrab;
-    Servo rflip, lflip;
+    Servo rflip, lflip, stopper;
 
     BNO055IMU imu;
     Orientation lastAngles;
@@ -45,48 +43,52 @@ public class ciscoAutoBlue extends LinearOpMode {
     VuforiaTrackables trackables;
     VuforiaTrackable trackable;
     VuforiaTrackableDefaultListener listener;
-
     OpenGLMatrix lastKnownLocation;
     OpenGLMatrix phoneLocation;
 
-    public static final String V_KEY = "Aelee1z/////AAAAGSOzCHm55k0ymtB98J5uxqsJ3VZ0L7SyL2P9mkwAcASPo5jphdOuL+kEucaxbqfA3GfMKZbO9/7zChpv5oYcZ+yc/T6cl7LjsJVETcd2kf+6W1cby1xBzFBwuHi0wHKvxx+PmsKhwA0dLReiaVIkev7aJ8CrAhDfPfkeT8HMXNRvoJ3tkiAkfc9ONcNxNt4XzbXTcslg8/+xgHw/q7yhnuWy1hgPizTCcIQr+oWRuukFDC228GuWhTiHDGFqHWMd0dublyymuEgSxpSByagvaHJ73/mJbfRCTcBJgmvLmAzv86N6vyycC4pReQxHn8djz8QCicZnEbz9CM10HcaRxqftMFNv0iKnlDH85NJrnyMw";
+    public static final String V_KEY = "Aelee1z/////AAAAGSOzCHm55k0ymtB98J5uxqsJ3VZ0L7SyL2P9mk" +
+            "wAcASPo5jphdOuL+kEucaxbqfA3GfMKZbO9/7zChpv5oYcZ+yc/T6cl7LjsJVETcd2kf+6W1cby1xBzFB" +
+            "wuHi0wHKvxx+PmsKhwA0dLReiaVIkev7aJ8CrAhDfPfkeT8HMXNRvoJ3tkiAkfc9ONcNxNt4XzbXTcslg" +
+            "8/+xgHw/q7yhnuWy1hgPizTCcIQr+oWRuukFDC228GuWhTiHDGFqHWMd0dublyymuEgSxpSByagvaHJ73" +
+            "/mJbfRCTcBJgmvLmAzv86N6vyycC4pReQxHn8djz8QCicZnEbz9CM10HcaRxqftMFNv0iKnlDH85NJrnyMw";
 
     String imageDetected;
 
-    final static double CAT_STOW = 0.66;
-    final static double CAT_EXTEND = 0.35;
+    final static double CAT_STOW = 0.79;
+    final static double CAT_EXTEND = 0.31;
 
-    final static double KNOCK_CENTER = 0.38;
-    final static double KNOCK_LEFT = 0.32;
-    final static double KNOCK_RIGHT = 0.44;
-
-    final static double STRAIGHT_TICKS_PER_INCH = 49.23;
+    final static double STRAIGHT_TICKS_PER_INCH = 52.63;
     final static double SIDE_TICKS_PER_INCH = 51.51;
 
-    final static double RFLIP_DEPOSIT = 0.215; //0.47
-    final static double RFLIP_ZERO = 0.505; //0.74
-    final static double RFLIP_GRAB = 0.575;
-    final static double LFLIP_DEPOSIT = 0.87995; //0.53
-    final static double LFLIP_ZERO = 0.3495; //0.26
-    final static double LFLIP_GRAB = 0.2395;
+    final static double STOPPER_STOP = 0.959444444444444445;
+    final static double STOPPER_DEPOSIT = 0.62000000000000001;
+    final static double STOPPER_ZERO = 0.16944444444444452;
+    final static double RFLIP_DEPOSIT = 0.7794444444444446;
+    final static double RFLIP_ZERO = 0.199444444444444444448;
+    final static double RFLIP_GRAB = 0.0500000000000000000044;
+    final static double LFLIP_DEPOSIT = 0.040000000000000036;
+    final static double LFLIP_ZERO = 0.59000000000000000001;
+    final static double LFLIP_GRAB = 0.719444444444444444446;
 
-    double p_turn = .03;//0.008;
-    double i_turn = .00; //.0045; //.003;
+    final static int DESIRED_BLUE = 11;
+
+    double p_turn = .037;//0.008;
+    double i_turn = .002; //.0045; //.003;
     double d_turn = .002; //.04 //.0045;
     double f_turn = .0;
     double pT = 0;
     double pE = 0;
     double tE = 0;
 
+    double dist = 0;
+
     ElapsedTime runtime = new ElapsedTime();
 
     @Override
     public void runOpMode() throws InterruptedException {
         cat = hardwareMap.servo.get("cat");
-        knock = hardwareMap.servo.get("knock");
 
         jewelSensor = hardwareMap.colorSensor.get("jewelSensor");
-        lineSensor = hardwareMap.colorSensor.get("lineSensor");
 
         fr = hardwareMap.dcMotor.get("frdrive");
         fl = hardwareMap.dcMotor.get("fldrive");
@@ -98,16 +100,18 @@ public class ciscoAutoBlue extends LinearOpMode {
 
         rflip = hardwareMap.servo.get("rflip");
         lflip = hardwareMap.servo.get("lflip");
+        stopper = hardwareMap.servo.get("stopper");
 
-        fr.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        fl.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        br.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        bl.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        fl.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        fr.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        fl.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        br.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bl.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        fr.setDirection(DcMotorSimple.Direction.REVERSE);
-        br.setDirection(DcMotorSimple.Direction.REVERSE);
-        fl.setDirection(DcMotorSimple.Direction.FORWARD);
-        bl.setDirection(DcMotorSimple.Direction.FORWARD);
+        fr.setDirection(DcMotorSimple.Direction.FORWARD);
+        br.setDirection(DcMotorSimple.Direction.FORWARD);
+        fl.setDirection(DcMotorSimple.Direction.REVERSE);
+        bl.setDirection(DcMotorSimple.Direction.REVERSE);
 
         fr.setPower(0);
         fl.setPower(0);
@@ -116,14 +120,14 @@ public class ciscoAutoBlue extends LinearOpMode {
         rgrab.setPower(0);
         lgrab.setPower(0);
 
-        cat.setPosition(CAT_STOW);    //stow
-        knock.setPosition(KNOCK_CENTER);    //center
+        cat.setPosition(CAT_STOW);
 
-        grab();
+        zero();
 
         setupVuforia(0);
 
-        lastKnownLocation = createMatrix(0, 0, 0, 0, 0, 0);             //Coordinates are in millimeters and are based off of the center of the robot
+        lastKnownLocation = createMatrix(0, 0, 0, 0, 0, 0);
+        //Coordinates are in millimeters and are based off of the center of the robot
 
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.loggingEnabled = true;
@@ -138,27 +142,14 @@ public class ciscoAutoBlue extends LinearOpMode {
             idle();
         }
 
-        cat.setPosition(CAT_EXTEND);      //extend
-        sleep(1000);
-        jewelAuto(jewelSensor, knock);
-        cat.setPosition(CAT_STOW);     //stow
-        sleep(1000);
-
         imageDetected = doVuforia();
-        drive(3, "FORWARD", 0.4);
-        drive(17, "FORWARD", 0.8);
-        // findLine and followline until top of the triangle, or turn towards glyphs
+        jewelAuto(jewelSensor, cat);
+        driveBackward(-15 + dist, -0.4);
+        sleep(2000);
         doImage(imageDetected);
-        turn(-90, 3);
-//        turn(90, 3);
-//        grab(-0.7);
-//        drive(15, "FORWARD", 0.8);
-//        grab(0);
-//        drive(5, "BACKWARD", 0.8);
-//        turn(-90, 3);
-        //doNextGlyphs(imageDetected);
     }
 
+    //VUFORIA FUNCTIONS-----------------------------------------------------------------------------
     public void setupVuforia(int image) {
         parameters = new VuforiaLocalizer.Parameters(R.id.cameraMonitorViewId);
         Log.i("setup", "workss");
@@ -180,13 +171,85 @@ public class ciscoAutoBlue extends LinearOpMode {
     }
 
     public OpenGLMatrix createMatrix(float x, float y, float z, float u, float v, float w){
-        return OpenGLMatrix.translation(x, y, z).multiplied(Orientation.getRotationMatrix(AxesReference.EXTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES, u, v, w));
+        return OpenGLMatrix.translation(x, y, z).multiplied(Orientation.getRotationMatrix
+                (AxesReference.EXTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES, u, v, w));
     }
 
+    public String doVuforia() {
+        String image = "none";
+
+        trackables.activate();
+
+        while (image == "none") {
+            OpenGLMatrix currentLocation = listener.getUpdatedRobotLocation();
+
+            if (currentLocation != null) {
+                lastKnownLocation = currentLocation;
+            }
+
+            RelicRecoveryVuMark detector = RelicRecoveryVuMark.from(trackable);
+
+            if (listener.isVisible()) {
+                if (detector == RelicRecoveryVuMark.LEFT) {
+                    image = "L";
+                } else if (detector == RelicRecoveryVuMark.CENTER) {
+                    image = "C";
+                } else if (detector == RelicRecoveryVuMark.RIGHT) {
+                    image = "R";
+                }
+                else {
+                    image = "none";
+                }
+            }
+            telemetry.addData("image", image);
+            telemetry.update();
+        }
+
+        return image;
+    }
+
+    public void doImage(String image) {
+        // check for robot at the top of the triangle
+        if (image.equals("R")) {
+            turn(-120, 3);
+            driveForward(6, 0.3);
+            outtake();
+            sleep(500);
+            driveBackward(-5, -0.3);
+            sleep(1000);
+            driveForward(7, 0.3);
+            sleep(500);
+            driveBackward(-5, -0.3);
+        } else if (image.equals("L")) {
+            turn(-74, 3);
+            driveForward(6, 0.3);
+            outtake();
+            sleep(500);
+            driveBackward(-5, -0.3);
+            sleep(1000);
+            driveForward(7, 0.3);
+            sleep(500);
+            driveBackward(-5, -0.3);
+        } else {
+            turn(-98, 3);
+            driveForward(4, 0.3);
+            outtake();
+            sleep(500);
+            driveBackward(-4, -0.3);
+            sleep(1000);
+            driveForward(5, 0.3);
+            sleep(500);
+            driveBackward(-4, -0.3);
+        }
+    }
+    //----------------------------------------------------------------------------------------------
+
+    //PID FUNCTIONS---------------------------------------------------------------------------------
     void showPID() {
         telemetry.addAction(new Runnable() { @Override public void run()
         {
-            lastAngles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            lastAngles = imu.getAngularOrientation
+                    (AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         }
         });
 
@@ -225,7 +288,8 @@ public class ciscoAutoBlue extends LinearOpMode {
     }
 
     String formatDegrees(double degrees){
-        return String.format(Locale.getDefault(), "%.1f", AngleUnit.DEGREES.normalize(degrees));
+        return String.format
+                (Locale.getDefault(), "%.1f", AngleUnit.DEGREES.normalize(degrees));
     }
 
     public void startDegreeController(){
@@ -255,16 +319,11 @@ public class ciscoAutoBlue extends LinearOpMode {
     public void turn(double degree, double margin) {
         startDegreeController();
         double pYaw = lastAngles.firstAngle;
-        while (Math.abs(getDifference(lastAngles.firstAngle, degree)) > margin || Math.abs(pYaw - lastAngles.firstAngle) > .05) {
-            Log.i("debug: ", "yaw: " + lastAngles.firstAngle);
-            Log.i("debug: ", "difference: " + getDifference(lastAngles.firstAngle, degree));
-            Log.i("debug", "target: " + degree + " cur: " + lastAngles.firstAngle);
+        while (Math.abs(getDifference(lastAngles.firstAngle, degree)) > margin ||
+                Math.abs(pYaw - lastAngles.firstAngle) > .05) {
             double change = degreeController(degree);
             double forwardPower = Range.clip(change, -1, 1);
             double backPower = Range.clip(-change, -1, 1);
-            Log.i("powers", "forward: " + forwardPower);
-            Log.i("powers", "backward: " + backPower);
-            Log.i("debug: ", "difference: " + getDifference(lastAngles.firstAngle, degree));
             if (getDifference(lastAngles.firstAngle, degree) > 0) {
                 fr.setPower(0.5 * backPower);
                 br.setPower(0.5 * backPower);
@@ -290,7 +349,8 @@ public class ciscoAutoBlue extends LinearOpMode {
     }
 
     void resetAngles() {
-        lastAngles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        lastAngles = imu.getAngularOrientation
+                (AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
     }
 
     public double getDifference(double beg, double end){
@@ -309,94 +369,55 @@ public class ciscoAutoBlue extends LinearOpMode {
         }
         return 0;
     }
+    //----------------------------------------------------------------------------------------------
 
+    //JEWEL FUNCTION--------------------------------------------------------------------------------
     public void jewelAuto(ColorSensor sensor, Servo servo) {
-        if (sensor.red() > sensor.blue()) {
-            servo.setPosition(KNOCK_LEFT);
-            sleep(1000);
-        } else if (sensor.blue() > sensor.red()) {
-            servo.setPosition(KNOCK_RIGHT);
-            sleep(1000);
-        }
-        servo.setPosition(KNOCK_CENTER);
+        servo.setPosition(CAT_EXTEND);
         sleep(1000);
-        telemetry.addData("Red value", sensor.red());
-        telemetry.addData("Blue value", sensor.blue());
-        telemetry.update();
-    }
-
-    public String doVuforia() {
-        String image = "none";
-
-        trackables.activate();
-
-        while (image == "none") {
-            OpenGLMatrix currentLocation = listener.getUpdatedRobotLocation();
-
-            if (currentLocation != null) {
-                lastKnownLocation = currentLocation;
-            }
-
-            RelicRecoveryVuMark detector = RelicRecoveryVuMark.from(trackable);
-
-            if (listener.isVisible()) {
-                if (detector == RelicRecoveryVuMark.LEFT) {
-                    image = "L";
-                } else if (detector == RelicRecoveryVuMark.CENTER) {
-                    image = "C";
-                } else if (detector == RelicRecoveryVuMark.RIGHT) {
-                    image = "R";
-                }
-                else {
-                    image = "none";
-                }
-            }
+        if (sensor.red() > sensor.blue()) {
+            dist = -5;
+            driveBackward(-2, -0.35);
+            sleep(2000);
+            servo.setPosition(CAT_STOW);
+            sleep(2000);
         }
-
-        return image;
-    }
-
-    public void doImage(String image) {
-        // check for robot at the top of the triangle
-        if (image.equals("R")) {
-            turn(-60, 3);
-            drive(4, "FORWARD", 0.4);
-            outtake();
-        } else if (image.equals("L")) {
-            turn(-120, 3);
-            drive(4, "FORWARD", 0.4);
-            outtake();
-        } else {
-            drive(4, "FORWARD", 0.4);
-            outtake();
+        else {
+            dist = -3;
+            driveForward(1, 0.25);
+            servo.setPosition(CAT_STOW);
+            sleep(500);
+            driveBackward(-11, -1);
+            sleep(500);
         }
     }
+    //----------------------------------------------------------------------------------------------
 
+    //GLYPH FUNCTIONS-------------------------------------------------------------------------------
 //    public void grab(double power) {
 //        rgrab.setPower(power);
 //        lgrab.setPower(power);
 //    }
 
     public void outtake() {
-        zero();
-        sleep(500);
         deposit();
-        sleep(500);
-        zero();
         sleep(500);
     }
 
     public void grab() {
         rflip.setPosition(RFLIP_GRAB);
         lflip.setPosition(LFLIP_GRAB);
+        stopper.setPosition(STOPPER_STOP);
     }
     public void zero() {
         rflip.setPosition(RFLIP_ZERO);
         lflip.setPosition(LFLIP_ZERO);
+        stopper.setPosition(STOPPER_STOP);
     }
     public void deposit() {
         rflip.setPosition(RFLIP_DEPOSIT);
         lflip.setPosition(LFLIP_DEPOSIT);
+        stopper.setPosition(STOPPER_DEPOSIT);
     }
 
 //    public void doNextGlyphs(String image) {
@@ -429,548 +450,43 @@ public class ciscoAutoBlue extends LinearOpMode {
 //            drive(1, "BACKWARD", 0.1);
 //        }
 //    }
+    //----------------------------------------------------------------------------------------------
 
-    public void drive(double distance, String direction, double maxpower) {
+    //DRIVE FUNCTIONS--------------------------------------------------------------------------------
+    public void driveForward(double distance, double maxpower) {
         int ticks;
-        int old_ticks = fr.getCurrentPosition();
-        double multi, old_multi;
-        switch (direction) {
-            case "FORWARD":
-                ticks = (int) (STRAIGHT_TICKS_PER_INCH * distance);
-                multi = 0.15;
-                old_multi = 0.15;
-                fr.setPower(0.3 * maxpower);
-                fl.setPower(0.3 * maxpower);
-                br.setPower(0.3 * maxpower);
-                bl.setPower(0.3 * maxpower);
-                while (fr.getCurrentPosition() < ((ticks + old_ticks) * multi)) {
-                    telemetry.addData("flmotore", fl.getCurrentPosition());
-                    telemetry.addData("frmotore", fr.getCurrentPosition());
-                    telemetry.addData("blmotore", bl.getCurrentPosition());
-                    telemetry.addData("brmotore", br.getCurrentPosition());
-                    telemetry.addData("flmotorp", fl.getPower());
-                    telemetry.addData("frmotorp", fr.getPower());
-                    telemetry.addData("blmotorp", bl.getPower());
-                    telemetry.addData("brmotorp", br.getPower());
-                    telemetry.update();
-                }
-                fr.setPower(0.5 * maxpower);
-                fl.setPower(0.5 * maxpower);
-                br.setPower(0.5 * maxpower);
-                bl.setPower(0.5 * maxpower);
-                multi = 0.3;
-                while (fr.getCurrentPosition() < ((ticks + old_ticks) * multi) && fr.getCurrentPosition() >= ((ticks + old_ticks) * old_multi)) {
-                    telemetry.addData("flmotore", fl.getCurrentPosition());
-                    telemetry.addData("frmotore", fr.getCurrentPosition());
-                    telemetry.addData("blmotore", bl.getCurrentPosition());
-                    telemetry.addData("brmotore", br.getCurrentPosition());
-                    telemetry.addData("flmotorp", fl.getPower());
-                    telemetry.addData("frmotorp", fr.getPower());
-                    telemetry.addData("blmotorp", bl.getPower());
-                    telemetry.addData("brmotorp", br.getPower());
-                    telemetry.update();
-                }
-                fr.setPower(0.75 * maxpower);
-                fl.setPower(0.75 * maxpower);
-                br.setPower(0.75 * maxpower);
-                bl.setPower(0.75 * maxpower);
-                old_multi = multi;
-                multi = 0.45;
-                while (fr.getCurrentPosition() < ((ticks + old_ticks) * multi) && fr.getCurrentPosition() >= ((ticks + old_ticks) * old_multi)) {
-                    telemetry.addData("flmotore", fl.getCurrentPosition());
-                    telemetry.addData("frmotore", fr.getCurrentPosition());
-                    telemetry.addData("blmotore", bl.getCurrentPosition());
-                    telemetry.addData("brmotore", br.getCurrentPosition());
-                    telemetry.addData("flmotorp", fl.getPower());
-                    telemetry.addData("frmotorp", fr.getPower());
-                    telemetry.addData("blmotorp", bl.getPower());
-                    telemetry.addData("brmotorp", br.getPower());
-                    telemetry.update();
-                }
-                fr.setPower(1 * maxpower);
-                fl.setPower(1 * maxpower);
-                br.setPower(1 * maxpower);
-                bl.setPower(1 * maxpower);
-                old_multi = multi;
-                multi = 0.6;
-                while (fr.getCurrentPosition() < ((ticks + old_ticks) * multi) && fr.getCurrentPosition() >= ((ticks + old_ticks) * old_multi)) {
-                    telemetry.addData("flmotore", fl.getCurrentPosition());
-                    telemetry.addData("frmotore", fr.getCurrentPosition());
-                    telemetry.addData("blmotore", bl.getCurrentPosition());
-                    telemetry.addData("brmotore", br.getCurrentPosition());
-                    telemetry.addData("flmotorp", fl.getPower());
-                    telemetry.addData("frmotorp", fr.getPower());
-                    telemetry.addData("blmotorp", bl.getPower());
-                    telemetry.addData("brmotorp", br.getPower());
-                    telemetry.update();
-                }
-                fr.setPower(0.75 * maxpower);
-                fl.setPower(0.75 * maxpower);
-                br.setPower(0.75 * maxpower);
-                bl.setPower(0.75 * maxpower);
-                old_multi = multi;
-                multi = 0.75;
-                while (fr.getCurrentPosition() < ((ticks + old_ticks) * multi) && fr.getCurrentPosition() >= ((ticks + old_ticks) * old_multi)) {
-                    telemetry.addData("flmotore", fl.getCurrentPosition());
-                    telemetry.addData("frmotore", fr.getCurrentPosition());
-                    telemetry.addData("blmotore", bl.getCurrentPosition());
-                    telemetry.addData("brmotore", br.getCurrentPosition());
-                    telemetry.addData("flmotorp", fl.getPower());
-                    telemetry.addData("frmotorp", fr.getPower());
-                    telemetry.addData("blmotorp", bl.getPower());
-                    telemetry.addData("brmotorp", br.getPower());
-                    telemetry.update();
-                }
-                fr.setPower(0.5 * maxpower);
-                fl.setPower(0.5 * maxpower);
-                br.setPower(0.5 * maxpower);
-                bl.setPower(0.5 * maxpower);
-                old_multi = multi;
-                multi = 0.85;
-                while (fr.getCurrentPosition() < ((ticks + old_ticks) * multi) && fr.getCurrentPosition() >= ((ticks + old_ticks) * old_multi)) {
-                    telemetry.addData("flmotore", fl.getCurrentPosition());
-                    telemetry.addData("frmotore", fr.getCurrentPosition());
-                    telemetry.addData("blmotore", bl.getCurrentPosition());
-                    telemetry.addData("brmotore", br.getCurrentPosition());
-                    telemetry.addData("flmotorp", fl.getPower());
-                    telemetry.addData("frmotorp", fr.getPower());
-                    telemetry.addData("blmotorp", bl.getPower());
-                    telemetry.addData("brmotorp", br.getPower());
-                    telemetry.update();
-                }
-                fr.setPower(0.3 * maxpower);
-                fl.setPower(0.3 * maxpower);
-                br.setPower(0.3 * maxpower);
-                bl.setPower(0.3 * maxpower);
-                old_multi = multi;
-                multi = 1;
-                while (fr.getCurrentPosition() < ((ticks + old_ticks) * multi) && fr.getCurrentPosition() >= ((ticks + old_ticks) * old_multi)) {
-                    telemetry.addData("flmotore", fl.getCurrentPosition());
-                    telemetry.addData("frmotore", fr.getCurrentPosition());
-                    telemetry.addData("blmotore", bl.getCurrentPosition());
-                    telemetry.addData("brmotore", br.getCurrentPosition());
-                    telemetry.addData("flmotorp", fl.getPower());
-                    telemetry.addData("frmotorp", fr.getPower());
-                    telemetry.addData("blmotorp", bl.getPower());
-                    telemetry.addData("brmotorp", br.getPower());
-                    telemetry.update();
-                }
-                fr.setPower(0);
-                fl.setPower(0);
-                br.setPower(0);
-                bl.setPower(0);
-                telemetry.addData("flmotore", fl.getCurrentPosition());
-                telemetry.addData("frmotore", fr.getCurrentPosition());
-                telemetry.addData("blmotore", bl.getCurrentPosition());
-                telemetry.addData("brmotore", br.getCurrentPosition());
-                telemetry.addData("flmotorp", fl.getPower());
-                telemetry.addData("frmotorp", fr.getPower());
-                telemetry.addData("blmotorp", bl.getPower());
-                telemetry.addData("brmotorp", br.getPower());
-                telemetry.update();
-                break;
-            case "RIGHT":
-                ticks = (int) (STRAIGHT_TICKS_PER_INCH * distance);
-                multi = 0.15;
-                old_multi = 0.15;
-                fr.setPower(-0.3 * maxpower);
-                fl.setPower(0.3 * maxpower);
-                br.setPower(0.3 * maxpower);
-                bl.setPower(-0.3 * maxpower);
-                while (fr.getCurrentPosition() > (-(ticks + old_ticks) * multi)) {
-                    telemetry.addData("flmotore", fl.getCurrentPosition());
-                    telemetry.addData("frmotore", fr.getCurrentPosition());
-                    telemetry.addData("blmotore", bl.getCurrentPosition());
-                    telemetry.addData("brmotore", br.getCurrentPosition());
-                    telemetry.addData("flmotorp", fl.getPower());
-                    telemetry.addData("frmotorp", fr.getPower());
-                    telemetry.addData("blmotorp", bl.getPower());
-                    telemetry.addData("brmotorp", br.getPower());
-                    telemetry.update();
-                }
-                fr.setPower(-0.5 * maxpower);
-                fl.setPower(0.5 * maxpower);
-                br.setPower(0.5 * maxpower);
-                bl.setPower(-0.5 * maxpower);
-                multi = 0.3;
-                while (fr.getCurrentPosition() > (-(ticks + old_ticks) * multi) && fr.getCurrentPosition() <= (-(ticks + old_ticks) * old_multi)) {
-                    telemetry.addData("flmotore", fl.getCurrentPosition());
-                    telemetry.addData("frmotore", fr.getCurrentPosition());
-                    telemetry.addData("blmotore", bl.getCurrentPosition());
-                    telemetry.addData("brmotore", br.getCurrentPosition());
-                    telemetry.addData("flmotorp", fl.getPower());
-                    telemetry.addData("frmotorp", fr.getPower());
-                    telemetry.addData("blmotorp", bl.getPower());
-                    telemetry.addData("brmotorp", br.getPower());
-                    telemetry.update();
-                }
-                fr.setPower(-0.75 * maxpower);
-                fl.setPower(0.75 * maxpower);
-                br.setPower(0.75 * maxpower);
-                bl.setPower(-0.75 * maxpower);
-                old_multi = multi;
-                multi = 0.45;
-                while (fr.getCurrentPosition() > (-(ticks + old_ticks) * multi) && fr.getCurrentPosition() <= (-(ticks + old_ticks) * old_multi)) {
-                    telemetry.addData("flmotore", fl.getCurrentPosition());
-                    telemetry.addData("frmotore", fr.getCurrentPosition());
-                    telemetry.addData("blmotore", bl.getCurrentPosition());
-                    telemetry.addData("brmotore", br.getCurrentPosition());
-                    telemetry.addData("flmotorp", fl.getPower());
-                    telemetry.addData("frmotorp", fr.getPower());
-                    telemetry.addData("blmotorp", bl.getPower());
-                    telemetry.addData("brmotorp", br.getPower());
-                    telemetry.update();
-                }
-                fr.setPower(-1 * maxpower);
-                fl.setPower(1 * maxpower);
-                br.setPower(1 * maxpower);
-                bl.setPower(-1 * maxpower);
-                old_multi = multi;
-                multi = 0.6;
-                while (fr.getCurrentPosition() > (-(ticks + old_ticks) * multi) && fr.getCurrentPosition() <= (-(ticks + old_ticks) * old_multi)) {
-                    telemetry.addData("flmotore", fl.getCurrentPosition());
-                    telemetry.addData("frmotore", fr.getCurrentPosition());
-                    telemetry.addData("blmotore", bl.getCurrentPosition());
-                    telemetry.addData("brmotore", br.getCurrentPosition());
-                    telemetry.addData("flmotorp", fl.getPower());
-                    telemetry.addData("frmotorp", fr.getPower());
-                    telemetry.addData("blmotorp", bl.getPower());
-                    telemetry.addData("brmotorp", br.getPower());
-                    telemetry.update();
-                }
-                fr.setPower(-0.75 * maxpower);
-                fl.setPower(0.75 * maxpower);
-                br.setPower(0.75 * maxpower);
-                bl.setPower(-0.75 * maxpower);
-                old_multi = multi;
-                multi = 0.75;
-                while (fr.getCurrentPosition() > (-(ticks + old_ticks) * multi) && fr.getCurrentPosition() <= (-(ticks + old_ticks) * old_multi)) {
-                    telemetry.addData("flmotore", fl.getCurrentPosition());
-                    telemetry.addData("frmotore", fr.getCurrentPosition());
-                    telemetry.addData("blmotore", bl.getCurrentPosition());
-                    telemetry.addData("brmotore", br.getCurrentPosition());
-                    telemetry.addData("flmotorp", fl.getPower());
-                    telemetry.addData("frmotorp", fr.getPower());
-                    telemetry.addData("blmotorp", bl.getPower());
-                    telemetry.addData("brmotorp", br.getPower());
-                    telemetry.update();
-                }
-                fr.setPower(-0.5 * maxpower);
-                fl.setPower(0.5 * maxpower);
-                br.setPower(0.5 * maxpower);
-                bl.setPower(-0.5 * maxpower);
-                old_multi = multi;
-                multi = 0.85;
-                while (fr.getCurrentPosition() > (-(ticks + old_ticks) * multi) && fr.getCurrentPosition() <= (-(ticks + old_ticks) * old_multi)) {
-                    telemetry.addData("flmotore", fl.getCurrentPosition());
-                    telemetry.addData("frmotore", fr.getCurrentPosition());
-                    telemetry.addData("blmotore", bl.getCurrentPosition());
-                    telemetry.addData("brmotore", br.getCurrentPosition());
-                    telemetry.addData("flmotorp", fl.getPower());
-                    telemetry.addData("frmotorp", fr.getPower());
-                    telemetry.addData("blmotorp", bl.getPower());
-                    telemetry.addData("brmotorp", br.getPower());
-                    telemetry.update();
-                }
-                fr.setPower(-0.3 * maxpower);
-                fl.setPower(0.3 * maxpower);
-                br.setPower(0.3 * maxpower);
-                bl.setPower(-0.3 * maxpower);
-                old_multi = multi;
-                multi = 1;
-                while (fr.getCurrentPosition() > (-(ticks + old_ticks) * multi) && fr.getCurrentPosition() <= (-(ticks + old_ticks) * old_multi)) {
-                    telemetry.addData("flmotore", fl.getCurrentPosition());
-                    telemetry.addData("frmotore", fr.getCurrentPosition());
-                    telemetry.addData("blmotore", bl.getCurrentPosition());
-                    telemetry.addData("brmotore", br.getCurrentPosition());
-                    telemetry.addData("flmotorp", fl.getPower());
-                    telemetry.addData("frmotorp", fr.getPower());
-                    telemetry.addData("blmotorp", bl.getPower());
-                    telemetry.addData("brmotorp", br.getPower());
-                    telemetry.update();
-                }
-                fr.setPower(0);
-                fl.setPower(0);
-                br.setPower(0);
-                bl.setPower(0);
-                telemetry.addData("flmotore", fl.getCurrentPosition());
-                telemetry.addData("frmotore", fr.getCurrentPosition());
-                telemetry.addData("blmotore", bl.getCurrentPosition());
-                telemetry.addData("brmotore", br.getCurrentPosition());
-                telemetry.addData("flmotorp", fl.getPower());
-                telemetry.addData("frmotorp", fr.getPower());
-                telemetry.addData("blmotorp", bl.getPower());
-                telemetry.addData("brmotorp", br.getPower());
-                telemetry.update();
-                break;
-            case "BACKWARD":
-                ticks = (int) (SIDE_TICKS_PER_INCH * distance);
-                multi = 0.15;
-                old_multi = 0.15;
-                fr.setPower(-0.3 * maxpower);
-                fl.setPower(-0.3 * maxpower);
-                br.setPower(-0.3 * maxpower);
-                bl.setPower(-0.3 * maxpower);
-                while (fr.getCurrentPosition() > (-(ticks + old_ticks) * multi)) {
-                    telemetry.addData("flmotore", fl.getCurrentPosition());
-                    telemetry.addData("frmotore", fr.getCurrentPosition());
-                    telemetry.addData("blmotore", bl.getCurrentPosition());
-                    telemetry.addData("brmotore", br.getCurrentPosition());
-                    telemetry.addData("flmotorp", fl.getPower());
-                    telemetry.addData("frmotorp", fr.getPower());
-                    telemetry.addData("blmotorp", bl.getPower());
-                    telemetry.addData("brmotorp", br.getPower());
-                    telemetry.update();
-                }
-                fr.setPower(-0.5 * maxpower);
-                fl.setPower(-0.5 * maxpower);
-                br.setPower(-0.5 * maxpower);
-                bl.setPower(-0.5 * maxpower);
-                multi = 0.3;
-                while (fr.getCurrentPosition() > (-(ticks + old_ticks) * multi) && fr.getCurrentPosition() <= (-(ticks + old_ticks) * old_multi)) {
-                    telemetry.addData("flmotore", fl.getCurrentPosition());
-                    telemetry.addData("frmotore", fr.getCurrentPosition());
-                    telemetry.addData("blmotore", bl.getCurrentPosition());
-                    telemetry.addData("brmotore", br.getCurrentPosition());
-                    telemetry.addData("flmotorp", fl.getPower());
-                    telemetry.addData("frmotorp", fr.getPower());
-                    telemetry.addData("blmotorp", bl.getPower());
-                    telemetry.addData("brmotorp", br.getPower());
-                    telemetry.update();
-                }
-                fr.setPower(-0.75 * maxpower);
-                fl.setPower(-0.75 * maxpower);
-                br.setPower(-0.75 * maxpower);
-                bl.setPower(-0.75 * maxpower);
-                old_multi = multi;
-                multi = 0.45;
-                while (fr.getCurrentPosition() > (-(ticks + old_ticks) * multi) && fr.getCurrentPosition() <= (-(ticks + old_ticks) * old_multi)) {
-                    telemetry.addData("flmotore", fl.getCurrentPosition());
-                    telemetry.addData("frmotore", fr.getCurrentPosition());
-                    telemetry.addData("blmotore", bl.getCurrentPosition());
-                    telemetry.addData("brmotore", br.getCurrentPosition());
-                    telemetry.addData("flmotorp", fl.getPower());
-                    telemetry.addData("frmotorp", fr.getPower());
-                    telemetry.addData("blmotorp", bl.getPower());
-                    telemetry.addData("brmotorp", br.getPower());
-                    telemetry.update();
-                }
-                fr.setPower(-1 * maxpower);
-                fl.setPower(-1 * maxpower);
-                br.setPower(-1 * maxpower);
-                bl.setPower(-1 * maxpower);
-                old_multi = multi;
-                multi = 0.6;
-                while (fr.getCurrentPosition() > (-(ticks + old_ticks) * multi) && fr.getCurrentPosition() <= (-(ticks + old_ticks) * old_multi)) {
-                    telemetry.addData("flmotore", fl.getCurrentPosition());
-                    telemetry.addData("frmotore", fr.getCurrentPosition());
-                    telemetry.addData("blmotore", bl.getCurrentPosition());
-                    telemetry.addData("brmotore", br.getCurrentPosition());
-                    telemetry.addData("flmotorp", fl.getPower());
-                    telemetry.addData("frmotorp", fr.getPower());
-                    telemetry.addData("blmotorp", bl.getPower());
-                    telemetry.addData("brmotorp", br.getPower());
-                    telemetry.update();
-                }
-                fr.setPower(-0.75 * maxpower);
-                fl.setPower(-0.75 * maxpower);
-                br.setPower(-0.75 * maxpower);
-                bl.setPower(-0.75 * maxpower);
-                old_multi = multi;
-                multi = 0.75;
-                while (fr.getCurrentPosition() > (-(ticks + old_ticks) * multi) && fr.getCurrentPosition() <= (-(ticks + old_ticks) * old_multi)) {
-                    telemetry.addData("flmotore", fl.getCurrentPosition());
-                    telemetry.addData("frmotore", fr.getCurrentPosition());
-                    telemetry.addData("blmotore", bl.getCurrentPosition());
-                    telemetry.addData("brmotore", br.getCurrentPosition());
-                    telemetry.addData("flmotorp", fl.getPower());
-                    telemetry.addData("frmotorp", fr.getPower());
-                    telemetry.addData("blmotorp", bl.getPower());
-                    telemetry.addData("brmotorp", br.getPower());
-                    telemetry.update();
-                }
-                fr.setPower(-0.5 * maxpower);
-                fl.setPower(-0.5 * maxpower);
-                br.setPower(-0.5 * maxpower);
-                bl.setPower(-0.5 * maxpower);
-                old_multi = multi;
-                multi = 0.85;
-                while (fr.getCurrentPosition() > (-(ticks + old_ticks) * multi) && fr.getCurrentPosition() <= (-(ticks + old_ticks) * old_multi)) {
-                    telemetry.addData("flmotore", fl.getCurrentPosition());
-                    telemetry.addData("frmotore", fr.getCurrentPosition());
-                    telemetry.addData("blmotore", bl.getCurrentPosition());
-                    telemetry.addData("brmotore", br.getCurrentPosition());
-                    telemetry.addData("flmotorp", fl.getPower());
-                    telemetry.addData("frmotorp", fr.getPower());
-                    telemetry.addData("blmotorp", bl.getPower());
-                    telemetry.addData("brmotorp", br.getPower());
-                    telemetry.update();
-                }
-                fr.setPower(-0.3 * maxpower);
-                fl.setPower(-0.3 * maxpower);
-                br.setPower(-0.3 * maxpower);
-                bl.setPower(-0.3 * maxpower);
-                old_multi = multi;
-                multi = 1;
-                while (fr.getCurrentPosition() > (-(ticks + old_ticks) * multi) && fr.getCurrentPosition() <= (-(ticks + old_ticks) * old_multi)) {
-                    telemetry.addData("flmotore", fl.getCurrentPosition());
-                    telemetry.addData("frmotore", fr.getCurrentPosition());
-                    telemetry.addData("blmotore", bl.getCurrentPosition());
-                    telemetry.addData("brmotore", br.getCurrentPosition());
-                    telemetry.addData("flmotorp", fl.getPower());
-                    telemetry.addData("frmotorp", fr.getPower());
-                    telemetry.addData("blmotorp", bl.getPower());
-                    telemetry.addData("brmotorp", br.getPower());
-                    telemetry.update();
-                }
-                fr.setPower(0);
-                fl.setPower(0);
-                br.setPower(0);
-                bl.setPower(0);
-                telemetry.addData("flmotore", fl.getCurrentPosition());
-                telemetry.addData("frmotore", fr.getCurrentPosition());
-                telemetry.addData("blmotore", bl.getCurrentPosition());
-                telemetry.addData("brmotore", br.getCurrentPosition());
-                telemetry.addData("flmotorp", fl.getPower());
-                telemetry.addData("frmotorp", fr.getPower());
-                telemetry.addData("blmotorp", bl.getPower());
-                telemetry.addData("brmotorp", br.getPower());
-                telemetry.update();
-                break;
-            case "LEFT":
-                ticks = (int) (SIDE_TICKS_PER_INCH * distance);
-                multi = 0.15;
-                old_multi = 0.15;
-                fr.setPower(0.3 * maxpower);
-                fl.setPower(-0.3 * maxpower);
-                br.setPower(-0.3 * maxpower);
-                bl.setPower(0.3 * maxpower);
-                while (fr.getCurrentPosition() < ((ticks + old_ticks) * multi)) {
-                    telemetry.addData("flmotore", fl.getCurrentPosition());
-                    telemetry.addData("frmotore", fr.getCurrentPosition());
-                    telemetry.addData("blmotore", bl.getCurrentPosition());
-                    telemetry.addData("brmotore", br.getCurrentPosition());
-                    telemetry.addData("flmotorp", fl.getPower());
-                    telemetry.addData("frmotorp", fr.getPower());
-                    telemetry.addData("blmotorp", bl.getPower());
-                    telemetry.addData("brmotorp", br.getPower());
-                    telemetry.update();
-                }
-                fr.setPower(0.5 * maxpower);
-                fl.setPower(-0.5 * maxpower);
-                br.setPower(-0.5 * maxpower);
-                bl.setPower(0.5 * maxpower);
-                multi = 0.3;
-                while (fr.getCurrentPosition() < ((ticks + old_ticks) * multi) && fr.getCurrentPosition() >= ((ticks + old_ticks) * old_multi)) {
-                    telemetry.addData("flmotore", fl.getCurrentPosition());
-                    telemetry.addData("frmotore", fr.getCurrentPosition());
-                    telemetry.addData("blmotore", bl.getCurrentPosition());
-                    telemetry.addData("brmotore", br.getCurrentPosition());
-                    telemetry.addData("flmotorp", fl.getPower());
-                    telemetry.addData("frmotorp", fr.getPower());
-                    telemetry.addData("blmotorp", bl.getPower());
-                    telemetry.addData("brmotorp", br.getPower());
-                    telemetry.update();
-                }
-                fr.setPower(0.75 * maxpower);
-                fl.setPower(-0.75 * maxpower);
-                br.setPower(-0.75 * maxpower);
-                bl.setPower(0.75 * maxpower);
-                old_multi = multi;
-                multi = 0.45;
-                while (fr.getCurrentPosition() < ((ticks + old_ticks) * multi) && fr.getCurrentPosition() >= ((ticks + old_ticks) * old_multi)) {
-                    telemetry.addData("flmotore", fl.getCurrentPosition());
-                    telemetry.addData("frmotore", fr.getCurrentPosition());
-                    telemetry.addData("blmotore", bl.getCurrentPosition());
-                    telemetry.addData("brmotore", br.getCurrentPosition());
-                    telemetry.addData("flmotorp", fl.getPower());
-                    telemetry.addData("frmotorp", fr.getPower());
-                    telemetry.addData("blmotorp", bl.getPower());
-                    telemetry.addData("brmotorp", br.getPower());
-                    telemetry.update();
-                }
-                fr.setPower(1 * maxpower);
-                fl.setPower(-1 * maxpower);
-                br.setPower(-1 * maxpower);
-                bl.setPower(1 * maxpower);
-                old_multi = multi;
-                multi = 0.6;
-                while (fr.getCurrentPosition() < ((ticks + old_ticks) * multi) && fr.getCurrentPosition() >= ((ticks + old_ticks) * old_multi)) {
-                    telemetry.addData("flmotore", fl.getCurrentPosition());
-                    telemetry.addData("frmotore", fr.getCurrentPosition());
-                    telemetry.addData("blmotore", bl.getCurrentPosition());
-                    telemetry.addData("brmotore", br.getCurrentPosition());
-                    telemetry.addData("flmotorp", fl.getPower());
-                    telemetry.addData("frmotorp", fr.getPower());
-                    telemetry.addData("blmotorp", bl.getPower());
-                    telemetry.addData("brmotorp", br.getPower());
-                    telemetry.update();
-                }
-                fr.setPower(0.75 * maxpower);
-                fl.setPower(-0.75 * maxpower);
-                br.setPower(-0.75 * maxpower);
-                bl.setPower(0.75 * maxpower);
-                old_multi = multi;
-                multi = 0.75;
-                while (fr.getCurrentPosition() < ((ticks + old_ticks) * multi) && fr.getCurrentPosition() >= ((ticks + old_ticks) * old_multi)) {
-                    telemetry.addData("flmotore", fl.getCurrentPosition());
-                    telemetry.addData("frmotore", fr.getCurrentPosition());
-                    telemetry.addData("blmotore", bl.getCurrentPosition());
-                    telemetry.addData("brmotore", br.getCurrentPosition());
-                    telemetry.addData("flmotorp", fl.getPower());
-                    telemetry.addData("frmotorp", fr.getPower());
-                    telemetry.addData("blmotorp", bl.getPower());
-                    telemetry.addData("brmotorp", br.getPower());
-                    telemetry.update();
-                }
-                fr.setPower(0.5 * maxpower);
-                fl.setPower(-0.5 * maxpower);
-                br.setPower(-0.5 * maxpower);
-                bl.setPower(0.5 * maxpower);
-                old_multi = multi;
-                multi = 0.85;
-                while (fr.getCurrentPosition() < ((ticks + old_ticks) * multi) && fr.getCurrentPosition() >= ((ticks + old_ticks) * old_multi)) {
-                    telemetry.addData("flmotore", fl.getCurrentPosition());
-                    telemetry.addData("frmotore", fr.getCurrentPosition());
-                    telemetry.addData("blmotore", bl.getCurrentPosition());
-                    telemetry.addData("brmotore", br.getCurrentPosition());
-                    telemetry.addData("flmotorp", fl.getPower());
-                    telemetry.addData("frmotorp", fr.getPower());
-                    telemetry.addData("blmotorp", bl.getPower());
-                    telemetry.addData("brmotorp", br.getPower());
-                    telemetry.update();
-                }
-                fr.setPower(0.3 * maxpower);
-                fl.setPower(-0.3 * maxpower);
-                br.setPower(-0.3 * maxpower);
-                bl.setPower(0.3 * maxpower);
-                old_multi = multi;
-                multi = 1;
-                while (fr.getCurrentPosition() < ((ticks + old_ticks) * multi) && fr.getCurrentPosition() >= ((ticks + old_ticks) * old_multi)) {
-                    telemetry.addData("flmotore", fl.getCurrentPosition());
-                    telemetry.addData("frmotore", fr.getCurrentPosition());
-                    telemetry.addData("blmotore", bl.getCurrentPosition());
-                    telemetry.addData("brmotore", br.getCurrentPosition());
-                    telemetry.addData("flmotorp", fl.getPower());
-                    telemetry.addData("frmotorp", fr.getPower());
-                    telemetry.addData("blmotorp", bl.getPower());
-                    telemetry.addData("brmotorp", br.getPower());
-                    telemetry.update();
-                }
-                fr.setPower(0);
-                fl.setPower(0);
-                br.setPower(0);
-                bl.setPower(0);
-                telemetry.addData("flmotore", fl.getCurrentPosition());
-                telemetry.addData("frmotore", fr.getCurrentPosition());
-                telemetry.addData("blmotore", bl.getCurrentPosition());
-                telemetry.addData("brmotore", br.getCurrentPosition());
-                telemetry.addData("flmotorp", fl.getPower());
-                telemetry.addData("frmotorp", fr.getPower());
-                telemetry.addData("blmotorp", bl.getPower());
-                telemetry.addData("brmotorp", br.getPower());
-                telemetry.update();
-                break;
+        int old_ticks = fl.getCurrentPosition();
+        ticks = (int) (STRAIGHT_TICKS_PER_INCH * distance);
+        fr.setPower(maxpower);
+        fl.setPower(maxpower);
+        br.setPower(maxpower);
+        bl.setPower(maxpower);
+        while (fl.getCurrentPosition() < ticks + old_ticks) {
+            telemetry.addData("Fl current position: ", fl.getCurrentPosition());
+            telemetry.addData("Fl power: ", fl.getPower());
         }
+        fr.setPower(0);
+        fl.setPower(0);
+        br.setPower(0);
+        bl.setPower(0);
     }
+
+    public void driveBackward(double distance, double maxpower) {
+        int ticks;
+        int old_ticks = fl.getCurrentPosition();
+        ticks = (int) (STRAIGHT_TICKS_PER_INCH * distance);
+        fr.setPower(maxpower);
+        fl.setPower(maxpower);
+        br.setPower(maxpower);
+        bl.setPower(maxpower);
+        while (fl.getCurrentPosition() > ticks + old_ticks) {
+            telemetry.addData("Fl current position: ", fl.getCurrentPosition());
+            telemetry.addData("Fl power: ", fl.getPower());
+        }
+        fr.setPower(0);
+        fl.setPower(0);
+        br.setPower(0);
+        bl.setPower(0);
+    }
+    //----------------------------------------------------------------------------------------------
 }
