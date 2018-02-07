@@ -35,22 +35,18 @@ import com.qualcomm.robotcore.eventloop.opmode.OpModeManager;
 import com.qualcomm.robotcore.eventloop.opmode.OpModeRegister;
 
 import org.firstinspires.ftc.robotcontroller.external.samples.ConceptNullOp;
-import org.firstinspires.ftc.robotcontroller.internal.Cisco.ciscoAutoBlue;
-import org.firstinspires.ftc.robotcontroller.internal.Cisco.ciscoAutoRed;
-import org.firstinspires.ftc.robotcontroller.internal.Cisco.ciscoTeleOp;
-import org.firstinspires.ftc.robotcontroller.internal.Google.googleAutoBlue;
-import org.firstinspires.ftc.robotcontroller.internal.Google.googleAutoRed;
 import org.firstinspires.ftc.robotcontroller.internal.Tests.BasicLineFollowing;
 import org.firstinspires.ftc.robotcontroller.internal.Tests.NavXCalib;
 import org.firstinspires.ftc.robotcontroller.internal.Tests.NavX_Zero;
 import org.firstinspires.ftc.robotcontroller.internal.Tests.PIDTest;
-import org.firstinspires.ftc.robotcontroller.internal.Tests.Vuforia;
+import org.firstinspires.ftc.robotcontroller.internal.Subsystems.Vuforia;
 import org.firstinspires.ftc.robotcontroller.internal.Tests.colorSensorTest;
 import org.firstinspires.ftc.robotcontroller.internal.Tests.encoderCountTest;
 import org.firstinspires.ftc.robotcontroller.internal.Tests.glyphAutoTest;
 import org.firstinspires.ftc.robotcontroller.internal.Tests.grabberTest;
 import org.firstinspires.ftc.robotcontroller.internal.Tests.intakeTest;
 import org.firstinspires.ftc.robotcontroller.internal.Tests.jewelAutoTest;
+import org.firstinspires.ftc.robotcontroller.internal.Tests.liftTest;
 import org.firstinspires.ftc.robotcontroller.internal.Tests.lineFollowingTest;
 import org.firstinspires.ftc.robotcontroller.internal.Tests.lineFollowingTest2;
 import org.firstinspires.ftc.robotcontroller.internal.Tests.lineFollowingTest3;
@@ -90,8 +86,7 @@ public class FtcOpModeRegister implements OpModeRegister {
         /**
          * Any manual OpMode class registrations should go here.
          */
-        manager.register(new OpModeMeta("Google Auto Blue", OpModeMeta.Flavor.AUTONOMOUS), googleAutoBlue.class);
-        manager.register(new OpModeMeta("Google Auto Red", OpModeMeta.Flavor.AUTONOMOUS), googleAutoRed.class);
+
         manager.register(new OpModeMeta("encoder test", OpModeMeta.Flavor.AUTONOMOUS), encoderCountTest.class);
         manager.register(new OpModeMeta("simple encoder test", OpModeMeta.Flavor.AUTONOMOUS), simpleEncoderCountTest.class);
         manager.register(new OpModeMeta("Jewel Auto (Scrim)", OpModeMeta.Flavor.AUTONOMOUS), jewelAutoTest.class);
@@ -101,11 +96,11 @@ public class FtcOpModeRegister implements OpModeRegister {
         manager.register(new OpModeMeta("line following test 2.0", OpModeMeta.Flavor.AUTONOMOUS), lineFollowingTest2.class);
         manager.register(new OpModeMeta("line following test 3.0", OpModeMeta.Flavor.AUTONOMOUS), lineFollowingTest3.class);
         manager.register(new OpModeMeta("Vuforia", OpModeMeta.Flavor.AUTONOMOUS), Vuforia.class);
-        manager.register(new OpModeMeta("Cisco Auto Red", OpModeMeta.Flavor.AUTONOMOUS), ciscoAutoRed.class);
-        manager.register(new OpModeMeta("Cisco Auto Blue", OpModeMeta.Flavor.AUTONOMOUS), ciscoAutoBlue.class);
+        manager.register(new OpModeMeta("Cisco Auto Red", OpModeMeta.Flavor.AUTONOMOUS), autoRed.class);
+        manager.register(new OpModeMeta("Cisco Auto Blue", OpModeMeta.Flavor.AUTONOMOUS), autoBlue.class);
         manager.register("nav x calib test", NavXCalib.class);
         manager.register("pid test", PIDTest.class);
-        manager.register("Cisco TeleOp", ciscoTeleOp.class);
+        manager.register("Cisco TeleOp", teleOp.class);
         manager.register("test Tele", teleOpTest.class);
         manager.register("grabber test", grabberTest.class);
         manager.register("servo test", servoTest.class);
@@ -114,5 +109,6 @@ public class FtcOpModeRegister implements OpModeRegister {
         manager.register("drive test", teleOpTest.class);
         manager.register("color test", colorSensorTest.class);
         manager.register("intake test", intakeTest.class);
+        manager.register("lift test", liftTest.class);
     }
 }
