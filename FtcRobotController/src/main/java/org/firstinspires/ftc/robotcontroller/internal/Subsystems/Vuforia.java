@@ -25,14 +25,14 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
  */
 public class Vuforia {
 
-    VuforiaLocalizer vuforiaLocalizer;
-    VuforiaLocalizer.Parameters parameters;
-    VuforiaTrackables trackables;
-    VuforiaTrackable trackable;
-    VuforiaTrackableDefaultListener listener;
+    public VuforiaLocalizer vuforiaLocalizer;
+    public VuforiaLocalizer.Parameters parameters;
+    public VuforiaTrackables trackables;
+    public VuforiaTrackable trackable;
+    public VuforiaTrackableDefaultListener listener;
 
-    OpenGLMatrix lastKnownLocation;
-    OpenGLMatrix phoneLocation;
+    public OpenGLMatrix lastKnownLocation;
+    public OpenGLMatrix phoneLocation;
 
     public Vuforia(int image, String key) {
         this.parameters = new VuforiaLocalizer.Parameters(R.id.cameraMonitorViewId);

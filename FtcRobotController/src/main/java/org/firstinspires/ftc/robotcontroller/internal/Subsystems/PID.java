@@ -24,15 +24,14 @@ public class PID {
     public BNO055IMU imu;
     public Orientation lastAngles;
 
-    double p_turn = .04;//0.008;
-    double i_turn = .002; //.0045; //.003;
-    double d_turn = .002; //.04 //.0045;
-    double f_turn = .0;
-    double pT = 0;
-    double pE = 0;
-    double tE = 0;
+    public double p_turn = .04;//0.008;
+    public double i_turn = .002; //.0045; //.003;
+    public double d_turn = .002; //.04 //.0045;
+    public double pT = 0;
+    public double pE = 0;
+    public double tE = 0;
 
-    ElapsedTime runtime = new ElapsedTime();
+    public ElapsedTime runtime = new ElapsedTime();
 
     public PID(HardwareMap hardwareMap) {
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
@@ -40,15 +39,6 @@ public class PID {
         parameters.loggingTag     = "IMU";
         this.imu = hardwareMap.get(BNO055IMU.class, "imu");
         imu.initialize(parameters);
-    }
-
-    String formatAngle(AngleUnit angleUnit, double angle) {
-        return formatDegrees(AngleUnit.DEGREES.fromUnit(angleUnit, angle));
-    }
-
-    String formatDegrees(double degrees){
-        return String.format
-                (Locale.getDefault(), "%.1f", AngleUnit.DEGREES.normalize(degrees));
     }
 
     public void startDegreeController(){
