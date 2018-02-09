@@ -31,8 +31,6 @@ public class autoBlue extends LinearOpMode {
 
     String imageDetected;
 
-    double dist = 0;
-
     @Override
     public void runOpMode() throws InterruptedException {
         drivetrain = new Drivetrain(hardwareMap);
@@ -68,9 +66,9 @@ public class autoBlue extends LinearOpMode {
             idle();
         }
 
-        imageDetected = vuforia.doVuforia();
         jewelAuto();
-        drivetrain.driveBackward(-15 + dist, -0.4);             //-22 = directly to center
+        imageDetected = vuforia.doVuforia();
+        drivetrain.driveBackward(-24, -0.4);             //-22 = directly to center
         sleep(2000);
         doImage(imageDetected);
     }
@@ -114,23 +112,49 @@ public class autoBlue extends LinearOpMode {
 
     //JEWEL FUNCTION--------------------------------------------------------------------------------
     public void jewelAuto() {
-        jewel.extendCat();
+        extend();
         sleep(1000);
-        if (jewel.isRed()) {
-            dist = -5;
-            drivetrain.driveBackward(-2, -0.35);
-            sleep(2000);
-            jewel.stowCat();
-            sleep(2000);
+        if (jewel.isBlue()) {
+            right();
+            jewel.knockCenter();
+            sleep(250);
+            stow();
         }
         else {
-            dist = -3;
-            drivetrain.driveForward(1, 0.25);
-            jewel.stowCat();
-            sleep(500);
-            drivetrain.driveBackward(-11, -1);
-            sleep(500);
+            left();
+            jewel.knockCenter();
+            sleep(250);
+            stow();
         }
+    }
+
+
+    public void stow() {
+        jewel.halfCat();
+        sleep(250);
+        jewel.stowKnock();
+        sleep(250);
+        jewel.stowCat();
+        sleep(250);
+    }
+
+    public void extend() {
+        jewel.halfCat();
+        sleep(250);
+        jewel.knockCenter();
+        sleep(250);
+        jewel.extendCat();
+        sleep(250);
+    }
+
+    public void right() {
+        jewel.knockRight();
+        sleep(250);
+    }
+
+    public void left() {
+        jewel.knockLeft();
+        sleep(250);
     }
     //----------------------------------------------------------------------------------------------
 

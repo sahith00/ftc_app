@@ -31,8 +31,6 @@ public class autoRed extends LinearOpMode {
 
     String imageDetected;
 
-    double dist = 0;
-
     @Override
     public void runOpMode() throws InterruptedException {
         drivetrain = new Drivetrain(hardwareMap);
@@ -59,7 +57,7 @@ public class autoRed extends LinearOpMode {
         intake.rintake.setPower(0);
         intake.lintake.setPower(0);
 
-        jewel.stowCat();
+        stow();
 
         flipper.zero();
 
@@ -68,9 +66,9 @@ public class autoRed extends LinearOpMode {
             idle();
         }
 
-        imageDetected = vuforia.doVuforia();
         jewelAuto();
-        drivetrain.driveForward(15 - dist, 0.4);
+        imageDetected = vuforia.doVuforia();
+        drivetrain.driveForward(24, 0.4);
         sleep(2000);
         doImage(imageDetected);
     }
@@ -114,24 +112,49 @@ public class autoRed extends LinearOpMode {
 
     //JEWEL FUNCTION--------------------------------------------------------------------------------
     public void jewelAuto() {
-        jewel.extendCat();
+        extend();
         sleep(1000);
         if (jewel.isRed()) {
-            dist = 2;
-            drivetrain.driveForward(2, 0.35);
-            sleep(2000);
-            jewel.stowCat();
-            sleep(2000);
+            right();
+            jewel.knockCenter();
+            sleep(250);
+            stow();
         }
         else {
-            dist = -5;
-            drivetrain.driveBackward(-3, -0.35);
-            sleep(500);
-            jewel.stowCat();
-            sleep(500);
-            drivetrain.driveForward(10, 1);
-            sleep(500);
+            left();
+            jewel.knockCenter();
+            sleep(250);
+            stow();
         }
+    }
+
+
+    public void stow() {
+        jewel.halfCat();
+        sleep(250);
+        jewel.stowKnock();
+        sleep(250);
+        jewel.stowCat();
+        sleep(250);
+    }
+
+    public void extend() {
+        jewel.halfCat();
+        sleep(250);
+        jewel.knockCenter();
+        sleep(250);
+        jewel.extendCat();
+        sleep(250);
+    }
+
+    public void right() {
+        jewel.knockRight();
+        sleep(250);
+    }
+
+    public void left() {
+        jewel.knockLeft();
+        sleep(250);
     }
     //----------------------------------------------------------------------------------------------
 

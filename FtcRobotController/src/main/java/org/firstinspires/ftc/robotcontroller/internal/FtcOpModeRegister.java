@@ -55,6 +55,7 @@ import org.firstinspires.ftc.robotcontroller.internal.Tests.servoTest;
 import org.firstinspires.ftc.robotcontroller.internal.Tests.simpleEncoderCountTest;
 import org.firstinspires.ftc.robotcontroller.internal.Tests.teleOpTest;
 import org.firstinspires.ftc.robotcore.internal.opmode.OpModeMeta;
+import org.firstinspires.ftc.robotcore.internal.opmode.OpModeMeta.Flavor;
 
 /**
  * {@link FtcOpModeRegister} is responsible for registering opmodes for use in an FTC game.
@@ -87,17 +88,16 @@ public class FtcOpModeRegister implements OpModeRegister {
          * Any manual OpMode class registrations should go here.
          */
 
-        manager.register(new OpModeMeta("encoder test", OpModeMeta.Flavor.AUTONOMOUS), encoderCountTest.class);
-        manager.register(new OpModeMeta("simple encoder test", OpModeMeta.Flavor.AUTONOMOUS), simpleEncoderCountTest.class);
-        manager.register(new OpModeMeta("Jewel Auto (Scrim)", OpModeMeta.Flavor.AUTONOMOUS), jewelAutoTest.class);
-        manager.register(new OpModeMeta("Glyph Auto Test", OpModeMeta.Flavor.AUTONOMOUS), glyphAutoTest.class);
-        manager.register(new OpModeMeta("line following test", OpModeMeta.Flavor.AUTONOMOUS), lineFollowingTest.class);
-        manager.register(new OpModeMeta("basic line following test", OpModeMeta.Flavor.AUTONOMOUS), BasicLineFollowing.class);
-        manager.register(new OpModeMeta("line following test 2.0", OpModeMeta.Flavor.AUTONOMOUS), lineFollowingTest2.class);
-        manager.register(new OpModeMeta("line following test 3.0", OpModeMeta.Flavor.AUTONOMOUS), lineFollowingTest3.class);
-        manager.register(new OpModeMeta("Vuforia", OpModeMeta.Flavor.AUTONOMOUS), Vuforia.class);
-        manager.register(new OpModeMeta("Cisco Auto Red", OpModeMeta.Flavor.AUTONOMOUS), autoRed.class);
-        manager.register(new OpModeMeta("Cisco Auto Blue", OpModeMeta.Flavor.AUTONOMOUS), autoBlue.class);
+        manager.register(new OpModeMeta("encoder test", Flavor.AUTONOMOUS), encoderCountTest.class);
+        manager.register(new OpModeMeta("simple encoder test", Flavor.AUTONOMOUS), simpleEncoderCountTest.class);
+        manager.register(new OpModeMeta("Jewel Auto (Scrim)", Flavor.AUTONOMOUS), jewelAutoTest.class);
+        manager.register(new OpModeMeta("Glyph Auto Test", Flavor.AUTONOMOUS), glyphAutoTest.class);
+        manager.register(new OpModeMeta("line following test", Flavor.AUTONOMOUS), lineFollowingTest.class);
+        manager.register(new OpModeMeta("basic line following test", Flavor.AUTONOMOUS), BasicLineFollowing.class);
+        manager.register(new OpModeMeta("line following test 2.0", Flavor.AUTONOMOUS), lineFollowingTest2.class);
+        manager.register(new OpModeMeta("line following test 3.0", Flavor.AUTONOMOUS), lineFollowingTest3.class);
+        manager.register(new OpModeMeta("Cisco Auto Red", Flavor.AUTONOMOUS), autoRed.class);
+        manager.register(new OpModeMeta("Cisco Auto Blue", Flavor.AUTONOMOUS), autoBlue.class);
         manager.register("nav x calib test", NavXCalib.class);
         manager.register("pid test", PIDTest.class);
         manager.register("Cisco TeleOp", teleOp.class);

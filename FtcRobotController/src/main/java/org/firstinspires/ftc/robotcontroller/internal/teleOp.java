@@ -76,6 +76,7 @@ public class teleOp extends LinearOpMode{
         waitForStart();
         while(opModeIsActive()) {
             jewel.stowCat();
+            jewel.stowKnock();
             //-----------------------------------------------------------------------------
             // DRIVE ROBOT
 
