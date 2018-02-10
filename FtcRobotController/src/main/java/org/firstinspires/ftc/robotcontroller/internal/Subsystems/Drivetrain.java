@@ -4,6 +4,8 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.Range;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+
 /**
  * Created by sahith on 2/5/18.
  */
@@ -15,12 +17,12 @@ public class Drivetrain {
     final static double STRAIGHT_TICKS_PER_INCH = 52.63;
     final static double SIDE_TICKS_PER_INCH = 51.51;
 
-    public Drivetrain(HardwareMap hardwareMap) {
+    public Drivetrain(HardwareMap hardwareMap, Telemetry telemetry) {
         this.fr = hardwareMap.dcMotor.get("frdrive");
         this.fl = hardwareMap.dcMotor.get("fldrive");
         this.br = hardwareMap.dcMotor.get("brdrive");
         this.bl = hardwareMap.dcMotor.get("bldrive");
-        pid = new PID(hardwareMap);
+        pid = new PID(hardwareMap, telemetry);
     }
 
     public void driveForward(double distance, double maxpower) {
@@ -106,5 +108,9 @@ public class Drivetrain {
         br.setPower(0);
         fl.setPower(0);
         bl.setPower(0);
+    }
+
+    public void showPID() {
+        pid.showPID();
     }
 }

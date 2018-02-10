@@ -33,7 +33,7 @@ public class autoRed extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        drivetrain = new Drivetrain(hardwareMap);
+        drivetrain = new Drivetrain(hardwareMap, telemetry);
         flipper = new Flipper(hardwareMap);
         intake = new Intake(hardwareMap);
         vuforia = new Vuforia(0, V_KEY);
@@ -60,6 +60,8 @@ public class autoRed extends LinearOpMode {
         stow();
 
         flipper.zero();
+
+        drivetrain.showPID();
 
         while (!isStarted()) {
             telemetry.update();

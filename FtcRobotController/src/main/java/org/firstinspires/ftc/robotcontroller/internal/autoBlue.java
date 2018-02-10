@@ -33,7 +33,7 @@ public class autoBlue extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        drivetrain = new Drivetrain(hardwareMap);
+        drivetrain = new Drivetrain(hardwareMap, telemetry);
         flipper = new Flipper(hardwareMap);
         vuforia = new Vuforia(0, V_KEY);
         intake = new Intake(hardwareMap);
@@ -60,6 +60,8 @@ public class autoBlue extends LinearOpMode {
         jewel.stowCat();
 
         flipper.zero();
+
+        drivetrain.showPID();
 
         while (!isStarted()) {
             telemetry.update();

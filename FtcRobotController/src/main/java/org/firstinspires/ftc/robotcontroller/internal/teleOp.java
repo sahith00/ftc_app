@@ -38,7 +38,7 @@ public class teleOp extends LinearOpMode{
 
     @Override
     public void runOpMode() throws InterruptedException {
-        drivetrain = new Drivetrain(hardwareMap);
+        drivetrain = new Drivetrain(hardwareMap, telemetry);
         flipper = new Flipper(hardwareMap);
         intake = new Intake(hardwareMap);
         jewel = new Jewel(hardwareMap);

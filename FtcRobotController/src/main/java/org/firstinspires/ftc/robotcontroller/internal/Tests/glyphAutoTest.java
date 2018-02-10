@@ -103,10 +103,12 @@ public class glyphAutoTest extends LinearOpMode {
         grab();
         sleep(500);
         grabGlyph(-0.7);
-        driveForward(15, 0.8);
-        driveForward(5, 0.8);
+        driveForward(15, 0.4);
+        driveForward(5, 0.4);
+        sleep(500);
         grabGlyph(0);
         grabGlyph(0.5);
+        sleep(1000);
         zero();
         sleep(500);
         grabGlyph(0);
