@@ -12,13 +12,14 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  */
 public class teleOp extends LinearOpMode{
     DcMotor fr, fl, br, bl;
-    DcMotor lift;
+    DcMotor lift, relicLift;
     DcMotor rintake, lintake;
 
     Servo cat, knock;
     ColorSensor jewelSensor;
 
     Servo rflip, lflip, stopper;
+    Servo lig, claw;
 
     final static double CAT_STOW = 0.85944444444444444444;
     final static double KNOCK_STOW = .359444444444444444444445;
@@ -33,15 +34,24 @@ public class teleOp extends LinearOpMode{
     final static double LFLIP_ZERO = 0.619444444444444444445;
     final static double LFLIP_GRAB = 0.739444444444444444446;
 
+    final static double LIG_STOW = .12944444444444444447 + 0.3;
+    final static double LIG_GRAB = .8094444444444444444;//.899444444444444444445;
+    final static double LIG_HALF_STOW = .47944444444444437;
+    final static double CLAW_STOW = .79;
+    final static double CLAW_GRAB = .1694444444444445;
+
     final static double LEVEL_ONE = 0;
     final static double LEVEL_TWO = -372;
     final static double LEVEL_THREE = -770;
+    double t1, t2;
     double intakep;
     boolean lift_zero;
-    double multiplier = 1.0;
+    double multiplier;
     boolean switch1, switch2, switch3;
     double zero_encoder, t;
     double desired_lift_val, desired_lift_power, currentpos;
+    double stowPos;
+
 
     ElapsedTime ctime = new ElapsedTime();
 
@@ -53,6 +63,7 @@ public class teleOp extends LinearOpMode{
         bl = hardwareMap.dcMotor.get("bldrive");
 
         lift = hardwareMap.dcMotor.get("lift");
+        relicLift = hardwareMap.dcMotor.get("relicLift");
 
         rintake = hardwareMap.dcMotor.get("rintake");
         lintake = hardwareMap.dcMotor.get("lintake");
@@ -65,12 +76,16 @@ public class teleOp extends LinearOpMode{
         knock = hardwareMap.servo.get("knock");
         jewelSensor = hardwareMap.colorSensor.get("jewelSensor");
 
+        lig = hardwareMap.servo.get("lig");
+        claw = hardwareMap.servo.get("relicGrab");
+
         fl.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         fr.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         fl.setDirection(DcMotorSimple.Direction.REVERSE);
         fr.setDirection(DcMotorSimple.Direction.REVERSE);
         bl.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         br.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        relicLift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE); //so that lift can hold its position
@@ -82,21 +97,27 @@ public class teleOp extends LinearOpMode{
         bl.setPower(0);
         br.setPower(0);
         lift.setPower(0);
+        relicLift.setPower(0);
         rintake.setPower(0);
         lintake.setPower(0);
         cat.setPosition(CAT_STOW);
         knock.setPosition(KNOCK_STOW);
+        lig.setPosition(LIG_STOW);
+        claw.setPosition(CLAW_STOW);
 
+        multiplier = 1.0;
         intakep = .0;
         lift_zero = true;
         zero_encoder = 0;
         desired_lift_val = 0;
         desired_lift_power = 0;
         currentpos = 0;
+        stowPos = LIG_STOW;
         switch1 = true;
         switch2 = false;
         switch3 = false;
         t = 0;
+        t1 = 0;
 
         waitForStart();
         while(opModeIsActive()) {
@@ -104,9 +125,40 @@ public class teleOp extends LinearOpMode{
             knock.setPosition(KNOCK_STOW);
             //-----------------------------------------------------------------------------
             // DRIVE ROBOT
+            if (gamepad1.b && (ctime.milliseconds() > (t1+250))) {
+                t1 = ctime.milliseconds();
+                if (multiplier == 1.0) {
+                    multiplier = .3;
+                }
+                else {
+                    multiplier = 1.0;
+                }
+            }
             mecanum(gamepad1.left_stick_y, -(gamepad1.left_stick_x), -(gamepad1.right_stick_x), multiplier);
             //-----------------------------------------------------------------------------
             // GRAB RELIC AND DEPOSIT
+            relicLift.setPower(gamepad1.left_trigger-gamepad1.right_trigger);
+
+            if (gamepad1.dpad_up && (ctime.milliseconds() > (t2+250))) {
+                t2 = ctime.milliseconds();
+                if (stowPos == LIG_STOW) {
+                    multiplier = LIG_HALF_STOW;
+                }
+                else {
+                    multiplier = LIG_STOW;
+                }
+                lig.setPosition(stowPos);
+            }
+
+            if (gamepad1.dpad_down) {
+                lig.setPosition(LIG_GRAB);
+            }
+            if (gamepad1.dpad_right) {
+                claw.setPosition(CLAW_GRAB);
+            }
+            if (gamepad1.dpad_left) {
+                claw.setPosition(CLAW_STOW);
+            }
             //-----------------------------------------------------------------------------
             // GRAB GLYPH AND DEPOSIT
             grabGlyph();
@@ -250,10 +302,10 @@ public class teleOp extends LinearOpMode{
             bl.setPower(multiplier * (v3/max));
             br.setPower(multiplier * (v4/max));
         } else {
-            fl.setPower(v1);
-            fr.setPower(v2);
-            bl.setPower(v3);
-            br.setPower(v4);
+            fl.setPower(multiplier*v1);
+            fr.setPower(multiplier*v2);
+            bl.setPower(multiplier*v3);
+            br.setPower(multiplier*v4);
         }
     }
 }
