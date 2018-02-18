@@ -19,24 +19,24 @@ public class glyphAutoTest extends autoMethods {
         rintake.setPower(0);
         lintake.setPower(0);
 
-        zero();
+        grab();
 
         waitForStart();
 
-        grab();
-        sleep(500);
-        grabGlyph(-0.7);
-        driveBackward(-18, -0.3);
-        sleep(3000);
-        turn(15, 3.5);
-        sleep(500);
-        turn(-15, 3.5);
+        grabGlyph(1.0);
+        driveBackward(-24, -0.3);
+        sleep(4000);
+        driveBackward(-7, -0.3);
         sleep(1000);
         zero();
         sleep(500);
         turn(0, 3.5);
-        driveForward(20, 0.5);
+        driveForward(29, 0.5);
         sleep(500);
         outtake();
+        sleep(500);
+        driveBackward(-3, -0.3);
+        driveForward(3, 0.3);
+        driveBackward(-4, -0.3);
     }
 }

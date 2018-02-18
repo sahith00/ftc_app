@@ -23,6 +23,8 @@ public class autoRed extends autoMethods {
         sleep(250);
         cat.setPosition(CAT_STOW);
         sleep(250);
+        lig.setPosition(LIG_STOW);
+        sleep(250);
 
         zero();
 
@@ -35,5 +37,6 @@ public class autoRed extends autoMethods {
         driveForward(26, 0.4);
         sleep(1000);
         doImage(imageDetected, -114, -65, -90);
+        glyphAuto(-90, -65);
     }
 }

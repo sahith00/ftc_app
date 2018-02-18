@@ -23,6 +23,8 @@ public class autoBlue extends autoMethods {
         sleep(250);
         cat.setPosition(CAT_STOW);
         sleep(250);
+        lig.setPosition(LIG_STOW);
+        sleep(250);
 
         zero();
 
@@ -32,8 +34,9 @@ public class autoBlue extends autoMethods {
 
         jewelAuto("BLUE");
         imageDetected = doVuforia();
-        driveBackward(-24, -0.4);
+        driveBackward(-21, -0.4);
         sleep(1000);
-        doImage(imageDetected, -65, -116, -90);
+        doImage(imageDetected, -116, -65, -90);
+        glyphAuto(-90, -65);
     }
 }

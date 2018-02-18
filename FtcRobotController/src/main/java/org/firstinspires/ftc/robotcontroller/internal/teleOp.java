@@ -35,7 +35,7 @@ public class teleOp extends LinearOpMode{
     final static double LFLIP_GRAB = 0.739444444444444444446;
 
     final static double LIG_STOW = .12944444444444444447 + 0.3;
-    final static double LIG_GRAB = .8094444444444444444;//.899444444444444444445;
+    final static double LIG_GRAB = .8094444444444444444 + 0.045;//.899444444444444444445;
     final static double LIG_HALF_STOW = .47944444444444437;
     final static double CLAW_STOW = .79;
     final static double CLAW_GRAB = .1694444444444445;
@@ -49,7 +49,7 @@ public class teleOp extends LinearOpMode{
     double multiplier;
     boolean switch1, switch2, switch3;
     double zero_encoder, t;
-    double desired_lift_val, desired_lift_power, currentpos;
+    double desired_lift_val, currentpos;
     double stowPos;
 
 
@@ -90,6 +90,8 @@ public class teleOp extends LinearOpMode{
         lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE); //so that lift can hold its position
         lift.setDirection(DcMotorSimple.Direction.FORWARD);
+        rintake.setDirection(DcMotorSimple.Direction.REVERSE);
+        lintake.setDirection(DcMotorSimple.Direction.FORWARD);
 
         grab(); //inits flipper to grab position to prepare for grabbing
         fl.setPower(0);
@@ -110,7 +112,6 @@ public class teleOp extends LinearOpMode{
         lift_zero = true;
         zero_encoder = 0;
         desired_lift_val = 0;
-        desired_lift_power = 0;
         currentpos = 0;
         stowPos = LIG_STOW;
         switch1 = true;
@@ -137,7 +138,7 @@ public class teleOp extends LinearOpMode{
             mecanum(gamepad1.left_stick_y, -(gamepad1.left_stick_x), -(gamepad1.right_stick_x), multiplier);
             //-----------------------------------------------------------------------------
             // GRAB RELIC AND DEPOSIT
-            relicLift.setPower(gamepad1.left_trigger-gamepad1.right_trigger);
+            relicLift.setPower(Math.pow(gamepad1.left_trigger-gamepad1.right_trigger, 3));
 
             if (gamepad1.dpad_up && (ctime.milliseconds() > (t2+250))) {
                 t2 = ctime.milliseconds();
@@ -182,7 +183,8 @@ public class teleOp extends LinearOpMode{
             intakep = .0;
         }
         if (gamepad2.right_trigger > 0 || gamepad2.left_trigger > 0) {
-            runIntake(-0.65 * Math.signum(gamepad2.right_trigger), -0.65 * Math.signum(gamepad2.left_trigger));
+            runIntake(-0.65 * Math.signum(gamepad2.right_trigger)
+                    , -0.65 * Math.signum(gamepad2.left_trigger));
         }
         else {
             runIntake(intakep, intakep);
@@ -191,13 +193,11 @@ public class teleOp extends LinearOpMode{
 
     public void moveLift() {
         if (gamepad2.right_stick_y < 0) {
-            desired_lift_power = .7;
             desired_lift_val = desired_lift_val - 1000; //Always keep running at power when joystick is moved
             switch1 = true;
             switch2 = false;
             switch3 = true;
         } else if (gamepad2.right_stick_y > 0) {
-            desired_lift_power = .7;
             desired_lift_val = desired_lift_val + 1000;
             switch1 = true;
             switch2 = false;
@@ -212,7 +212,6 @@ public class teleOp extends LinearOpMode{
                 desired_lift_val = currentpos;
             }
             if (gamepad2.a) {
-                desired_lift_power = .7;
                 desired_lift_val = zero_encoder + LEVEL_ONE;
                 switch1 = false; //stop making lift stay at its current position
                 switch2 = true;
@@ -220,7 +219,6 @@ public class teleOp extends LinearOpMode{
             }
             if (gamepad2.y) {
                 zero();
-                desired_lift_power = .7;
                 desired_lift_val = zero_encoder + LEVEL_THREE;;
                 switch1 = false;
                 switch2 = true;
@@ -228,7 +226,6 @@ public class teleOp extends LinearOpMode{
             }
             if (gamepad2.x) {
                 zero();
-                desired_lift_power = .7;
                 desired_lift_val = zero_encoder + LEVEL_TWO;
                 switch1 = false;
                 switch2 = true;
@@ -247,7 +244,7 @@ public class teleOp extends LinearOpMode{
                 zero_encoder = lift.getCurrentPosition();
             }
         }
-        lift.setPower(desired_lift_power);
+        lift.setPower(.7);
         lift.setTargetPosition((int) desired_lift_val);
     }
 

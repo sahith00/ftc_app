@@ -31,6 +31,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 public class autoMethods extends LinearOpMode {
     DcMotor fr, fl, br, bl;
     DcMotor rintake, lintake;
+    Servo lig;
     Servo cat, knock;
     ColorSensor jewelSensor;
     Servo rflip, lflip, stopper;
@@ -65,6 +66,7 @@ public class autoMethods extends LinearOpMode {
     final static double KNOCK_RIGHT = .75;
     final static double KNOCK_LEFT = .0;
     final static double KNOCK_STOW = .359444444444444444444445;
+    final static double LIG_STOW = .12944444444444444447 + 0.3;
 
     final static double STOPPER_STOP = 0.959444444444444445;
     final static double STOPPER_DEPOSIT = 0.62000000000000001;
@@ -91,6 +93,7 @@ public class autoMethods extends LinearOpMode {
         fl = hardwareMap.dcMotor.get("fldrive");
         br = hardwareMap.dcMotor.get("brdrive");
         bl = hardwareMap.dcMotor.get("bldrive");
+        lig = hardwareMap.servo.get("lig");
         cat = hardwareMap.servo.get("cat");
         knock = hardwareMap.servo.get("knock");
         jewelSensor = hardwareMap.colorSensor.get("jewelSensor");
@@ -116,8 +119,68 @@ public class autoMethods extends LinearOpMode {
         br.setDirection(DcMotorSimple.Direction.FORWARD);
         fl.setDirection(DcMotorSimple.Direction.REVERSE);
         bl.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        rintake.setDirection(DcMotorSimple.Direction.REVERSE);
+        lintake.setDirection(DcMotorSimple.Direction.FORWARD);
     }
 
+    //JEWEL FUNCTION--------------------------------------------------------------------------------
+    public void jewelAuto(String team) {
+        extend();
+        sleep(500);
+        if (team.equals("RED")) {
+            doJewel(jewelSensor.red(), jewelSensor.blue());
+        }
+        else if (team.equals("BLUE")){
+            doJewel(jewelSensor.blue(), jewelSensor.red());
+        }
+    }
+
+    public void doJewel(int color1, int color2) {
+        if (color1 > color2) {
+            right();
+            knock.setPosition(KNOCK_CENTER);
+            sleep(250);
+            stow();
+        }
+        else {
+            left();
+            knock.setPosition(KNOCK_CENTER);
+            sleep(250);
+            stow();
+        }
+    }
+
+    public void stow() {
+        cat.setPosition(CAT_EXTEND + 0.3);
+        sleep(250);
+        knock.setPosition(KNOCK_STOW);
+        sleep(250);
+        cat.setPosition(CAT_STOW);
+        sleep(250);
+    }
+
+    public void extend() {
+        cat.setPosition(CAT_EXTEND + 0.3);
+        sleep(250);
+        knock.setPosition(KNOCK_CENTER);
+        sleep(250);
+        cat.setPosition(CAT_EXTEND);
+        sleep(250);
+    }
+
+    public void right() {
+        knock.setPosition(KNOCK_RIGHT);
+        sleep(250);
+    }
+
+    public void left() {
+        knock.setPosition(KNOCK_LEFT);
+        sleep(250);
+    }
+    //----------------------------------------------------------------------------------------------
+
+    //GLYPH FUNCTIONS-------------------------------------------------------------------------------
     public void doImage(String image, double rturn, double lturn, double cturn) {
         // check for robot at the top of the triangle
         if (image.equals("R")) {
@@ -184,6 +247,33 @@ public class autoMethods extends LinearOpMode {
         return image;
     }
 
+    public void glyphAuto(double cturn, double lturn) {
+        grab();
+        sleep(500);
+        driveBackward(-6, -0.3);
+        grabGlyph(1.0);
+        turn(cturn, 3.5);
+        driveBackward(-26, -0.3);
+        sleep(4000);
+        grabGlyph(-0.7);
+        sleep(500);
+        grabGlyph(0);
+        zero();
+        sleep(500);
+        turn(cturn, 3.5);
+        driveForward(26, 0.5);
+        sleep(500);
+        turn(lturn, 3.5);
+        driveForward(6, 0.3);
+        outtake();
+        sleep(500);
+        driveBackward(-3, -0.3);
+        driveForward(3, 0.3);
+        driveBackward(-4, -0.3);
+        driveForward(4, 0.3);
+        driveBackward(-4, -0.3);
+    }
+
     public OpenGLMatrix createMatrix(float x, float y, float z, float u, float v, float w){
         return OpenGLMatrix.translation(x, y, z).multiplied(Orientation.getRotationMatrix(AxesReference.EXTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES, u, v, w));
     }
@@ -206,65 +296,7 @@ public class autoMethods extends LinearOpMode {
 
         lastKnownLocation = createMatrix(0, 0, 0, 0, 0, 0);
     }
-    //----------------------------------------------------------------------------------------------
 
-    //JEWEL FUNCTION--------------------------------------------------------------------------------
-    public void jewelAuto(String team) {
-        extend();
-        sleep(500);
-        if (team.equals("RED")) {
-            doJewel(jewelSensor.red(), jewelSensor.blue());
-        }
-        else if (team.equals("BLUE")){
-            doJewel(jewelSensor.blue(), jewelSensor.red());
-        }
-    }
-
-    public void doJewel(int color1, int color2) {
-        if (color1 > color2) {
-            right();
-            knock.setPosition(KNOCK_CENTER);
-            sleep(250);
-            stow();
-        }
-        else {
-            left();
-            knock.setPosition(KNOCK_CENTER);
-            sleep(250);
-            stow();
-        }
-    }
-
-    public void stow() {
-        cat.setPosition(CAT_EXTEND + 0.3);
-        sleep(250);
-        knock.setPosition(KNOCK_STOW);
-        sleep(250);
-        cat.setPosition(CAT_STOW);
-        sleep(250);
-    }
-
-    public void extend() {
-        cat.setPosition(CAT_EXTEND + 0.3);
-        sleep(250);
-        knock.setPosition(KNOCK_CENTER);
-        sleep(250);
-        cat.setPosition(CAT_EXTEND);
-        sleep(250);
-    }
-
-    public void right() {
-        knock.setPosition(KNOCK_RIGHT);
-        sleep(250);
-    }
-
-    public void left() {
-        knock.setPosition(KNOCK_LEFT);
-        sleep(250);
-    }
-    //----------------------------------------------------------------------------------------------
-
-    //GLYPH FUNCTIONS-------------------------------------------------------------------------------
     public void outtake() {
         deposit();
         sleep(500);
@@ -377,11 +409,6 @@ public class autoMethods extends LinearOpMode {
         return ans;
     }
 
-    public void resetAngles() {
-        lastAngles = imu.getAngularOrientation
-                (AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-    }
-
     public double getDifference(double beg, double end){
         if (end > beg){
             if (Math.abs(end - beg) < Math.abs((end - 360) - beg)){
@@ -399,4 +426,8 @@ public class autoMethods extends LinearOpMode {
         return 0;
     }
 
+    public void resetAngles() {
+        lastAngles = imu.getAngularOrientation
+                (AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+    }
 }

@@ -23,6 +23,8 @@ public class autoRed2 extends autoMethods {
         sleep(250);
         cat.setPosition(CAT_STOW);
         sleep(250);
+        lig.setPosition(LIG_STOW);
+        sleep(250);
 
         zero();
 
@@ -36,7 +38,7 @@ public class autoRed2 extends autoMethods {
         sleep(1000);
         turn(90, 3.5);
         sleep(1000);
-        driveForward(5, 0.4);
+        driveForward(6.5, 0.4);
         sleep(1000);
         doImage(imageDetected, -25, 25, 0);
     }

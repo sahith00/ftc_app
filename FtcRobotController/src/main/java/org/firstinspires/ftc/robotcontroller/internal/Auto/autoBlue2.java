@@ -23,6 +23,8 @@ public class autoBlue2 extends autoMethods {
         sleep(250);
         cat.setPosition(CAT_STOW);
         sleep(250);
+        lig.setPosition(LIG_STOW);
+        sleep(250);
 
         zero();
 
