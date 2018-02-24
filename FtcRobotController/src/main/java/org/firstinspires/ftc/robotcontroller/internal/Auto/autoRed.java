@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.robotcontroller.internal.Auto;
 
+import com.qualcomm.robotcore.util.ElapsedTime;
+
 /**
  * Created by sahith on 12/10/17.
  */
@@ -34,9 +36,9 @@ public class autoRed extends autoMethods {
 
         jewelAuto("RED");
         imageDetected = doVuforia();
-        driveForward(26, 0.4);
+        driveForward(27, 0.4);
         sleep(1000);
         doImage(imageDetected, -114, -65, -90);
-        glyphAuto(-90, -65);
+        //glyphAuto(-90, -65);
     }
 }

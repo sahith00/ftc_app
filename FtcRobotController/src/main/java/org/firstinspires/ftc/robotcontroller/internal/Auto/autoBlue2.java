@@ -31,7 +31,7 @@ public class autoBlue2 extends autoMethods {
         setUpVuforia();
 
         waitForStart();
-
+        lig.setPosition(.12944444444444444447 + 0.3);
         jewelAuto("BLUE");
         imageDetected = doVuforia();
         driveBackward(-7.5, -0.4);

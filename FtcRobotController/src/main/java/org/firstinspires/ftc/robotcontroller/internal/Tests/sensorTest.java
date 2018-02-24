@@ -13,7 +13,7 @@ public class sensorTest extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        sensor = hardwareMap.colorSensor.get("sensor");
+        sensor = hardwareMap.colorSensor.get("jewelSensor");
         String move = "NONE";
         waitForStart();
         while(opModeIsActive()) {

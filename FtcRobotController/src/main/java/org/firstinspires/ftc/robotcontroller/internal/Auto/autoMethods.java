@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.qualcomm.ftcrobotcontroller.R;
 import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -66,7 +67,7 @@ public class autoMethods extends LinearOpMode {
     final static double KNOCK_RIGHT = .75;
     final static double KNOCK_LEFT = .0;
     final static double KNOCK_STOW = .359444444444444444444445;
-    final static double LIG_STOW = .12944444444444444447 + 0.3;
+    final static double LIG_STOW = 0;
 
     final static double STOPPER_STOP = 0.959444444444444445;
     final static double STOPPER_DEPOSIT = 0.62000000000000001;
@@ -84,6 +85,7 @@ public class autoMethods extends LinearOpMode {
     public double pT = 0;
     public double pE = 0;
     public double tE = 0;
+
 
     public ElapsedTime runtime = new ElapsedTime();
 
@@ -104,8 +106,12 @@ public class autoMethods extends LinearOpMode {
         stopper = hardwareMap.servo.get("stopper");
 
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
+        parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+        parameters.calibrationDataFile = "BNO055IMUCalibration.json";
         parameters.loggingEnabled = true;
         parameters.loggingTag     = "IMU";
+        parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         imu.initialize(parameters);
 
@@ -127,7 +133,7 @@ public class autoMethods extends LinearOpMode {
     //JEWEL FUNCTION--------------------------------------------------------------------------------
     public void jewelAuto(String team) {
         extend();
-        sleep(500);
+        sleep(2000);
         if (team.equals("RED")) {
             doJewel(jewelSensor.red(), jewelSensor.blue());
         }
@@ -185,34 +191,34 @@ public class autoMethods extends LinearOpMode {
         // check for robot at the top of the triangle
         if (image.equals("R")) {
             turn(rturn, 3.5);
-            driveForward(6, 0.3);
+            driveForward(5, 0.3);
             outtake();
             sleep(250);
-            driveBackward(-5, -0.3);
+            driveBackward(-4, -0.2);
             sleep(250);
-            driveForward(7, 0.3);
+            driveForward(6, 0.3);
             sleep(250);
-            driveBackward(-5, -0.3);
+            driveBackward(-4, -0.2);
         } else if (image.equals("L")) {
             turn(lturn, 3.5);
-            driveForward(6, 0.3);
+            driveForward(5, 0.3);
             outtake();
             sleep(250);
-            driveBackward(-5, -0.3);
+            driveBackward(-4, -0.2);
             sleep(250);
-            driveForward(7, 0.3);
+            driveForward(6, 0.3);
             sleep(250);
-            driveBackward(-5, -0.3);
+            driveBackward(-4, -0.2);
         } else {
             turn(cturn, 3.5);
             driveForward(4, 0.3);
             outtake();
             sleep(250);
-            driveBackward(-4, -0.3);
+            driveBackward(-4, -0.2);
             sleep(250);
             driveForward(5, 0.3);
             sleep(250);
-            driveBackward(-4, -0.3);
+            driveBackward(-4, -0.2);
         }
     }
 
@@ -221,7 +227,7 @@ public class autoMethods extends LinearOpMode {
 
         trackables.activate();
 
-        while (image == "none") {
+        while (image == "none" && opModeIsActive()) {
             OpenGLMatrix currentLocation = listener.getUpdatedRobotLocation();
 
             if (currentLocation != null) {
@@ -242,6 +248,7 @@ public class autoMethods extends LinearOpMode {
                     image = "none";
                 }
             }
+            sleep(10);
         }
 
         return image;
@@ -255,16 +262,11 @@ public class autoMethods extends LinearOpMode {
         turn(cturn, 3.5);
         driveBackward(-26, -0.3);
         sleep(4000);
-        grabGlyph(-0.7);
-        sleep(500);
-        grabGlyph(0);
-        zero();
-        sleep(500);
         turn(cturn, 3.5);
-        driveForward(26, 0.5);
+        driveForward(29, 0.5);
         sleep(500);
         turn(lturn, 3.5);
-        driveForward(6, 0.3);
+        driveForward(5, 0.3);
         outtake();
         sleep(500);
         driveBackward(-3, -0.3);
@@ -333,7 +335,8 @@ public class autoMethods extends LinearOpMode {
         fl.setPower(maxpower);
         br.setPower(maxpower);
         bl.setPower(maxpower);
-        while (fl.getCurrentPosition() < ticks + old_ticks) {
+        while (fl.getCurrentPosition() < ticks + old_ticks && opModeIsActive()) {
+            sleep(10);
         }
         fr.setPower(0);
         fl.setPower(0);
@@ -349,7 +352,8 @@ public class autoMethods extends LinearOpMode {
         fl.setPower(maxpower);
         br.setPower(maxpower);
         bl.setPower(maxpower);
-        while (fl.getCurrentPosition() > ticks + old_ticks) {
+        while (fl.getCurrentPosition() > ticks + old_ticks && opModeIsActive()) {
+            sleep(10);
         }
         fr.setPower(0);
         fl.setPower(0);
@@ -360,8 +364,8 @@ public class autoMethods extends LinearOpMode {
     public void turn(double degree, double margin) {
         startDegreeController();
         double pYaw = lastAngles.firstAngle;
-        while (Math.abs(getDifference(lastAngles.firstAngle, degree)) > margin ||
-                Math.abs(pYaw - lastAngles.firstAngle) > .05) {
+        while ((Math.abs(getDifference(lastAngles.firstAngle, degree)) > margin ||
+                Math.abs(pYaw - lastAngles.firstAngle) > .05) && opModeIsActive()) {
             double change = degreeController(degree);
             double forwardPower = Range.clip(change, -1, 1);
             double backPower = Range.clip(-change, -1, 1);
@@ -378,6 +382,7 @@ public class autoMethods extends LinearOpMode {
             }
             pYaw = lastAngles.firstAngle;
             resetAngles();
+            sleep(10);
         }
         fr.setPower(0);
         br.setPower(0);

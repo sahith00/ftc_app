@@ -126,10 +126,10 @@ public class teleOp extends LinearOpMode{
             knock.setPosition(KNOCK_STOW);
             //-----------------------------------------------------------------------------
             // DRIVE ROBOT
-            if (gamepad1.b && (ctime.milliseconds() > (t1+250))) {
+            if (gamepad1.left_bumper && (ctime.milliseconds() > (t1+250))) {
                 t1 = ctime.milliseconds();
                 if (multiplier == 1.0) {
-                    multiplier = .3;
+                    multiplier = .4;
                 }
                 else {
                     multiplier = 1.0;
@@ -143,10 +143,10 @@ public class teleOp extends LinearOpMode{
             if (gamepad1.dpad_up && (ctime.milliseconds() > (t2+250))) {
                 t2 = ctime.milliseconds();
                 if (stowPos == LIG_STOW) {
-                    multiplier = LIG_HALF_STOW;
+                    stowPos = LIG_HALF_STOW;
                 }
                 else {
-                    multiplier = LIG_STOW;
+                    stowPos = LIG_STOW;
                 }
                 lig.setPosition(stowPos);
             }
