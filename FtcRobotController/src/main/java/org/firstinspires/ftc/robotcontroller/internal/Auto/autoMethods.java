@@ -72,12 +72,12 @@ public class autoMethods extends LinearOpMode {
     final static double STOPPER_STOP = 0.959444444444444445;
     final static double STOPPER_DEPOSIT = 0.62000000000000001;
     final static double STOPPER_ZERO = 0.16944444444444452;
-    final static double RFLIP_DEPOSIT = 0.789444444444444446;
-    final static double RFLIP_ZERO = 0.18;
-    final static double RFLIP_GRAB = 0.06;
-    final static double LFLIP_DEPOSIT = 0.0294444444444444444;
-    final static double LFLIP_ZERO = 0.619444444444444444445;
-    final static double LFLIP_GRAB = 0.739444444444444444446;
+    final static double RFLIP_DEPOSIT = 0.749444444444444446;
+    final static double RFLIP_ZERO = 0.1794444444444444446;
+    final static double RFLIP_GRAB = 0.080000000000002;
+    final static double LFLIP_DEPOSIT = 0.00594444444444444444;
+    final static double LFLIP_ZERO = 0.599444444444444444445;
+    final static double LFLIP_GRAB = 0.709444444444444444446;
 
     public double p_turn = .04;//0.008;
     public double i_turn = .002; //.0045; //.003;
@@ -135,9 +135,15 @@ public class autoMethods extends LinearOpMode {
         extend();
         sleep(2000);
         if (team.equals("RED")) {
+            while ((jewelSensor.red() < 8 && jewelSensor.blue() < 8) && opModeIsActive()) {
+                telemetry.addData("Red", jewelSensor.red());
+            }
             doJewel(jewelSensor.red(), jewelSensor.blue());
         }
         else if (team.equals("BLUE")){
+            while ((jewelSensor.red() < 8 && jewelSensor.blue() < 8) && opModeIsActive()) {
+                telemetry.addData("Blue", jewelSensor.blue());
+            }
             doJewel(jewelSensor.blue(), jewelSensor.red());
         }
     }
@@ -149,7 +155,7 @@ public class autoMethods extends LinearOpMode {
             sleep(250);
             stow();
         }
-        else {
+        else if (color2 > color1){
             left();
             knock.setPosition(KNOCK_CENTER);
             sleep(250);
