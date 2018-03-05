@@ -39,6 +39,6 @@ public class autoRed extends autoMethods {
         driveForward(27, 0.4);
         sleep(1000);
         doImage(imageDetected, -114, -65, -90);
-        //glyphAuto(-90, -65);
+        //glyphAutoClose(-90, -65);
     }
 }

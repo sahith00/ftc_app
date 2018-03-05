@@ -35,7 +35,7 @@ public class autoMethods extends LinearOpMode {
     Servo lig;
     Servo cat, knock;
     ColorSensor jewelSensor;
-    Servo rflip, lflip, stopper;
+    Servo rflip, lflip, gflip, stopper;
 
     BNO055IMU imu;
     Orientation lastAngles;
@@ -63,21 +63,22 @@ public class autoMethods extends LinearOpMode {
 
     final static double CAT_STOW = 0.85944444444444444444;
     final static double CAT_EXTEND = 0.3094444444444444444;
-    final static double KNOCK_CENTER = 0.23944444444444444444452;
+    final static double KNOCK_CENTER = 0.30944444444444444447;
     final static double KNOCK_RIGHT = .75;
     final static double KNOCK_LEFT = .0;
-    final static double KNOCK_STOW = .359444444444444444444445;
+    final static double KNOCK_STOW = .50944444444444444444444;
     final static double LIG_STOW = 0;
 
-    final static double STOPPER_STOP = 0.959444444444444445;
-    final static double STOPPER_DEPOSIT = 0.62000000000000001;
-    final static double STOPPER_ZERO = 0.16944444444444452;
+    final static double STOPPER_STOP = 0.0;
+    final static double STOPPER_STOW = 1.0;
     final static double RFLIP_DEPOSIT = 0.739444444444444446;
     final static double RFLIP_ZERO = 0.160000000000000000003;
     final static double RFLIP_GRAB = 0.050000000000004;
     final static double LFLIP_DEPOSIT = 0.10944444444444444444;
     final static double LFLIP_ZERO = 0.669444444444444444445;
     final static double LFLIP_GRAB = 0.769444444444444444446;
+    final static double GFLIP_STOW = 0.58;
+    final static double GFLIP_GRAB = 0.69;
 
     public double p_turn = .04;//0.008;
     public double i_turn = .002; //.0045; //.003;
@@ -85,7 +86,6 @@ public class autoMethods extends LinearOpMode {
     public double pT = 0;
     public double pE = 0;
     public double tE = 0;
-
 
     public ElapsedTime runtime = new ElapsedTime();
 
@@ -103,6 +103,7 @@ public class autoMethods extends LinearOpMode {
         lintake = hardwareMap.dcMotor.get("lintake");
         rflip = hardwareMap.servo.get("rflip");
         lflip = hardwareMap.servo.get("lflip");
+        gflip = hardwareMap.servo.get("gflip");
         stopper = hardwareMap.servo.get("stopper");
 
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
@@ -155,10 +156,13 @@ public class autoMethods extends LinearOpMode {
             sleep(250);
             stow();
         }
-        else if (color2 > color1){
+        else if (color2 > color1) {
             left();
             knock.setPosition(KNOCK_CENTER);
             sleep(250);
+            stow();
+        }
+        else {
             stow();
         }
     }
@@ -190,6 +194,7 @@ public class autoMethods extends LinearOpMode {
         knock.setPosition(KNOCK_LEFT);
         sleep(250);
     }
+
     //----------------------------------------------------------------------------------------------
 
     //GLYPH FUNCTIONS-------------------------------------------------------------------------------
@@ -260,7 +265,7 @@ public class autoMethods extends LinearOpMode {
         return image;
     }
 
-    public void glyphAuto(double cturn, double lturn) {
+    public void glyphAutoClose(double cturn, double lturn) {
         grab();
         sleep(500);
         driveBackward(-6, -0.3);
@@ -273,6 +278,26 @@ public class autoMethods extends LinearOpMode {
         sleep(500);
         turn(lturn, 3.5);
         driveForward(5, 0.3);
+        outtake();
+        sleep(500);
+        driveBackward(-3, -0.3);
+        driveForward(3, 0.3);
+        driveBackward(-4, -0.3);
+        driveForward(4, 0.3);
+        driveBackward(-4, -0.3);
+    }
+
+    public void glyphAutoFar(double lturn, double rturn) {
+        grab();
+        sleep(500);
+        turn(rturn, 3.5);
+        driveBackward(-6, -0.3);
+        grabGlyph(1.0);
+        driveBackward(-34, -0.4);
+        sleep(4000);
+        driveForward(35, 0.5);
+        turn(lturn, 3.5);
+        driveForward(6, 0.3);
         outtake();
         sleep(500);
         driveBackward(-3, -0.3);
@@ -307,6 +332,8 @@ public class autoMethods extends LinearOpMode {
 
     public void outtake() {
         deposit();
+        sleep(1000);
+        gflip.setPosition(GFLIP_STOW);
         sleep(500);
     }
 
@@ -314,16 +341,18 @@ public class autoMethods extends LinearOpMode {
         rflip.setPosition(RFLIP_GRAB);
         lflip.setPosition(LFLIP_GRAB);
         stopper.setPosition(STOPPER_STOP);
+
     }
     public void zero() {
         rflip.setPosition(RFLIP_ZERO);
         lflip.setPosition(LFLIP_ZERO);
-        stopper.setPosition(STOPPER_ZERO);
+        stopper.setPosition(STOPPER_STOW);
     }
     public void deposit() {
         rflip.setPosition(RFLIP_DEPOSIT);
         lflip.setPosition(LFLIP_DEPOSIT);
-        stopper.setPosition(STOPPER_DEPOSIT);
+        gflip.setPosition(GFLIP_GRAB);
+        stopper.setPosition(STOPPER_STOW);
     }
 
     public void grabGlyph(double power) {

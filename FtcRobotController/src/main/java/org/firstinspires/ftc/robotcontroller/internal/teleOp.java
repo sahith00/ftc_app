@@ -18,21 +18,22 @@ public class teleOp extends LinearOpMode{
     Servo cat, knock;
     ColorSensor jewelSensor;
 
-    Servo rflip, lflip, stopper;
+    Servo rflip, lflip, gflip, stopper;
     Servo lig, claw;
 
     final static double CAT_STOW = 0.85944444444444444444;
-    final static double KNOCK_STOW = .359444444444444444444445;
+    final static double KNOCK_STOW = .50944444444444444444444;
 
-    final static double STOPPER_STOP = 0.959444444444444445;
-    final static double STOPPER_DEPOSIT = 0.62000000000000001;
-    final static double STOPPER_ZERO = 0.16944444444444452;
+    final static double STOPPER_STOP = 0.0;
+    final static double STOPPER_STOW = 1.0;
     final static double RFLIP_DEPOSIT = 0.739444444444444446;
     final static double RFLIP_ZERO = 0.160000000000000000003;
     final static double RFLIP_GRAB = 0.050000000000004;
     final static double LFLIP_DEPOSIT = 0.10944444444444444444;
     final static double LFLIP_ZERO = 0.669444444444444444445;
     final static double LFLIP_GRAB = 0.769444444444444444446;
+    final static double GFLIP_STOW = 0.58;
+    final static double GFLIP_GRAB = 0.69;
 
     final static double LIG_STOW = .12944444444444444447 + 0.3;
     final static double LIG_GRAB = .8094444444444444444 + 0.045;//.899444444444444444445;
@@ -43,7 +44,7 @@ public class teleOp extends LinearOpMode{
     final static double LEVEL_ONE = 0;
     final static double LEVEL_TWO = -372;
     final static double LEVEL_THREE = -770;
-    double t1, t2;
+    double t1, t2, t3;
     double intakep;
     boolean lift_zero;
     double multiplier;
@@ -51,6 +52,7 @@ public class teleOp extends LinearOpMode{
     double zero_encoder, t;
     double desired_lift_val, currentpos;
     double stowPos;
+    boolean grabFlip;
 
 
     ElapsedTime ctime = new ElapsedTime();
@@ -70,6 +72,7 @@ public class teleOp extends LinearOpMode{
 
         rflip = hardwareMap.servo.get("rflip");
         lflip = hardwareMap.servo.get("lflip");
+        gflip = hardwareMap.servo.get("gflip");
         stopper = hardwareMap.servo.get("stopper");
 
         cat = hardwareMap.servo.get("cat");
@@ -119,6 +122,9 @@ public class teleOp extends LinearOpMode{
         switch3 = false;
         t = 0;
         t1 = 0;
+        t2 = 0;
+        t3 = 0;
+        grabFlip = false;
 
         waitForStart();
         while(opModeIsActive()) {
@@ -165,6 +171,23 @@ public class teleOp extends LinearOpMode{
             grabGlyph();
             moveLift();
             flip();
+
+            if (gamepad1.b && (ctime.milliseconds() > (t3+250))) {
+                t3 = ctime.milliseconds();
+                if (grabFlip) {
+                    grabFlip = false;
+                }
+                else {
+                    grabFlip = true;
+                }
+            }
+
+            if(grabFlip) {
+                gflip.setPosition(GFLIP_GRAB);
+            }
+            else if(!grabFlip) {
+                gflip.setPosition(GFLIP_STOW);
+            }
             //-----------------------------------------------------------------------------
             // TELEMETRY
             telemetry.addData("Lift Encoder Count: ", lift.getCurrentPosition());
@@ -182,9 +205,13 @@ public class teleOp extends LinearOpMode{
         if (gamepad2.left_bumper) {
             intakep = .0;
         }
-        if (gamepad2.right_trigger > 0 || gamepad2.left_trigger > 0) {
-            runIntake(-0.65 * Math.signum(gamepad2.right_trigger)
-                    , -0.65 * Math.signum(gamepad2.left_trigger));
+        if (gamepad2.right_trigger > 0.85 || gamepad2.left_trigger > 0.85) {
+            runIntake(-1.0 * Math.signum(gamepad2.right_trigger)
+                    , -1.0 * Math.signum(gamepad2.left_trigger));
+        }
+        else if (gamepad2.right_trigger > 0 || gamepad2.left_trigger > 0) {
+            runIntake(-0.5 * Math.signum(gamepad2.right_trigger)
+                    , -0.5 * Math.signum(gamepad2.left_trigger));
         }
         else {
             runIntake(intakep, intakep);
@@ -268,17 +295,23 @@ public class teleOp extends LinearOpMode{
     public void grab() {
         rflip.setPosition(RFLIP_GRAB);
         lflip.setPosition(LFLIP_GRAB);
+        gflip.setPosition(GFLIP_STOW);
         stopper.setPosition(STOPPER_STOP);
+        grabFlip = false;
     }
     public void zero() {
         rflip.setPosition(RFLIP_ZERO);
         lflip.setPosition(LFLIP_ZERO);
-        stopper.setPosition(STOPPER_ZERO);
+        gflip.setPosition(GFLIP_GRAB);
+        stopper.setPosition(STOPPER_STOW);
+        grabFlip = true;
     }
     public void deposit() {
         rflip.setPosition(RFLIP_DEPOSIT);
         lflip.setPosition(LFLIP_DEPOSIT);
-        stopper.setPosition(STOPPER_DEPOSIT);
+        gflip.setPosition(GFLIP_GRAB);
+        stopper.setPosition(STOPPER_STOW);
+        grabFlip = true;
     }
 
     public void mecanum(double joyly, double joylx, double joyrx, double multiplier) {
