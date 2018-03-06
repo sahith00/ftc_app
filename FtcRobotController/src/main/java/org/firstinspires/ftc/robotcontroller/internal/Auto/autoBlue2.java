@@ -38,7 +38,7 @@ public class autoBlue2 extends autoMethods {
         sleep(1000);
         turn(90, 3.5);
         sleep(1000);
-        driveForward(9, 0.4);
+        driveForward(7, 0.4);
         sleep(1000);
         doImage(imageDetected, 153, 203, 178);
     }

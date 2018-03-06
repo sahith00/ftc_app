@@ -41,5 +41,6 @@ public class autoRed2 extends autoMethods {
         driveForward(6.5, 0.4);
         sleep(1000);
         doImage(imageDetected, -25, 25, 0);
+        glyphAutoFar(25, -25);
     }
 }

@@ -63,9 +63,9 @@ public class autoMethods extends LinearOpMode {
 
     final static double CAT_STOW = 0.85944444444444444444;
     final static double CAT_EXTEND = 0.3094444444444444444;
-    final static double KNOCK_CENTER = 0.30944444444444444447;
-    final static double KNOCK_RIGHT = .75;
-    final static double KNOCK_LEFT = .0;
+    final static double KNOCK_CENTER = 0.37;
+    final static double KNOCK_RIGHT = .56;
+    final static double KNOCK_LEFT = .18;
     final static double KNOCK_STOW = .50944444444444444444444;
     final static double LIG_STOW = 0;
 
@@ -136,34 +136,38 @@ public class autoMethods extends LinearOpMode {
         extend();
         sleep(2000);
         if (team.equals("RED")) {
-            while ((jewelSensor.red() < 8 && jewelSensor.blue() < 8) && opModeIsActive()) {
-                telemetry.addData("Red", jewelSensor.red());
+            if (jewelSensor.blue() > jewelSensor.red()) {
+                right();
+                knock.setPosition(KNOCK_CENTER);
+                sleep(250);
+                stow();
             }
-            doJewel(jewelSensor.red(), jewelSensor.blue());
+            else if (jewelSensor.red() > jewelSensor.blue()) {
+                left();
+                knock.setPosition(KNOCK_CENTER);
+                sleep(250);
+                stow();
+            }
+            else {
+                stow();
+            }
         }
         else if (team.equals("BLUE")){
-            while ((jewelSensor.red() < 8 && jewelSensor.blue() < 8) && opModeIsActive()) {
-                telemetry.addData("Blue", jewelSensor.blue());
+            if (jewelSensor.red() > jewelSensor.blue()) {
+                right();
+                knock.setPosition(KNOCK_CENTER);
+                sleep(250);
+                stow();
             }
-            doJewel(jewelSensor.blue(), jewelSensor.red());
-        }
-    }
-
-    public void doJewel(int color1, int color2) {
-        if (color1 > color2) {
-            right();
-            knock.setPosition(KNOCK_CENTER);
-            sleep(250);
-            stow();
-        }
-        else if (color2 > color1) {
-            left();
-            knock.setPosition(KNOCK_CENTER);
-            sleep(250);
-            stow();
-        }
-        else {
-            stow();
+            else if (jewelSensor.blue() > jewelSensor.red()) {
+                left();
+                knock.setPosition(KNOCK_CENTER);
+                sleep(250);
+                stow();
+            }
+            else {
+                stow();
+            }
         }
     }
 
@@ -272,7 +276,13 @@ public class autoMethods extends LinearOpMode {
         grabGlyph(1.0);
         turn(cturn, 3.5);
         driveBackward(-26, -0.3);
-        sleep(4000);
+        sleep(3000);
+        grabGlyph(-1);
+        driveForward(5, 0.3);
+        grabGlyph(0.0);
+        sleep(500);
+        grabGlyph(1.0);
+        driveBackward(-5, -0.3);
         turn(cturn, 3.5);
         driveForward(29, 0.5);
         sleep(500);
@@ -288,13 +298,21 @@ public class autoMethods extends LinearOpMode {
     }
 
     public void glyphAutoFar(double lturn, double rturn) {
+        //for blue, lturn and rturn should be the same value
         grab();
         sleep(500);
         turn(rturn, 3.5);
         driveBackward(-6, -0.3);
         grabGlyph(1.0);
-        driveBackward(-34, -0.4);
-        sleep(4000);
+        driveBackward(-25, -0.4);
+        sleep(3000);
+        grabGlyph(-1);
+        driveForward(5, 0.3);
+        grabGlyph(0.0);
+        sleep(500);
+        grabGlyph(1.0);
+        driveBackward(-5, -0.3);
+        turn(rturn, 3.5);
         driveForward(35, 0.5);
         turn(lturn, 3.5);
         driveForward(6, 0.3);
