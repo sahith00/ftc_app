@@ -21,8 +21,8 @@ public class teleOp extends LinearOpMode{
     Servo rflip, lflip, gflip, stopper;
     Servo lig, claw;
 
-    final static double CAT_STOW = 0.85944444444444444444;
-    final static double KNOCK_STOW = .50944444444444444444444;
+    final static double CAT_STOW = 0.85944444444444444444; // during teleop after intialization subtract 0.01
+    final static double KNOCK_STOW = .42;
 
     final static double STOPPER_STOP = 0.0;
     final static double STOPPER_STOW = 1.0;
@@ -35,15 +35,16 @@ public class teleOp extends LinearOpMode{
     final static double GFLIP_STOW = 0.58;
     final static double GFLIP_GRAB = 0.69;
 
-    final static double LIG_STOW = .12944444444444444447 + 0.3;
-    final static double LIG_GRAB = .8094444444444444444 + 0.045;//.899444444444444444445;
-    final static double LIG_HALF_STOW = .47944444444444437;
-    final static double CLAW_STOW = .79;
-    final static double CLAW_GRAB = .1694444444444445;
+    final static double LIG_STOW = .01999999999999994;
+    final static double LIG_GRAB = .8094444444444444444 + 0.04;//.899444444444444444445;
+    final static double LIG_HALF_STOW = 0.35944444444444445;
+    final static double CLAW_STOW = 0.279999999999999999997;
+    final static double CLAW_OPEN = .799444444444444444444;
+    final static double CLAW_GRAB = .249444444444444444;
 
     final static double LEVEL_ONE = 0;
-    final static double LEVEL_TWO = -372;
-    final static double LEVEL_THREE = -770;
+    final static double LEVEL_TWO = -565;
+    final static double LEVEL_THREE = -930;
     double t1, t2, t3;
     double intakep;
     boolean lift_zero;
@@ -107,7 +108,7 @@ public class teleOp extends LinearOpMode{
         lintake.setPower(0);
         cat.setPosition(CAT_STOW);
         knock.setPosition(KNOCK_STOW);
-        lig.setPosition(LIG_STOW);
+        lig.setPosition(LIG_HALF_STOW);
         claw.setPosition(CLAW_STOW);
 
         multiplier = 1.0;
@@ -128,7 +129,7 @@ public class teleOp extends LinearOpMode{
 
         waitForStart();
         while(opModeIsActive()) {
-            cat.setPosition(CAT_STOW);
+            cat.setPosition(CAT_STOW-.01);
             knock.setPosition(KNOCK_STOW);
             //-----------------------------------------------------------------------------
             // DRIVE ROBOT
@@ -141,22 +142,14 @@ public class teleOp extends LinearOpMode{
                     multiplier = 1.0;
                 }
             }
-            mecanum(gamepad1.left_stick_y, -(gamepad1.left_stick_x), -(gamepad1.right_stick_x), multiplier);
+            mecanum(gamepad1.left_stick_y, gamepad1.left_stick_x, -(gamepad1.right_stick_x), multiplier);
             //-----------------------------------------------------------------------------
             // GRAB RELIC AND DEPOSIT
-            relicLift.setPower(Math.pow(gamepad1.left_trigger-gamepad1.right_trigger, 3));
+            relicLift.setPower(Math.pow(gamepad1.right_trigger-gamepad1.left_trigger, 3));
 
-            if (gamepad1.dpad_up && (ctime.milliseconds() > (t2+250))) {
-                t2 = ctime.milliseconds();
-                if (stowPos == LIG_STOW) {
-                    stowPos = LIG_HALF_STOW;
-                }
-                else {
-                    stowPos = LIG_STOW;
-                }
-                lig.setPosition(stowPos);
+            if (gamepad1.dpad_up) {
+                lig.setPosition(LIG_HALF_STOW);
             }
-
             if (gamepad1.dpad_down) {
                 lig.setPosition(LIG_GRAB);
             }
@@ -164,7 +157,7 @@ public class teleOp extends LinearOpMode{
                 claw.setPosition(CLAW_GRAB);
             }
             if (gamepad1.dpad_left) {
-                claw.setPosition(CLAW_STOW);
+                claw.setPosition(CLAW_OPEN);
             }
             //-----------------------------------------------------------------------------
             // GRAB GLYPH AND DEPOSIT

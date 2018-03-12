@@ -31,15 +31,21 @@ public class autoBlue2 extends autoMethods {
         setUpVuforia();
 
         waitForStart();
-        lig.setPosition(.12944444444444444447 + 0.3);
+
+        autoT = runtime.milliseconds();
+
+        lig.setPosition(LIG_HALF_STOW);
+        sleep(250);
+
         jewelAuto("BLUE");
         imageDetected = doVuforia();
         driveBackward(-7.5, -0.4);
-        sleep(1000);
+        sleep(500);
         turn(90, 3.5);
-        sleep(1000);
+        sleep(500);
         driveForward(7, 0.4);
-        sleep(1000);
+        sleep(500);
         doImage(imageDetected, 153, 203, 178);
+        //glyphAutoFar(203, 213);
     }
 }
