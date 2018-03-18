@@ -39,9 +39,13 @@ public class autoBlue extends autoMethods {
 
         jewelAuto("BLUE");
         imageDetected = doVuforia();
-        driveBackward(-23, -0.4);
-        sleep(1000);
-        doImage(imageDetected, -114, -62, -90);
-        //glyphAutoClose(imageDetected, -110, -62, -88);
+        drive(-10, -0.5);
+        //drive up to cryptobox with touch sensor
+
+
+//        drive(-23, -0.4);
+//        sleep(1000);
+//        doImage(imageDetected, -114, -62, -90);
+//        glyphAutoClose(imageDetected, -110, -62, -88);
     }
 }

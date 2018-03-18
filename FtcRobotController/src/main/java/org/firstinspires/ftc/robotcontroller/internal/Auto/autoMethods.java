@@ -218,40 +218,9 @@ public class autoMethods extends LinearOpMode {
 
     //GLYPH FUNCTIONS-------------------------------------------------------------------------------
     public void doImage(String image, double rturn, double lturn, double cturn) {
-        // check for robot at the top of the triangle
         if (image.equals("R")) {
-            turn(rturn, 3.5);
-            driveForward(5, 0.3);
-            sleep(500);
-            outtake();
-            sleep(500);
-            driveBackward(-5, -0.2);
-            sleep(500);
-            driveForward(5, 0.3);
-            sleep(500);
-            driveBackward(-5, -0.2);
         } else if (image.equals("L")) {
-            turn(lturn, 3.5);
-            driveForward(5, 0.3);
-            sleep(500);
-            outtake();
-            sleep(500);
-            driveBackward(-5, -0.2);
-            sleep(500);
-            driveForward(5, 0.3);
-            sleep(500);
-            driveBackward(-5, -0.2);
         } else {
-            turn(cturn, 3.5);
-            driveForward(4, 0.3);
-            sleep(500);
-            outtake();
-            sleep(500);
-            driveBackward(-4, -0.2);
-            sleep(500);
-            driveForward(5, 0.3);
-            sleep(500);
-            driveBackward(-5, -0.2);
         }
     }
 
@@ -294,69 +263,12 @@ public class autoMethods extends LinearOpMode {
 
     public void glyphAutoClose(String image, double rturn, double lturn, double cturn) {
         if(image.equals("R") || image.equals("C")) {
-            grab();
-            sleep(500);
-            driveBackward(-6, -0.3);
-            grabGlyph(1.0);
-            turn(cturn, 3.5);
-            driveBackward(-26, -0.2);
-            sleep(1000);
-            grabGlyph(-1);
-            driveForward(5, 0.3);
-            grabGlyph(0.0);
-            sleep(500);
-            grabGlyph(1.0);
-            driveBackward(-5, -0.3);
-            turn(cturn, 3.5);
-            driveForward(16, 0.5);
-            sleep(250);
-            doImage("L", rturn, lturn, cturn);
         }
         else {
-            grab();
-            sleep(500);
-            driveBackward(-6, -0.3);
-            grabGlyph(1.0);
-            turn(cturn, 3.5);
-            driveBackward(-26, -0.2);
-            sleep(1000);
-            grabGlyph(-1);
-            driveForward(5, 0.3);
-            grabGlyph(0.0);
-            sleep(500);
-            grabGlyph(1.0);
-            driveBackward(-5, -0.3);
-            turn(cturn, 3.5);
-            driveForward(20, 0.5);
-            sleep(250);
-            doImage("R", rturn, lturn, cturn);
         }
     }
 
     public void glyphAutoFar(double lturn, double rturn) {
-        //for blue, lturn and rturn should both be lturn
-        grab();
-        sleep(500);
-        turn(rturn, 3.5);
-        grabGlyph(1.0);
-        driveBackward(-35, -0.4);
-        sleep(2000);
-        grabGlyph(-1);
-        driveForward(5, 0.3);
-        grabGlyph(0.0);
-        sleep(500);
-        grabGlyph(1.0);
-        driveBackward(-5, -0.3);
-        turn(rturn, 3.5);
-        driveForward(35, 0.5);
-        sleep(500);
-        turn(lturn, 3.5);
-        driveForward(5, 0.3);
-        outtake();
-        sleep(500);
-        driveBackward(-4, -0.2);
-        driveForward(6, 0.3);
-        driveBackward(-6, -0.2);
     }
 
     public OpenGLMatrix createMatrix(float x, float y, float z, float u, float v, float w){
@@ -412,42 +324,43 @@ public class autoMethods extends LinearOpMode {
     //----------------------------------------------------------------------------------------------
 
     //DRIVE FUNCTIONS-------------------------------------------------------------------------------
-    public void driveForward(double distance, double maxpower) {
-        int ticks;
-        int old_ticks = fl.getCurrentPosition();
-        ticks = (int) (STRAIGHT_TICKS_PER_INCH * distance);
-        fr.setPower(maxpower);
-        fl.setPower(maxpower);
-        br.setPower(maxpower);
-        bl.setPower(maxpower);
-        while ((fl.getCurrentPosition() < (ticks + old_ticks)) && opModeIsActive()) {
-            if(autoT + 28000 < runtime.milliseconds()) {
-                end();
+    public void drive(double distance, double maxpower) {
+        if (distance < 0) {
+            int ticks;
+            int old_ticks = fl.getCurrentPosition();
+            ticks = (int) (STRAIGHT_TICKS_PER_INCH * distance);
+            fr.setPower(maxpower);
+            fl.setPower(maxpower);
+            br.setPower(maxpower);
+            bl.setPower(maxpower);
+            while ((fl.getCurrentPosition() < (ticks + old_ticks)) && opModeIsActive()) {
+                if (autoT + 28000 < runtime.milliseconds()) {
+                    end();
+                }
             }
+            fr.setPower(0);
+            fl.setPower(0);
+            br.setPower(0);
+            bl.setPower(0);
         }
-        fr.setPower(0);
-        fl.setPower(0);
-        br.setPower(0);
-        bl.setPower(0);
-    }
-
-    public void driveBackward(double distance, double maxpower) {
-        int ticks;
-        int old_ticks = fl.getCurrentPosition();
-        ticks = (int) (STRAIGHT_TICKS_PER_INCH * distance);
-        fr.setPower(maxpower);
-        fl.setPower(maxpower);
-        br.setPower(maxpower);
-        bl.setPower(maxpower);
-        while ((fl.getCurrentPosition() > (ticks + old_ticks)) && opModeIsActive()) {
-            if(autoT + 28000 < runtime.milliseconds()) {
-                end();
+        else if (distance > 0) {
+            int ticks;
+            int old_ticks = fl.getCurrentPosition();
+            ticks = (int) (STRAIGHT_TICKS_PER_INCH * distance);
+            fr.setPower(maxpower);
+            fl.setPower(maxpower);
+            br.setPower(maxpower);
+            bl.setPower(maxpower);
+            while ((fl.getCurrentPosition() > (ticks + old_ticks)) && opModeIsActive()) {
+                if(autoT + 28000 < runtime.milliseconds()) {
+                    end();
+                }
             }
+            fr.setPower(0);
+            fl.setPower(0);
+            br.setPower(0);
+            bl.setPower(0);
         }
-        fr.setPower(0);
-        fl.setPower(0);
-        br.setPower(0);
-        bl.setPower(0);
     }
 
     public void turn(double degree, double margin) {
@@ -541,3 +454,23 @@ public class autoMethods extends LinearOpMode {
         while(opModeIsActive()){}
     }
 }
+//    turn(rturn, 3.5);
+//    drive(5, 0.3);
+//    sleep(500);
+//    outtake();
+//    sleep(500);
+//    drive(-5, -0.2);
+//    sleep(500);
+//    drive(5, 0.3);
+//    sleep(500);
+//    drive(-5, -0.2);
+//    turn(cturn, 3.5);
+//    drive(4, 0.3);
+//    sleep(500);
+//    outtake();
+//    sleep(500);
+//    drive(-4, -0.2);
+//    sleep(500);
+//    drive(5, 0.3);
+//    sleep(500);
+//    drive(-5, -0.2);

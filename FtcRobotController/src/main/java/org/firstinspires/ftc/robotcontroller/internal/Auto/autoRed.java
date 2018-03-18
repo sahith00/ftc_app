@@ -39,9 +39,12 @@ public class autoRed extends autoMethods {
 
         jewelAuto("RED");
         imageDetected = doVuforia();
-        driveForward(23, 0.4);
-        sleep(1000);
-        doImage(imageDetected, -116, -65, -90);
-        //glyphAutoClose(imageDetected, -116, -65, -90);
+        drive(10, 0.5);
+
+
+//        drive(23, 0.4);
+//        sleep(1000);
+//        doImage(imageDetected, -116, -65, -90);
+//        glyphAutoClose(imageDetected, -116, -65, -90);
     }
 }

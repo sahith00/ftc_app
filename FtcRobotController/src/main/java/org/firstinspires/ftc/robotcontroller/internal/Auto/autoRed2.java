@@ -39,25 +39,30 @@ public class autoRed2 extends autoMethods {
 
         jewelAuto("RED");
         imageDetected = doVuforia();
-        driveForward(11, 0.4);
-        sleep(500);
-        turn(-90, 3.5);
-        sleep(500);
-        double tempt = runtime.milliseconds();
-        fr.setPower(0.4);
-        fl.setPower(0.4);
-        br.setPower(0.4);
-        bl.setPower(0.4);
-        while(tempt + 5000 > runtime.milliseconds()) {
-        }
-        fr.setPower(0.0);
-        fl.setPower(0.0);
-        br.setPower(0.0);
-        bl.setPower(0.0);
-        sleep(500);
-        driveBackward(-18, -0.4);
-        sleep(500);
-        doImage(imageDetected, -25, 25, 0);
-        //glyphAutoFar(25, -35);
+
+
+
+
+
+//        drive(11, 0.4);
+//        sleep(500);
+//        turn(-90, 3.5);
+//        sleep(500);
+//        double tempt = runtime.milliseconds();
+//        fr.setPower(0.4);
+//        fl.setPower(0.4);
+//        br.setPower(0.4);
+//        bl.setPower(0.4);
+//        while(tempt + 5000 > runtime.milliseconds()) {
+//        }
+//        fr.setPower(0.0);
+//        fl.setPower(0.0);
+//        br.setPower(0.0);
+//        bl.setPower(0.0);
+//        sleep(500);
+//        drive(-18, -0.4);
+//        sleep(500);
+//        doImage(imageDetected, -25, 25, 0);
+//        glyphAutoFar(25, -35);
     }
 }

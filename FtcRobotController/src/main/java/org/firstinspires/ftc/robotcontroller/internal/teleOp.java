@@ -1,11 +1,23 @@
 package org.firstinspires.ftc.robotcontroller.internal;
 
+import android.util.Log;
+
+import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.Range;
+
+import org.firstinspires.ftc.robotcontroller.external.samples.SensorColor;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 /**
  * Created by sahith on 12/10/17.
@@ -16,10 +28,13 @@ public class teleOp extends LinearOpMode{
     DcMotor rintake, lintake;
 
     Servo cat, knock;
-    ColorSensor jewelSensor;
+    NormalizedColorSensor j;
 
-    Servo rflip, lflip, gflip, stopper;
+    Servo rflip, lflip, stopper;
     Servo lig, claw;
+
+    BNO055IMU imu;
+    Orientation lastAngles;
 
     final static double CAT_STOW = 0.85944444444444444444; // during teleop after intialization subtract 0.01
     final static double KNOCK_STOW = .42;
@@ -32,8 +47,6 @@ public class teleOp extends LinearOpMode{
     final static double LFLIP_DEPOSIT = 0.10944444444444444444;
     final static double LFLIP_ZERO = 0.669444444444444444445;
     final static double LFLIP_GRAB = 0.769444444444444444446;
-    final static double GFLIP_STOW = 0.58;
-    final static double GFLIP_GRAB = 0.69;
 
     final static double LIG_STOW = .01999999999999994;
     final static double LIG_GRAB = .8094444444444444444 + 0.04;//.899444444444444444445;
@@ -42,20 +55,36 @@ public class teleOp extends LinearOpMode{
     final static double CLAW_OPEN = .799444444444444444444;
     final static double CLAW_GRAB = .249444444444444444;
 
+    final static double FAR_ANGLE = 90;
+    final static double CLOSE_ANGLE = 0;
+
     final static double LEVEL_ONE = 0;
     final static double LEVEL_TWO = -565;
     final static double LEVEL_THREE = -930;
-    double t1, t2, t3;
+
+    double t0, t1, t2, t3, t4, t5;
     double intakep;
     boolean lift_zero;
     double multiplier;
     boolean switch1, switch2, switch3;
-    double zero_encoder, t;
+    double zero_encoder;
     double desired_lift_val, currentpos;
     double stowPos;
+    double clawPos;
     boolean grabFlip;
+    boolean glyphMode;
+    boolean farpid;
+    boolean closepid;
 
+    double p_turn = .045;//0.008;
+    double i_turn = .002; //.0045; //.003;
+    double d_turn = .002; //.04 //.0045;
+    double pT = 0;
+    double pE = 0;
+    double tE = 0;
+    double pYaw = 0;
 
+    ElapsedTime runtime = new ElapsedTime();
     ElapsedTime ctime = new ElapsedTime();
 
     @Override
@@ -64,6 +93,7 @@ public class teleOp extends LinearOpMode{
         fl = hardwareMap.dcMotor.get("fldrive");
         br = hardwareMap.dcMotor.get("brdrive");
         bl = hardwareMap.dcMotor.get("bldrive");
+        j.
 
         lift = hardwareMap.dcMotor.get("lift");
         relicLift = hardwareMap.dcMotor.get("relicLift");
@@ -73,12 +103,10 @@ public class teleOp extends LinearOpMode{
 
         rflip = hardwareMap.servo.get("rflip");
         lflip = hardwareMap.servo.get("lflip");
-        gflip = hardwareMap.servo.get("gflip");
         stopper = hardwareMap.servo.get("stopper");
 
         cat = hardwareMap.servo.get("cat");
         knock = hardwareMap.servo.get("knock");
-        jewelSensor = hardwareMap.colorSensor.get("jewelSensor");
 
         lig = hardwareMap.servo.get("lig");
         claw = hardwareMap.servo.get("relicGrab");
@@ -111,6 +139,7 @@ public class teleOp extends LinearOpMode{
         lig.setPosition(LIG_HALF_STOW);
         claw.setPosition(CLAW_STOW);
 
+        clawPos = CLAW_STOW;
         multiplier = 1.0;
         intakep = .0;
         lift_zero = true;
@@ -121,65 +150,73 @@ public class teleOp extends LinearOpMode{
         switch1 = true;
         switch2 = false;
         switch3 = false;
-        t = 0;
+        t0 = 0;
         t1 = 0;
         t2 = 0;
         t3 = 0;
+        t4 = 0;
+        t5 = 0;
         grabFlip = false;
+        glyphMode = true;
+        farpid = false;
+        closepid = false;
 
         waitForStart();
         while(opModeIsActive()) {
             cat.setPosition(CAT_STOW-.01);
             knock.setPosition(KNOCK_STOW);
-            //-----------------------------------------------------------------------------
-            // DRIVE ROBOT
-            if (gamepad1.left_bumper && (ctime.milliseconds() > (t1+250))) {
+
+            if (gamepad1.b && (ctime.milliseconds() > (t1+250))) {
                 t1 = ctime.milliseconds();
-                if (multiplier == 1.0) {
-                    multiplier = .4;
+                if (glyphMode) {
+                    glyphMode = false;
                 }
                 else {
-                    multiplier = 1.0;
+                    glyphMode = true;
+                }
+            }
+            //-----------------------------------------------------------------------------
+            // DRIVE ROBOT
+            if(glyphMode) {
+                multiplier = Range.clip(Math.pow(1 - gamepad1.left_trigger, 2), 0.3, 1);
+            }
+            else {
+                multiplier = 1.0;
+                if (gamepad1.left_bumper && (ctime.milliseconds() > (t2+250))) {
+                    t2 = ctime.milliseconds();
+                    if (multiplier == 1.0) {
+                        multiplier = 0.3;
+                    }
+                    else {
+                        multiplier = 1.0;
+                    }
                 }
             }
             mecanum(gamepad1.left_stick_y, gamepad1.left_stick_x, -(gamepad1.right_stick_x), multiplier);
             //-----------------------------------------------------------------------------
             // GRAB RELIC AND DEPOSIT
-            relicLift.setPower(Math.pow(gamepad1.right_trigger-gamepad1.left_trigger, 3));
-
-            if (gamepad1.dpad_up) {
-                lig.setPosition(LIG_HALF_STOW);
-            }
-            if (gamepad1.dpad_down) {
-                lig.setPosition(LIG_GRAB);
-            }
-            if (gamepad1.dpad_right) {
-                claw.setPosition(CLAW_GRAB);
-            }
-            if (gamepad1.dpad_left) {
-                claw.setPosition(CLAW_OPEN);
+            if(!glyphMode) {
+                relicLift.setPower(Math.pow(gamepad1.right_trigger - gamepad1.left_trigger, 3));
+                moveRelicArm();
+                if(gamepad1.left_bumper) {
+                    farpid = true;
+                }
+                if(gamepad1.right_bumper) {
+                    closepid = true;
+                }
+                if(farpid) {
+                    turn(FAR_ANGLE, 3.5);
+                }
+                if(closepid) {
+                    turn(CLOSE_ANGLE, 3.5);
+                }
             }
             //-----------------------------------------------------------------------------
             // GRAB GLYPH AND DEPOSIT
-            grabGlyph();
-            moveLift();
-            flip();
-
-            if (gamepad1.b && (ctime.milliseconds() > (t3+250))) {
-                t3 = ctime.milliseconds();
-                if (grabFlip) {
-                    grabFlip = false;
-                }
-                else {
-                    grabFlip = true;
-                }
-            }
-
-            if(grabFlip) {
-                gflip.setPosition(GFLIP_GRAB);
-            }
-            else if(!grabFlip) {
-                gflip.setPosition(GFLIP_STOW);
+            if(glyphMode) {
+                grabGlyph();
+                moveLift();
+                flip();
             }
             //-----------------------------------------------------------------------------
             // TELEMETRY
@@ -198,7 +235,7 @@ public class teleOp extends LinearOpMode{
         if (gamepad2.left_bumper) {
             intakep = .0;
         }
-        if (gamepad2.right_trigger > 0.85 || gamepad2.left_trigger > 0.85) {
+        if (gamepad2.right_trigger > 0.85 || gamepad2.left_trigger > 0.85 || gamepad1.right_trigger > 0.1) {
             runIntake(-1.0 * Math.signum(gamepad2.right_trigger)
                     , -1.0 * Math.signum(gamepad2.left_trigger));
         }
@@ -235,24 +272,24 @@ public class teleOp extends LinearOpMode{
                 desired_lift_val = zero_encoder + LEVEL_ONE;
                 switch1 = false; //stop making lift stay at its current position
                 switch2 = true;
-                t = ctime.milliseconds(); //mark time
+                t0 = ctime.milliseconds(); //mark time
             }
             if (gamepad2.y) {
                 zero();
                 desired_lift_val = zero_encoder + LEVEL_THREE;;
                 switch1 = false;
                 switch2 = true;
-                t = ctime.milliseconds();
+                t0 = ctime.milliseconds();
             }
             if (gamepad2.x) {
                 zero();
                 desired_lift_val = zero_encoder + LEVEL_TWO;
                 switch1 = false;
                 switch2 = true;
-                t = ctime.milliseconds();
+                t0 = ctime.milliseconds();
             }
             if (switch2) {
-                if (ctime.milliseconds() < t + 1100) {//account for time needed for lift to get to preset value
+                if (ctime.milliseconds() < t0 + 1100) {//account for time needed for lift to get to preset value
                     switch1 = false;
                 } else {
                     switch1 = true;
@@ -288,23 +325,39 @@ public class teleOp extends LinearOpMode{
     public void grab() {
         rflip.setPosition(RFLIP_GRAB);
         lflip.setPosition(LFLIP_GRAB);
-        gflip.setPosition(GFLIP_STOW);
         stopper.setPosition(STOPPER_STOP);
         grabFlip = false;
     }
     public void zero() {
         rflip.setPosition(RFLIP_ZERO);
         lflip.setPosition(LFLIP_ZERO);
-        gflip.setPosition(GFLIP_GRAB);
         stopper.setPosition(STOPPER_STOW);
         grabFlip = true;
     }
     public void deposit() {
         rflip.setPosition(RFLIP_DEPOSIT);
         lflip.setPosition(LFLIP_DEPOSIT);
-        gflip.setPosition(GFLIP_GRAB);
         stopper.setPosition(STOPPER_STOW);
         grabFlip = true;
+    }
+
+    public void moveRelicArm() {
+        if (gamepad1.y) {
+            lig.setPosition(LIG_HALF_STOW);
+        }
+        if (gamepad1.a) {
+            lig.setPosition(LIG_GRAB);
+        }
+        if (gamepad1.x && (ctime.milliseconds() > (t3+250))) {
+            t3 = ctime.milliseconds();
+            if (clawPos == CLAW_GRAB) {
+                clawPos = CLAW_OPEN;
+            }
+            else {
+                clawPos = CLAW_GRAB;
+            }
+        }
+        claw.setPosition(clawPos);
     }
 
     public void mecanum(double joyly, double joylx, double joyrx, double multiplier) {
@@ -320,15 +373,91 @@ public class teleOp extends LinearOpMode{
         double temp_max2 = Math.max(temp_max, Math.abs(v3));
         double max = Math.max(temp_max2, Math.abs(v4));
         if (max > 1) {
-            fl.setPower(multiplier * (v1/max));
-            fr.setPower(multiplier * (v2/max));
-            bl.setPower(multiplier * (v3/max));
-            br.setPower(multiplier * (v4/max));
+            fl.setPower(multiplier * (Math.pow(v1/max, 3.0)));
+            fr.setPower(multiplier * (Math.pow(v2/max, 3.0)));
+            bl.setPower(multiplier * (Math.pow(v3/max, 3.0)));
+            br.setPower(multiplier * (Math.pow(v4/max, 3.0)));
         } else {
-            fl.setPower(multiplier*v1);
-            fr.setPower(multiplier*v2);
-            bl.setPower(multiplier*v3);
-            br.setPower(multiplier*v4);
+            fl.setPower(multiplier*(Math.pow(v1, 3.0)));
+            fr.setPower(multiplier*(Math.pow(v2, 3.0)));
+            bl.setPower(multiplier*(Math.pow(v3, 3.0)));
+            br.setPower(multiplier*(Math.pow(v4, 3.0)));
         }
+    }
+
+    public void startDegreeController(){
+        pT = runtime.time();
+        pE = 0;
+        tE = 0;
+    }
+
+    public void turn(double degree, double margin) {
+        if ((Math.abs(getDifference(lastAngles.firstAngle, degree)) > margin ||
+                Math.abs(pYaw - lastAngles.firstAngle) > .05)) {
+            double change = degreeController(degree);
+            double forwardPower = Range.clip(change, -1, 1);
+            double backPower = Range.clip(-change, -1, 1);
+            if (getDifference(lastAngles.firstAngle, degree) > 0) {
+                fr.setPower(0.5 * backPower);
+                br.setPower(0.5 * backPower);
+                fl.setPower(0.5 * forwardPower);
+                bl.setPower(0.5 * forwardPower);
+            } else {
+                fr.setPower(0.5 * forwardPower);
+                br.setPower(0.5 * forwardPower);
+                fl.setPower(0.5 * backPower);
+                bl.setPower(0.5 * backPower);
+            }
+            pYaw = lastAngles.firstAngle;
+            resetAngles();
+        }
+        else {
+            fr.setPower(0.0);
+            fl.setPower(0.0);
+            br.setPower(0.0);
+            bl.setPower(0.0);
+            farpid = false;
+            closepid = false;
+        }
+    }
+
+    public double degreeController(double degree){
+        double ans = 0;
+        double e = Math.abs(getDifference(lastAngles.firstAngle, degree));
+        double dE = e-pE;
+        double dT = runtime.time() - pT;
+        Log.i("PID turn", "e: " + e);
+        Log.i("PID Turn", "i: " + i_turn * tE);
+        Log.i("PID Turn", "d: " + d_turn * dE / dT);
+        Log.i("PID Turn", "p: " + p_turn * e);
+        ans = p_turn*e+ i_turn*tE + d_turn*dE/dT;//+f_turn* Math.signum(e);
+        pT = runtime.time();
+        pE = e;
+        tE += e*dT;
+        tE = Range.clip(tE * i_turn, -.15, 0.15);///i_turn;
+        ans = Range.clip(ans, 0, .7);
+        return ans;
+    }
+
+    public double getDifference(double beg, double end){
+        if (end > beg){
+            if (Math.abs(end - beg) < Math.abs((end - 360) - beg)){
+                return end - beg;
+            } else{
+                return  (end-360)-beg;
+            }
+        } else if(end <= beg){
+            if (Math.abs(end - beg) < Math.abs((end + 360) - beg)){
+                return end-beg;
+            } else{
+                return (end+360)-beg;
+            }
+        }
+        return 0;
+    }
+
+    public void resetAngles() {
+        lastAngles = imu.getAngularOrientation
+                (AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
     }
 }

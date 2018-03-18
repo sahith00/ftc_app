@@ -39,13 +39,16 @@ public class autoBlue2 extends autoMethods {
 
         jewelAuto("BLUE");
         imageDetected = doVuforia();
-        driveBackward(-7.5, -0.4);
-        sleep(500);
-        turn(90, 3.5);
-        sleep(500);
-        driveForward(7, 0.4);
-        sleep(500);
-        doImage(imageDetected, 153, 203, 178);
-        //glyphAutoFar(203, 213);
+
+
+
+//        drive(-7.5, -0.4);
+//        sleep(500);
+//        turn(90, 3.5);
+//        sleep(500);
+//        drive(7, 0.4);
+//        sleep(500);
+//        doImage(imageDetected, 153, 203, 178);
+//        glyphAutoFar(203, 213);
     }
 }
