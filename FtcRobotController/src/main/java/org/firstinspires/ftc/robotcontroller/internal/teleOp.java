@@ -93,7 +93,6 @@ public class teleOp extends LinearOpMode{
         fl = hardwareMap.dcMotor.get("fldrive");
         br = hardwareMap.dcMotor.get("brdrive");
         bl = hardwareMap.dcMotor.get("bldrive");
-        j.
 
         lift = hardwareMap.dcMotor.get("lift");
         relicLift = hardwareMap.dcMotor.get("relicLift");
@@ -398,24 +397,15 @@ public class teleOp extends LinearOpMode{
             double forwardPower = Range.clip(change, -1, 1);
             double backPower = Range.clip(-change, -1, 1);
             if (getDifference(lastAngles.firstAngle, degree) > 0) {
-                fr.setPower(0.5 * backPower);
-                br.setPower(0.5 * backPower);
-                fl.setPower(0.5 * forwardPower);
-                bl.setPower(0.5 * forwardPower);
+                mecanum(gamepad1.left_stick_y, gamepad1.left_stick_x, -forwardPower, 0.5);
             } else {
-                fr.setPower(0.5 * forwardPower);
-                br.setPower(0.5 * forwardPower);
-                fl.setPower(0.5 * backPower);
-                bl.setPower(0.5 * backPower);
+                mecanum(gamepad1.left_stick_y, gamepad1.left_stick_x, -backPower, 0.5);
             }
             pYaw = lastAngles.firstAngle;
             resetAngles();
         }
         else {
-            fr.setPower(0.0);
-            fl.setPower(0.0);
-            br.setPower(0.0);
-            bl.setPower(0.0);
+            mecanum(gamepad1.left_stick_y, gamepad1.left_stick_x, -gamepad1.right_stick_x, 0.5);
             farpid = false;
             closepid = false;
         }
