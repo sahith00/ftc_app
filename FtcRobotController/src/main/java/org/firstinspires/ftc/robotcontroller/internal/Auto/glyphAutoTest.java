@@ -23,7 +23,7 @@ public class glyphAutoTest extends autoMethods {
 
         waitForStart();
 
-        grabGlyph(1.0);
+        /*grabGlyph(1.0);
         driveBackward(-24, -0.3);
         sleep(4000);
         driveBackward(-7, -0.3);
@@ -37,6 +37,6 @@ public class glyphAutoTest extends autoMethods {
         sleep(500);
         driveBackward(-3, -0.3);
         driveForward(3, 0.3);
-        driveBackward(-4, -0.3);
+        driveBackward(-4, -0.3);*/
     }
 }

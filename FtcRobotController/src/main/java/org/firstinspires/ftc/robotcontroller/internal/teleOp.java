@@ -28,7 +28,6 @@ public class teleOp extends LinearOpMode{
     DcMotor rintake, lintake;
 
     Servo cat, knock;
-    NormalizedColorSensor j;
 
     Servo rflip, lflip, stopper;
     Servo lig, claw;
@@ -68,7 +67,7 @@ public class teleOp extends LinearOpMode{
     double multiplier;
     boolean switch1, switch2, switch3;
     double zero_encoder;
-    double desired_lift_val, currentpos;
+    double desired_lift_val, currentpos, desired_lift_p;
     double stowPos;
     double clawPos;
     boolean grabFlip;
@@ -146,7 +145,7 @@ public class teleOp extends LinearOpMode{
         desired_lift_val = 0;
         currentpos = 0;
         stowPos = LIG_STOW;
-        switch1 = true;
+        switch1 = false;
         switch2 = false;
         switch3 = false;
         t0 = 0;
@@ -159,6 +158,7 @@ public class teleOp extends LinearOpMode{
         glyphMode = true;
         farpid = false;
         closepid = false;
+        int position = 0;
 
         waitForStart();
         while(opModeIsActive()) {
@@ -214,7 +214,57 @@ public class teleOp extends LinearOpMode{
             // GRAB GLYPH AND DEPOSIT
             if(glyphMode) {
                 grabGlyph();
-                moveLift();
+                //moveLift();
+                if(Math.abs(gamepad2.right_stick_y) > 0.1) {
+                    lift.setPower(gamepad2.right_stick_y);
+                    if(gamepad2.right_stick_y > 0) {
+                        position += 1000;
+                        lift.setTargetPosition(position);
+                    }
+                    else {
+                        position -= 1000;
+                        lift.setTargetPosition(position);
+                    }
+                }
+                else {
+                    if(gamepad2.a) {
+                        switch1 = true;
+                        if(ctime.milliseconds() < t0 + 1100) {
+                            t0 = ctime.milliseconds();
+                            lift.setPower(0.7);
+                            lift.setTargetPosition((int) LEVEL_ONE);
+                            if(lift.getCurrentPosition() == LEVEL_ONE) {
+                                switch1 = false;
+                            }
+                        }
+                    }
+                    else if(gamepad2.x) {
+                        switch1 = true;
+                        if(ctime.milliseconds() < t0 + 1100) {
+                            t0 = ctime.milliseconds();
+                            lift.setPower(0.7);
+                            lift.setTargetPosition((int) LEVEL_TWO);
+                            if(lift.getCurrentPosition() == LEVEL_TWO) {
+                                switch1 = false;
+                            }
+                        }
+                    }
+                    else if(gamepad2.y) {
+                        switch1 = true;
+                        if(ctime.milliseconds() < t0 + 1100) {
+                            t0 = ctime.milliseconds();
+                            lift.setPower(0.7);
+                            lift.setTargetPosition((int) LEVEL_THREE);
+                            if(lift.getCurrentPosition() == LEVEL_THREE) {
+                                switch1 = false;
+                            }
+                        }
+                    }
+                    if(!switch1) {
+                        lift.setPower(0.7);
+                        lift.setTargetPosition(lift.getCurrentPosition());
+                    }
+                }
                 flip();
             }
             //-----------------------------------------------------------------------------
@@ -250,11 +300,13 @@ public class teleOp extends LinearOpMode{
     public void moveLift() {
         if (gamepad2.right_stick_y < 0) {
             desired_lift_val = desired_lift_val - 1000; //Always keep running at power when joystick is moved
+            desired_lift_p = gamepad2.right_stick_y;
             switch1 = true;
             switch2 = false;
             switch3 = true;
         } else if (gamepad2.right_stick_y > 0) {
             desired_lift_val = desired_lift_val + 1000;
+            desired_lift_p = gamepad2.right_stick_y;
             switch1 = true;
             switch2 = false;
             switch3 = true;
@@ -269,13 +321,15 @@ public class teleOp extends LinearOpMode{
             }
             if (gamepad2.a) {
                 desired_lift_val = zero_encoder + LEVEL_ONE;
+                desired_lift_p = .7;
                 switch1 = false; //stop making lift stay at its current position
                 switch2 = true;
                 t0 = ctime.milliseconds(); //mark time
             }
             if (gamepad2.y) {
                 zero();
-                desired_lift_val = zero_encoder + LEVEL_THREE;;
+                desired_lift_val = zero_encoder + LEVEL_THREE;
+                desired_lift_p = .7;
                 switch1 = false;
                 switch2 = true;
                 t0 = ctime.milliseconds();
@@ -283,6 +337,7 @@ public class teleOp extends LinearOpMode{
             if (gamepad2.x) {
                 zero();
                 desired_lift_val = zero_encoder + LEVEL_TWO;
+                desired_lift_p = .7;
                 switch1 = false;
                 switch2 = true;
                 t0 = ctime.milliseconds();
@@ -300,7 +355,7 @@ public class teleOp extends LinearOpMode{
                 zero_encoder = lift.getCurrentPosition();
             }
         }
-        lift.setPower(.7);
+        lift.setPower(desired_lift_p);
         lift.setTargetPosition((int) desired_lift_val);
     }
 

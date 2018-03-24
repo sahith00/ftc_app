@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
@@ -35,7 +36,8 @@ public class autoMethods extends LinearOpMode {
     Servo lig;
     Servo cat, knock;
     ColorSensor jewelSensor;
-    Servo rflip, lflip, gflip, stopper;
+    Servo rflip, lflip, stopper;
+    NormalizedColorSensor sensor;
 
     BNO055IMU imu;
     Orientation lastAngles;
@@ -106,8 +108,8 @@ public class autoMethods extends LinearOpMode {
         lintake = hardwareMap.dcMotor.get("lintake");
         rflip = hardwareMap.servo.get("rflip");
         lflip = hardwareMap.servo.get("lflip");
-        gflip = hardwareMap.servo.get("gflip");
         stopper = hardwareMap.servo.get("stopper");
+        sensor = hardwareMap.get(NormalizedColorSensor.class, "sensor_color");
 
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
@@ -268,7 +270,11 @@ public class autoMethods extends LinearOpMode {
         }
     }
 
-    public void glyphAutoFar(double lturn, double rturn) {
+    public void glyphAutoFar(String image, double rturn, double lturn, double cturn) {
+        if(image.equals("R") || image.equals("C")) {
+        }
+        else {
+        }
     }
 
     public OpenGLMatrix createMatrix(float x, float y, float z, float u, float v, float w){
@@ -297,7 +303,6 @@ public class autoMethods extends LinearOpMode {
     public void outtake() {
         deposit();
         sleep(500);
-        gflip.setPosition(GFLIP_STOW);
     }
 
     public void grab() {
@@ -313,7 +318,6 @@ public class autoMethods extends LinearOpMode {
     public void deposit() {
         rflip.setPosition(RFLIP_DEPOSIT);
         lflip.setPosition(LFLIP_DEPOSIT);
-        gflip.setPosition(GFLIP_GRAB);
         stopper.setPosition(STOPPER_STOW);
     }
 
