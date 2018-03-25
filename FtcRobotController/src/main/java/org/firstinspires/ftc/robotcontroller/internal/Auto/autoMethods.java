@@ -74,14 +74,12 @@ public class autoMethods extends LinearOpMode {
 
     final static double STOPPER_STOP = 0.0;
     final static double STOPPER_STOW = 1.0;
-    final static double RFLIP_DEPOSIT = 0.739444444444444446;
-    final static double RFLIP_ZERO = 0.160000000000000000003;
-    final static double RFLIP_GRAB = 0.050000000000004;
-    final static double LFLIP_DEPOSIT = 0.10944444444444444444;
-    final static double LFLIP_ZERO = 0.669444444444444444445;
-    final static double LFLIP_GRAB = 0.769444444444444444446;
-    final static double GFLIP_STOW = 0.58;
-    final static double GFLIP_GRAB = 0.69;
+    final static double RFLIP_DEPOSIT = 0.07;
+    final static double RFLIP_ZERO = 0.640000000000000000001;
+    final static double RFLIP_GRAB = 0.679444444444444444445;
+    final static double LFLIP_DEPOSIT = 0.91944444444444444445;
+    final static double LFLIP_ZERO = 0.319444444444444444445;
+    final static double LFLIP_GRAB = 0.269444444444444444443;
 
     public double p_turn = .045;//0.008;
     public double i_turn = .002; //.0045; //.003;

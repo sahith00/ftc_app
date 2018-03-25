@@ -40,12 +40,12 @@ public class teleOp extends LinearOpMode{
 
     final static double STOPPER_STOP = 0.0;
     final static double STOPPER_STOW = 1.0;
-    final static double RFLIP_DEPOSIT = 0.739444444444444446;
-    final static double RFLIP_ZERO = 0.160000000000000000003;
-    final static double RFLIP_GRAB = 0.050000000000004;
-    final static double LFLIP_DEPOSIT = 0.10944444444444444444;
-    final static double LFLIP_ZERO = 0.669444444444444444445;
-    final static double LFLIP_GRAB = 0.769444444444444444446;
+    final static double RFLIP_DEPOSIT = 0.07;
+    final static double RFLIP_ZERO = 0.640000000000000000001;
+    final static double RFLIP_GRAB = 0.679444444444444444445;
+    final static double LFLIP_DEPOSIT = 0.91944444444444444445;
+    final static double LFLIP_ZERO = 0.319444444444444444445;
+    final static double LFLIP_GRAB = 0.269444444444444444443;
 
     final static double LIG_STOW = .01999999999999994;
     final static double LIG_GRAB = .8094444444444444444 + 0.04;//.899444444444444444445;
@@ -74,6 +74,9 @@ public class teleOp extends LinearOpMode{
     boolean glyphMode;
     boolean farpid;
     boolean closepid;
+    boolean liftpid;
+    double desired_lift_pos;
+    int position;
 
     double p_turn = .045;//0.008;
     double i_turn = .002; //.0045; //.003;
@@ -82,6 +85,10 @@ public class teleOp extends LinearOpMode{
     double pE = 0;
     double tE = 0;
     double pYaw = 0;
+
+    double oldT = 0;
+    double oldE = 0;
+    double oldtE = 0;
 
     ElapsedTime runtime = new ElapsedTime();
     ElapsedTime ctime = new ElapsedTime();
@@ -117,7 +124,7 @@ public class teleOp extends LinearOpMode{
         br.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         relicLift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE); //so that lift can hold its position
         lift.setDirection(DcMotorSimple.Direction.FORWARD);
         rintake.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -158,7 +165,9 @@ public class teleOp extends LinearOpMode{
         glyphMode = true;
         farpid = false;
         closepid = false;
-        int position = 0;
+        liftpid = false;
+        position = 0;
+        desired_lift_pos = LEVEL_ONE;
 
         waitForStart();
         while(opModeIsActive()) {
@@ -167,12 +176,7 @@ public class teleOp extends LinearOpMode{
 
             if (gamepad1.b && (ctime.milliseconds() > (t1+250))) {
                 t1 = ctime.milliseconds();
-                if (glyphMode) {
-                    glyphMode = false;
-                }
-                else {
-                    glyphMode = true;
-                }
+                glyphMode = !glyphMode;
             }
             //-----------------------------------------------------------------------------
             // DRIVE ROBOT
@@ -214,58 +218,29 @@ public class teleOp extends LinearOpMode{
             // GRAB GLYPH AND DEPOSIT
             if(glyphMode) {
                 grabGlyph();
-                //moveLift();
-                if(Math.abs(gamepad2.right_stick_y) > 0.1) {
+                flip();
+                if((Math.abs(gamepad2.right_stick_y) > 0.1)) {
                     lift.setPower(gamepad2.right_stick_y);
-                    if(gamepad2.right_stick_y > 0) {
-                        position += 1000;
-                        lift.setTargetPosition(position);
-                    }
-                    else {
-                        position -= 1000;
-                        lift.setTargetPosition(position);
-                    }
+                    liftpid = false;
                 }
                 else {
+                    liftpid = true;
                     if(gamepad2.a) {
-                        switch1 = true;
-                        if(ctime.milliseconds() < t0 + 1100) {
-                            t0 = ctime.milliseconds();
-                            lift.setPower(0.7);
-                            lift.setTargetPosition((int) LEVEL_ONE);
-                            if(lift.getCurrentPosition() == LEVEL_ONE) {
-                                switch1 = false;
-                            }
-                        }
+                        desired_lift_pos = LEVEL_ONE;
                     }
                     else if(gamepad2.x) {
-                        switch1 = true;
-                        if(ctime.milliseconds() < t0 + 1100) {
-                            t0 = ctime.milliseconds();
-                            lift.setPower(0.7);
-                            lift.setTargetPosition((int) LEVEL_TWO);
-                            if(lift.getCurrentPosition() == LEVEL_TWO) {
-                                switch1 = false;
-                            }
-                        }
+                        desired_lift_pos = LEVEL_TWO;
                     }
                     else if(gamepad2.y) {
-                        switch1 = true;
-                        if(ctime.milliseconds() < t0 + 1100) {
-                            t0 = ctime.milliseconds();
-                            lift.setPower(0.7);
-                            lift.setTargetPosition((int) LEVEL_THREE);
-                            if(lift.getCurrentPosition() == LEVEL_THREE) {
-                                switch1 = false;
-                            }
-                        }
+                        desired_lift_pos = LEVEL_THREE;
                     }
-                    if(!switch1) {
-                        lift.setPower(0.7);
-                        lift.setTargetPosition(lift.getCurrentPosition());
+                    else {
+                        desired_lift_pos = lift.getCurrentPosition();
+                    }
+                    if(liftpid) {
+                        lift.setPower(moveLift3(desired_lift_pos));
                     }
                 }
-                flip();
             }
             //-----------------------------------------------------------------------------
             // TELEMETRY
@@ -357,6 +332,59 @@ public class teleOp extends LinearOpMode{
         }
         lift.setPower(desired_lift_p);
         lift.setTargetPosition((int) desired_lift_val);
+    }
+
+    public void moveLift2() {
+        if(Math.abs(gamepad2.right_stick_y) > 0.1) {
+            lift.setPower(gamepad2.right_stick_y);
+            if(gamepad2.right_stick_y > 0) {
+                position += 1000;
+                lift.setTargetPosition(position);
+            }
+            else {
+                position -= 1000;
+                lift.setTargetPosition(position);
+            }
+        }
+        else {
+            if(gamepad2.a) {
+                switch1 = true;
+                if(ctime.milliseconds() < t0 + 1100) {
+                    t0 = ctime.milliseconds();
+                    lift.setPower(0.7);
+                    lift.setTargetPosition((int) LEVEL_ONE);
+                    if(lift.getCurrentPosition() == LEVEL_ONE) {
+                        switch1 = false;
+                    }
+                }
+            }
+            else if(gamepad2.x) {
+                switch1 = true;
+                if(ctime.milliseconds() < t0 + 1100) {
+                    t0 = ctime.milliseconds();
+                    lift.setPower(0.7);
+                    lift.setTargetPosition((int) LEVEL_TWO);
+                    if(lift.getCurrentPosition() == LEVEL_TWO) {
+                        switch1 = false;
+                    }
+                }
+            }
+            else if(gamepad2.y) {
+                switch1 = true;
+                if(ctime.milliseconds() < t0 + 1100) {
+                    t0 = ctime.milliseconds();
+                    lift.setPower(0.7);
+                    lift.setTargetPosition((int) LEVEL_THREE);
+                    if(lift.getCurrentPosition() == LEVEL_THREE) {
+                        switch1 = false;
+                    }
+                }
+            }
+            if(!switch1) {
+                lift.setPower(0.7);
+                lift.setTargetPosition(lift.getCurrentPosition());
+            }
+        }
     }
 
     public void flip() {
@@ -482,6 +510,32 @@ public class teleOp extends LinearOpMode{
         tE = Range.clip(tE * i_turn, -.15, 0.15);///i_turn;
         ans = Range.clip(ans, 0, .7);
         return ans;
+    }
+
+    public double liftController(double position) {
+        double ans = 0;
+        double error = position - lift.getCurrentPosition();
+        double p = 0.045, i = 0.002, d = 0.002;
+        double dE = error - oldE;
+        double dT = runtime.time() - oldT;
+        ans = p*error + i*oldtE + d*dE/dT;
+        oldT = runtime.time();
+        oldE = error;
+        oldtE += error*dT;
+        oldtE = Range.clip(oldtE * i, -.15, 0.15);
+        ans = Range.clip(ans, 0, 1);
+        return ans;
+    }
+
+    public double moveLift3(double position) {
+        double power = 0;
+        if(lift.getCurrentPosition() - position > 0) {
+            power = -liftController(position);
+        }
+        else {
+            power = liftController(position);
+        }
+        return power;
     }
 
     public double getDifference(double beg, double end){
