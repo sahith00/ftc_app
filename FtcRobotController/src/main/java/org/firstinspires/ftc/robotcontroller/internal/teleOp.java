@@ -28,7 +28,6 @@ public class teleOp extends LinearOpMode{
     DcMotor rintake, lintake;
 
     Servo cat, knock;
-
     Servo rflip, lflip, stopper;
     Servo lig, claw;
 
@@ -39,13 +38,13 @@ public class teleOp extends LinearOpMode{
     final static double KNOCK_STOW = .42;
 
     final static double STOPPER_STOP = 0.0;
-    final static double STOPPER_STOW = 1.0;
-    final static double RFLIP_DEPOSIT = 0.07;
-    final static double RFLIP_ZERO = 0.640000000000000000001;
+    final static double STOPPER_STOW = 0.5;
+    final static double RFLIP_DEPOSIT = 0.069444444444444448;
+    final static double RFLIP_ZERO = 0.629444444444444444445;
     final static double RFLIP_GRAB = 0.679444444444444444445;
-    final static double LFLIP_DEPOSIT = 0.91944444444444444445;
-    final static double LFLIP_ZERO = 0.319444444444444444445;
-    final static double LFLIP_GRAB = 0.269444444444444444443;
+    final static double LFLIP_DEPOSIT = 0.93;
+    final static double LFLIP_ZERO = 0.359444444444444444445;
+    final static double LFLIP_GRAB = 0.299444444444444444446;
 
     final static double LIG_STOW = .01999999999999994;
     final static double LIG_GRAB = .8094444444444444444 + 0.04;//.899444444444444444445;
@@ -129,6 +128,16 @@ public class teleOp extends LinearOpMode{
         lift.setDirection(DcMotorSimple.Direction.FORWARD);
         rintake.setDirection(DcMotorSimple.Direction.REVERSE);
         lintake.setDirection(DcMotorSimple.Direction.FORWARD);
+
+        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
+        parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+        parameters.calibrationDataFile = "BNO055IMUCalibration.json";
+        parameters.loggingEnabled = true;
+        parameters.loggingTag     = "IMU";
+        parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
+        imu = hardwareMap.get(BNO055IMU.class, "imu");
+        imu.initialize(parameters);
 
         grab(); //inits flipper to grab position to prepare for grabbing
         fl.setPower(0);
