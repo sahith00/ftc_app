@@ -1,7 +1,11 @@
 package org.firstinspires.ftc.robotcontroller.internal.Tests;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
+
+import org.firstinspires.ftc.robotcontroller.external.samples.SensorREVColorDistance;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 
 /**
@@ -10,17 +14,13 @@ import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 
 public class revSensorTest extends LinearOpMode {
 
-    NormalizedColorSensor sensor;
+    DistanceSensor sensor;
 
     @Override
     public void runOpMode() throws InterruptedException {
-        sensor = hardwareMap.get(NormalizedColorSensor.class, "revSensor");
+        sensor = hardwareMap.get(DistanceSensor.class, "revSensor");
         while(opModeIsActive()) {
-            telemetry.addData("blue", sensor.getNormalizedColors().blue);
-            telemetry.addData("red", sensor.getNormalizedColors().red);
-            telemetry.addData("green", sensor.getNormalizedColors().green);
-            telemetry.addData("alpha", sensor.getNormalizedColors().alpha);
-            telemetry.addData("color", sensor.getNormalizedColors().toColor());
+            telemetry.addData("blue", sensor.getDistance(DistanceUnit.INCH));
             telemetry.update();
         }
     }

@@ -25,6 +25,8 @@ public class autoBlue2 extends autoMethods {
         sleep(250);
         lig.setPosition(LIG_STOW);
         sleep(250);
+        stopper.setPosition(STOPPER_STOW);
+        sleep(250);
 
         zero();
 
@@ -41,14 +43,5 @@ public class autoBlue2 extends autoMethods {
         imageDetected = doVuforia();
 
 
-
-//        drive(-7.5, -0.4);
-//        sleep(500);
-//        turn(90, 3.5);
-//        sleep(500);
-//        drive(7, 0.4);
-//        sleep(500);
-//        doImage(imageDetected, 153, 203, 178);
-//        glyphAutoFar(203, 213);
     }
 }

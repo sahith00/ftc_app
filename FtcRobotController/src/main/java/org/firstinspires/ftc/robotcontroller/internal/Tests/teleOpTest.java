@@ -1,20 +1,11 @@
 package org.firstinspires.ftc.robotcontroller.internal.Tests;
 
-import android.util.Log;
-
-import com.qualcomm.hardware.bosch.BNO055IMU;
-import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
-
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
-import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 /**
  * Created by sahith on 11/10/17.
@@ -24,52 +15,39 @@ public class teleOpTest extends LinearOpMode {
     DcMotor rintake, lintake;
     DcMotor lift;
 
-    Servo rflip, lflip, stopper;
+    Servo rflip, lflip, stopper, extendstopper;
 
-    BNO055IMU imu;
-    Orientation lastAngles;
+    final static double STOPPER_STOP = 0.5;
+    final static double STOPPER_STOW = 0.0;
+    final static double EXTENDSTOPPER_STOW = 0;
+    final static double EXTENDSTOPPER_STOP = 0.5;
 
-    final static double STOPPER_STOP = 0.0;
-    final static double STOPPER_STOW = 0.5;
-    final static double RFLIP_DEPOSIT = 0.069444444444444448;
+    final static double RFLIP_DEPOSIT = 0.069444444444444448;//new grab positions were tested so that the edge of the flipper towards the intake was in line with the top edge of the ramp
     final static double RFLIP_ZERO = 0.629444444444444444445;
-    final static double RFLIP_GRAB = 0.679444444444444444445;
+    final static double RFLIP_GRAB = 0.659444444444444445;//0.679444444444444444445;
     final static double LFLIP_DEPOSIT = 0.93;
     final static double LFLIP_ZERO = 0.359444444444444444445;
-    final static double LFLIP_GRAB = 0.299444444444444444446;
+    final static double LFLIP_GRAB = 0.32;//0.299444444444444444446;
 
-    final static double LEVEL_ONE = 0;
-    final static double LEVEL_TWO = -565;
-    final static double LEVEL_THREE = -930;
+    final static double LIFT_INIT = 0;
+    final static double LIFT_TWO = -1140;
+    final static double LIFT_THREE = -1650;
 
-    double t0, t1, t2, t3, t4, t5;
+
+    double tdeposit;
     double intakep;
-    boolean lift_zero;
     double multiplier;
-    boolean switch1, switch2, switch3;
-    double zero_encoder;
-    double desired_lift_val, currentpos, desired_lift_p;
-    boolean grabFlip;
-    boolean glyphMode;
-    boolean farpid;
-    boolean closepid;
-    boolean liftpid;
+
+    double desired_stopper_pos, desired_extendstopper_pos;
+    double desired_stopper_delay;
     double desired_lift_pos;
-    int position;
 
-    double p_turn = .045;//0.008;
-    double i_turn = .002; //.0045; //.003;
-    double d_turn = .002; //.04 //.0045;
-    double pT = 0;
-    double pE = 0;
-    double tE = 0;
-    double pYaw = 0;
+    boolean moveliftpreset;
+    boolean delayextendstopper, delaystopper;
 
-    double oldT = 0;
-    double oldE = 0;
-    double oldtE = 0;
 
-    ElapsedTime runtime = new ElapsedTime();
+
+
     ElapsedTime ctime = new ElapsedTime();
 
     @Override
@@ -86,6 +64,7 @@ public class teleOpTest extends LinearOpMode {
         rflip = hardwareMap.servo.get("rflip");
         lflip = hardwareMap.servo.get("lflip");
         stopper = hardwareMap.servo.get("stopper");
+        extendstopper = hardwareMap.servo.get("extendstopper");
 
         fldrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         frdrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -100,72 +79,46 @@ public class teleOpTest extends LinearOpMode {
         rintake.setDirection(DcMotorSimple.Direction.REVERSE);
         lintake.setDirection(DcMotorSimple.Direction.FORWARD);
 
-        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
-        parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-        parameters.calibrationDataFile = "BNO055IMUCalibration.json";
-        parameters.loggingEnabled = true;
-        parameters.loggingTag     = "IMU";
-        parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
-        imu = hardwareMap.get(BNO055IMU.class, "imu");
-        imu.initialize(parameters);
 
+        delayextendstopper = false;
+        delaystopper = false;
         grab(); //inits flipper to grab position to prepare for grabbing
+
         fldrive.setPower(0);
         frdrive.setPower(0);
         bldrive.setPower(0);
         brdrive.setPower(0);
+
         lift.setPower(0);
         rintake.setPower(0);
         lintake.setPower(0);
 
         multiplier = 1.0;
         intakep = .0;
-        lift_zero = true;
-        zero_encoder = 0;
-        desired_lift_val = 0;
-        currentpos = 0;
-        switch1 = false;
-        switch2 = false;
-        switch3 = false;
-        t0 = 0;
-        t1 = 0;
-        t2 = 0;
-        t3 = 0;
-        t4 = 0;
-        t5 = 0;
-        grabFlip = false;
-        glyphMode = true;
-        farpid = false;
-        closepid = false;
-        liftpid = false;
-        position = 0;
-        desired_lift_pos = LEVEL_ONE;
+        tdeposit = 0;
+        desired_lift_pos = LIFT_INIT;
 
         waitForStart();
+
         while(opModeIsActive()) {
 
-            if (gamepad1.b && (ctime.milliseconds() > (t1+250))) {
-                t1 = ctime.milliseconds();
-                glyphMode = !glyphMode;
-            }
             //-----------------------------------------------------------------------------
             // DRIVE ROBOT
             multiplier = -Range.clip(gamepad1.left_trigger - 1, -1, -0.3);
 
             mecanum(gamepad1.left_stick_y, -gamepad1.left_stick_x, -(gamepad1.right_stick_x), multiplier);
 
-            if(glyphMode) {
-                grabGlyph();
-                flip();
-                moveLift4();
-            }
+            grabGlyph();
+            flip();
+            moveLift4();
+            moveStopper();
+
             //-----------------------------------------------------------------------------
             // TELEMETRY
             telemetry.addData("Lift Encoder Count: ", lift.getCurrentPosition());
             telemetry.addData("Lift Power", lift.getPower());
             telemetry.addData("Intake power", intakep);
-            telemetry.addData("multiplier", multiplier);
+            telemetry.addData("Drive Multiplier", multiplier);
             telemetry.update();
         }
     }
@@ -195,98 +148,6 @@ public class teleOpTest extends LinearOpMode {
         }
     }
 
-    public void startDegreeController(){
-        pT = runtime.time();
-        pE = 0;
-        tE = 0;
-    }
-
-    public void turn(double degree, double margin) {
-        if ((Math.abs(getDifference(lastAngles.firstAngle, degree)) > margin ||
-                Math.abs(pYaw - lastAngles.firstAngle) > .05)) {
-            double change = degreeController(degree);
-            double forwardPower = Range.clip(change, -1, 1);
-            double backPower = Range.clip(-change, -1, 1);
-            if (getDifference(lastAngles.firstAngle, degree) > 0) {
-                mecanum(gamepad1.left_stick_y, gamepad1.left_stick_x, -forwardPower, 0.5);
-            } else {
-                mecanum(gamepad1.left_stick_y, gamepad1.left_stick_x, -backPower, 0.5);
-            }
-            pYaw = lastAngles.firstAngle;
-            resetAngles();
-        }
-        else {
-            mecanum(gamepad1.left_stick_y, gamepad1.left_stick_x, -gamepad1.right_stick_x, 0.5);
-            farpid = false;
-            closepid = false;
-        }
-    }
-
-    public double degreeController(double degree){
-        double ans = 0;
-        double e = Math.abs(getDifference(lastAngles.firstAngle, degree));
-        double dE = e-pE;
-        double dT = runtime.time() - pT;
-        Log.i("PID turn", "e: " + e);
-        Log.i("PID Turn", "i: " + i_turn * tE);
-        Log.i("PID Turn", "d: " + d_turn * dE / dT);
-        Log.i("PID Turn", "p: " + p_turn * e);
-        ans = p_turn*e+ i_turn*tE + d_turn*dE/dT;//+f_turn* Math.signum(e);
-        pT = runtime.time();
-        pE = e;
-        tE += e*dT;
-        tE = Range.clip(tE * i_turn, -.15, 0.15);///i_turn;
-        ans = Range.clip(ans, 0, .7);
-        return ans;
-    }
-
-    public double liftController(double position) {
-        double ans = 0;
-        double error = position - lift.getCurrentPosition();
-        double p = 0.045, i = 0.002, d = 0.002;
-        double dE = error - oldE;
-        double dT = runtime.time() - oldT;
-        ans = p*error + i*oldtE + d*dE/dT;
-        oldT = runtime.time();
-        oldE = error;
-        oldtE += error*dT;
-        oldtE = Range.clip(oldtE * i, -.15, 0.15);
-        ans = Range.clip(ans, 0, 1);
-        return ans;
-    }
-
-    public double moveLift3(double position) {
-        double power = 0;
-        if(lift.getCurrentPosition() - position > 0) {
-            power = -liftController(position);
-        }
-        else {
-            power = liftController(position);
-        }
-        return power;
-    }
-
-    public double getDifference(double beg, double end){
-        if (end > beg){
-            if (Math.abs(end - beg) < Math.abs((end - 360) - beg)){
-                return end - beg;
-            } else{
-                return  (end-360)-beg;
-            }
-        } else if(end <= beg){
-            if (Math.abs(end - beg) < Math.abs((end + 360) - beg)){
-                return end-beg;
-            } else{
-                return (end+360)-beg;
-            }
-        }
-        return 0;
-    }
-
-    public void resetAngles() {
-        lastAngles = imu.getAngularOrientation
-                (AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-    }
 
     public void grabGlyph() {
         if (gamepad2.right_bumper) {
@@ -312,149 +173,43 @@ public class teleOpTest extends LinearOpMode {
         }
     }
 
-    public void moveLift() {
-        if (gamepad2.right_stick_y < 0) {
-            desired_lift_val = desired_lift_val - 1000; //Always keep running at power when joystick is moved
-            desired_lift_p = gamepad2.right_stick_y;
-            switch1 = true;
-            switch2 = false;
-            switch3 = true;
-        } else if (gamepad2.right_stick_y > 0) {
-            desired_lift_val = desired_lift_val + 1000;
-            desired_lift_p = gamepad2.right_stick_y;
-            switch1 = true;
-            switch2 = false;
-            switch3 = true;
-        } else {
-            if (switch3) {
-                currentpos = lift.getCurrentPosition();
-                switch3 = false;
-            }
-            if (switch1) { //if we aren't moving our lift at all, have it stay at its last current position
-                //   desired_lift_power = .0;
-                desired_lift_val = currentpos;
-            }
-            if (gamepad2.a) {
-                desired_lift_val = zero_encoder + LEVEL_ONE;
-                desired_lift_p = .7;
-                switch1 = false; //stop making lift stay at its current position
-                switch2 = true;
-                t0 = ctime.milliseconds(); //mark time
-            }
-            if (gamepad2.y) {
-                zero();
-                desired_lift_val = zero_encoder + LEVEL_THREE;
-                desired_lift_p = .7;
-                switch1 = false;
-                switch2 = true;
-                t0 = ctime.milliseconds();
-            }
-            if (gamepad2.x) {
-                zero();
-                desired_lift_val = zero_encoder + LEVEL_TWO;
-                desired_lift_p = .7;
-                switch1 = false;
-                switch2 = true;
-                t0 = ctime.milliseconds();
-            }
-            if (switch2) {
-                if (ctime.milliseconds() < t0 + 1100) {//account for time needed for lift to get to preset value
-                    switch1 = false;
-                } else {
-                    switch1 = true;
-                    switch2 = false;
-                    switch3 = true;
-                }
-            }
-            if (gamepad2.b) {
-                zero_encoder = lift.getCurrentPosition();
-            }
-        }
-        lift.setPower(desired_lift_p);
-        lift.setTargetPosition((int) desired_lift_val);
-    }
 
-    public void moveLift2() {
-        if(Math.abs(gamepad2.right_stick_y) > 0.1) {
-            lift.setPower(gamepad2.right_stick_y);
-            if(gamepad2.right_stick_y > 0) {
-                position += 1000;
-                lift.setTargetPosition(position);
-            }
-            else {
-                position -= 1000;
-                lift.setTargetPosition(position);
-            }
-        }
-        else {
-            if(gamepad2.a) {
-                switch1 = true;
-                if(ctime.milliseconds() < t0 + 1100) {
-                    t0 = ctime.milliseconds();
-                    lift.setPower(0.7);
-                    lift.setTargetPosition((int) LEVEL_ONE);
-                    if(lift.getCurrentPosition() == LEVEL_ONE) {
-                        switch1 = false;
-                    }
-                }
-            }
-            else if(gamepad2.x) {
-                switch1 = true;
-                if(ctime.milliseconds() < t0 + 1100) {
-                    t0 = ctime.milliseconds();
-                    lift.setPower(0.7);
-                    lift.setTargetPosition((int) LEVEL_TWO);
-                    if(lift.getCurrentPosition() == LEVEL_TWO) {
-                        switch1 = false;
-                    }
-                }
-            }
-            else if(gamepad2.y) {
-                switch1 = true;
-                if(ctime.milliseconds() < t0 + 1100) {
-                    t0 = ctime.milliseconds();
-                    lift.setPower(0.7);
-                    lift.setTargetPosition((int) LEVEL_THREE);
-                    if(lift.getCurrentPosition() == LEVEL_THREE) {
-                        switch1 = false;
-                    }
-                }
-            }
-            if(!switch1) {
-                lift.setPower(0.7);
-                lift.setTargetPosition(lift.getCurrentPosition());
-            }
-        }
-    }
 
     public void moveLift4() {
-        if((Math.abs(gamepad2.right_stick_y) > 0.1)) {
-            lift.setPower(gamepad2.right_stick_y);
+        if(gamepad2.right_stick_y > 0 ) {
+            lift.setPower(Range.clip(gamepad2.right_stick_y, .1, 1));
+            moveliftpreset = false;
+        } else if (gamepad2.right_stick_y < 0) {
+            lift.setPower(Range.clip(gamepad2.right_stick_y, -1, -.1));
+            moveliftpreset = false;
         }
         else {
             if(gamepad2.a) {
-                desired_lift_pos = LEVEL_ONE;
+                desired_lift_pos = LIFT_INIT;
+                moveliftpreset = true;
             }
             else if(gamepad2.x) {
-                desired_lift_pos = LEVEL_TWO;
+                desired_lift_pos = LIFT_TWO;
+                stopper.setPosition(STOPPER_STOW);
+                moveliftpreset = true;
             }
             else if(gamepad2.y) {
-                desired_lift_pos = LEVEL_THREE;
+                desired_lift_pos = LIFT_THREE;
+                stopper.setPosition(STOPPER_STOW);
+                moveliftpreset = true;
             }
-            else {
-                desired_lift_pos = lift.getCurrentPosition();
-            }
-            if (Math.abs(lift.getCurrentPosition() - desired_lift_pos) < 0.1) {
-                lift.setPower(0.0);
-            }
-            else {
-                if(lift.getCurrentPosition() > desired_lift_pos) {
-                    lift.setPower(-0.7);
+            if (moveliftpreset) {
+                if (Math.abs(lift.getCurrentPosition() - desired_lift_pos) < 30) {
+                    lift.setPower(0.0);
+                    moveliftpreset = false;
                 }
                 else {
-                    lift.setPower(0.7);
+                    lift.setPower(Math.signum(lift.getCurrentPosition()-desired_lift_pos)*-.7); //May need to be reversed
                 }
+            } else {
+                lift.setPower(.0);
             }
+
         }
     }
 
@@ -474,23 +229,80 @@ public class teleOpTest extends LinearOpMode {
         rintake.setPower(rpower);
         lintake.setPower(lpower);
     }
+    //At grab and zero, the extendstopper and stopper are in stopping form; at zero,
+    //At deposit, the extendstopper and stopper are stowed
 
     public void grab() {
         rflip.setPosition(RFLIP_GRAB);
         lflip.setPosition(LFLIP_GRAB);
-        stopper.setPosition(STOPPER_STOP);
-        grabFlip = false;
+        stopperStopWithDelay();
+        /*if (desired_extendstopper_pos == EXTENDSTOPPER_STOP) {
+            stopper.setPosition(STOPPER_STOP);
+        } else {
+            stopperStopWithDelay();
+        }*/
     }
     public void zero() {
         rflip.setPosition(RFLIP_ZERO);
         lflip.setPosition(LFLIP_ZERO);
-        stopper.setPosition(STOPPER_STOW);
-        grabFlip = true;
+        stopperStopWithDelay();
+        /*if (desired_extendstopper_pos == EXTENDSTOPPER_STOP) {
+            stopper.setPosition(STOPPER_STOW);
+        } else {
+            extendstopper.setPosition(EXTENDSTOPPER_STOP);
+        }*/
+
     }
     public void deposit() {
-        rflip.setPosition(RFLIP_DEPOSIT);
-        lflip.setPosition(LFLIP_DEPOSIT);
-        stopper.setPosition(STOPPER_STOW);
-        grabFlip = true;
+        // rflip.setPosition(RFLIP_DEPOSIT);
+        // lflip.setPosition(LFLIP_DEPOSIT);
+        stopperStowWithDelay();
+       /* if (Math.abs(stopper.getPosition()-STOPPER_STOW) < .03) {
+            extendstopper.setPosition(EXTENDSTOPPER_STOW);
+            rflip.setPosition(RFLIP_DEPOSIT); //Deposits only after both the stopper and extendstopper's been stown away
+            lflip.setPosition(LFLIP_DEPOSIT);
+        } else {
+            stopperStowWithDelay();
+        }*/
+    }
+
+    public void stopperStopWithDelay() {
+        tdeposit = ctime.milliseconds();
+        delaystopper = true;
+        delayextendstopper = false;
+        desired_stopper_delay = 300;
+        desired_stopper_pos = STOPPER_STOP;
+        desired_extendstopper_pos = EXTENDSTOPPER_STOP;
+    }
+    public void stopperStowWithDelay() {
+        tdeposit = ctime.milliseconds();
+        delaystopper = false;
+        delayextendstopper = true;
+        desired_stopper_delay = 300;
+        desired_stopper_pos = STOPPER_STOW;
+        desired_extendstopper_pos = EXTENDSTOPPER_STOW;
+    }
+
+    public void moveStopper() {
+        if (delayextendstopper) {
+            stopper.setPosition(desired_stopper_pos);
+            if (ctime.milliseconds() < tdeposit + desired_stopper_delay)
+            {}
+            else {
+                extendstopper.setPosition(desired_extendstopper_pos);
+                rflip.setPosition(RFLIP_DEPOSIT); //Deposits only after both the stopper and extendstopper's been stown away
+                lflip.setPosition(LFLIP_DEPOSIT);
+                delayextendstopper = false;
+            }
+        }
+        if (delaystopper) {
+            extendstopper.setPosition(desired_extendstopper_pos);
+            if (ctime.milliseconds() < tdeposit + desired_stopper_delay)
+            {}
+            else {
+                stopper.setPosition(desired_stopper_pos);
+                delaystopper = false;
+            }
+        }
     }
 }

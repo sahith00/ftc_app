@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -19,6 +20,7 @@ import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.RelicRecoveryVuMark;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
@@ -36,8 +38,8 @@ public class autoMethods extends LinearOpMode {
     Servo lig;
     Servo cat, knock;
     ColorSensor jewelSensor;
+    DistanceSensor distanceSensor;
     Servo rflip, lflip, stopper;
-    NormalizedColorSensor sensor;
 
     BNO055IMU imu;
     Orientation lastAngles;
@@ -72,14 +74,15 @@ public class autoMethods extends LinearOpMode {
     final static double LIG_STOW = .01999999999999994;
     final static double LIG_HALF_STOW = 0.35944444444444445;
 
-    final static double STOPPER_STOP = 0.0;
-    final static double STOPPER_STOW = 1.0;
+    final static double STOPPER_STOW = 0.0;
     final static double RFLIP_DEPOSIT = 0.07;
     final static double RFLIP_ZERO = 0.640000000000000000001;
     final static double RFLIP_GRAB = 0.679444444444444444445;
     final static double LFLIP_DEPOSIT = 0.91944444444444444445;
     final static double LFLIP_ZERO = 0.319444444444444444445;
     final static double LFLIP_GRAB = 0.269444444444444444443;
+
+    public boolean jewelStow = true;
 
     public double p_turn = .045;//0.008;
     public double i_turn = .002; //.0045; //.003;
@@ -101,13 +104,13 @@ public class autoMethods extends LinearOpMode {
         lig = hardwareMap.servo.get("lig");
         cat = hardwareMap.servo.get("cat");
         knock = hardwareMap.servo.get("knock");
-        jewelSensor = hardwareMap.colorSensor.get("jewelSensor");
+        jewelSensor = hardwareMap.get(ColorSensor.class, "jewelSensor");
+        distanceSensor = hardwareMap.get(DistanceSensor.class, "jewelSensor");
         rintake = hardwareMap.dcMotor.get("rintake");
         lintake = hardwareMap.dcMotor.get("lintake");
         rflip = hardwareMap.servo.get("rflip");
         lflip = hardwareMap.servo.get("lflip");
         stopper = hardwareMap.servo.get("stopper");
-        sensor = hardwareMap.get(NormalizedColorSensor.class, "sensor_color");
 
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
@@ -143,19 +146,17 @@ public class autoMethods extends LinearOpMode {
                 telemetry.addData("Blue", jewelSensor.blue());
                 telemetry.addData("Red", jewelSensor.red());
                 telemetry.update();
-                right();
-                knock.setPosition(KNOCK_CENTER);
-                sleep(200);
+                left();
+                center();
                 stow();
             }
             else if (jewelSensor.red() > jewelSensor.blue()) {
                 telemetry.addData("Blue", jewelSensor.blue());
                 telemetry.addData("Red", jewelSensor.red());
                 telemetry.update();
-                left();
-                knock.setPosition(KNOCK_CENTER);
-                sleep(200);
-                stow();
+                right();
+                center();
+                jewelStow = false;
             }
             else {
                 stow();
@@ -166,19 +167,17 @@ public class autoMethods extends LinearOpMode {
                 telemetry.addData("Blue", jewelSensor.blue());
                 telemetry.addData("Red", jewelSensor.red());
                 telemetry.update();
-                right();
-                knock.setPosition(KNOCK_CENTER);
-                sleep(200);
+                left();
+                center();
                 stow();
             }
             else if (jewelSensor.blue() > jewelSensor.red()) {
                 telemetry.addData("Blue", jewelSensor.blue());
                 telemetry.addData("Red", jewelSensor.red());
                 telemetry.update();
-                left();
-                knock.setPosition(KNOCK_CENTER);
-                sleep(200);
-                stow();
+                right();
+                center();
+                jewelStow = false;
             }
             else {
                 stow();
@@ -193,6 +192,7 @@ public class autoMethods extends LinearOpMode {
         sleep(200);
         cat.setPosition(CAT_STOW);
         sleep(200);
+        jewelStow = true;
     }
 
     public void extend() {
@@ -214,14 +214,78 @@ public class autoMethods extends LinearOpMode {
         sleep(200);
     }
 
+    public void center() {
+        knock.setPosition(KNOCK_CENTER);
+        sleep(200);
+    }
+
     //----------------------------------------------------------------------------------------------
 
     //GLYPH FUNCTIONS-------------------------------------------------------------------------------
-    public void doImage(String image, double rturn, double lturn, double cturn) {
-        if (image.equals("R")) {
-        } else if (image.equals("L")) {
-        } else {
+    public void doImageClose(String team, String image, double rturn, double lturn, double cturn) {
+        if(team.equals("BLUE")) {
+            while (checkDistance() == 0 && opModeIsActive()) {
+                drive(0.7);
+            }
+            drive(0.0);
+            while (jewelSensor.blue() < 250 && opModeIsActive()) {
+                drive(0.3);
+            }
+            drive(0.0);
+            while (checkDistance() != 0 && opModeIsActive()) {
+                strafe(0.3);
+            }
+            strafe(0.0);
         }
+        else if(team.equals("RED")) {
+
+        }
+
+        if (image.equals("R")) {
+            turn(rturn, 3.5);
+            driveDistance(5, 0.3);
+            sleep(500);
+            outtake();
+            sleep(500);
+            driveDistance(-5, -0.2);
+            sleep(500);
+            driveDistance(5, 0.3);
+            sleep(500);
+            driveDistance(-5, -0.2);
+        } else if (image.equals("L")) {
+            turn(lturn, 3.5);
+            driveDistance(5, 0.3);
+            sleep(500);
+            outtake();
+            sleep(500);
+            driveDistance(-5, -0.2);
+            sleep(500);
+            driveDistance(5, 0.3);
+            sleep(500);
+            driveDistance(-5, -0.2);
+        } else {
+            turn(cturn, 3.5);
+            driveDistance(4, 0.3);
+            sleep(500);
+            outtake();
+            sleep(500);
+            driveDistance(-4, -0.2);
+            sleep(500);
+            driveDistance(5, 0.3);
+            sleep(500);
+            driveDistance(-5, -0.2);
+        }
+    }
+
+    public double checkDistance() {
+        double dist = 0;
+        try {
+            dist = distanceSensor.getDistance(DistanceUnit.CM);
+        }
+        catch (NullPointerException npe) {
+            return 0;
+        }
+        return dist;
     }
 
     public String doVuforia() {
@@ -306,17 +370,14 @@ public class autoMethods extends LinearOpMode {
     public void grab() {
         rflip.setPosition(RFLIP_GRAB);
         lflip.setPosition(LFLIP_GRAB);
-        stopper.setPosition(STOPPER_STOW);
     }
     public void zero() {
         rflip.setPosition(RFLIP_ZERO);
         lflip.setPosition(LFLIP_ZERO);
-        stopper.setPosition(STOPPER_STOW);
     }
     public void deposit() {
         rflip.setPosition(RFLIP_DEPOSIT);
         lflip.setPosition(LFLIP_DEPOSIT);
-        stopper.setPosition(STOPPER_STOW);
     }
 
     public void grabGlyph(double power) {
@@ -326,7 +387,7 @@ public class autoMethods extends LinearOpMode {
     //----------------------------------------------------------------------------------------------
 
     //DRIVE FUNCTIONS-------------------------------------------------------------------------------
-    public void drive(double distance, double maxpower) {
+    public void driveDistance(double distance, double maxpower) {
         if (distance < 0) {
             int ticks;
             int old_ticks = fl.getCurrentPosition();
@@ -363,6 +424,20 @@ public class autoMethods extends LinearOpMode {
             br.setPower(0);
             bl.setPower(0);
         }
+    }
+
+    public void drive(double maxpower) {
+        fr.setPower(maxpower);
+        fl.setPower(maxpower);
+        br.setPower(maxpower);
+        bl.setPower(maxpower);
+    }
+
+    public void strafe(double maxpower) {
+        fr.setPower(maxpower);
+        fl.setPower(-maxpower);
+        br.setPower(-maxpower);
+        bl.setPower(maxpower);
     }
 
     public void turn(double degree, double margin) {
@@ -456,23 +531,3 @@ public class autoMethods extends LinearOpMode {
         while(opModeIsActive()){}
     }
 }
-//    turn(rturn, 3.5);
-//    drive(5, 0.3);
-//    sleep(500);
-//    outtake();
-//    sleep(500);
-//    drive(-5, -0.2);
-//    sleep(500);
-//    drive(5, 0.3);
-//    sleep(500);
-//    drive(-5, -0.2);
-//    turn(cturn, 3.5);
-//    drive(4, 0.3);
-//    sleep(500);
-//    outtake();
-//    sleep(500);
-//    drive(-4, -0.2);
-//    sleep(500);
-//    drive(5, 0.3);
-//    sleep(500);
-//    drive(-5, -0.2);

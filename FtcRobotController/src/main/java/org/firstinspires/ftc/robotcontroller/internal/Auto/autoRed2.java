@@ -25,6 +25,8 @@ public class autoRed2 extends autoMethods {
         sleep(250);
         lig.setPosition(LIG_STOW);
         sleep(250);
+        stopper.setPosition(STOPPER_STOW);
+        sleep(250);
 
         zero();
 
@@ -41,28 +43,5 @@ public class autoRed2 extends autoMethods {
         imageDetected = doVuforia();
 
 
-
-
-
-//        drive(11, 0.4);
-//        sleep(500);
-//        turn(-90, 3.5);
-//        sleep(500);
-//        double tempt = runtime.milliseconds();
-//        fr.setPower(0.4);
-//        fl.setPower(0.4);
-//        br.setPower(0.4);
-//        bl.setPower(0.4);
-//        while(tempt + 5000 > runtime.milliseconds()) {
-//        }
-//        fr.setPower(0.0);
-//        fl.setPower(0.0);
-//        br.setPower(0.0);
-//        bl.setPower(0.0);
-//        sleep(500);
-//        drive(-18, -0.4);
-//        sleep(500);
-//        doImage(imageDetected, -25, 25, 0);
-//        glyphAutoFar(25, -35);
     }
 }

@@ -25,6 +25,8 @@ public class autoBlue extends autoMethods {
         sleep(250);
         lig.setPosition(LIG_STOW);
         sleep(250);
+        stopper.setPosition(STOPPER_STOW);
+        sleep(250);
 
         zero();
 
@@ -39,13 +41,9 @@ public class autoBlue extends autoMethods {
 
         jewelAuto("BLUE");
         imageDetected = doVuforia();
-        drive(-10, -0.5);
+        driveDistance(-10, -0.5);
         //drive up to cryptobox with touch sensor
 
 
-//        drive(-23, -0.4);
-//        sleep(1000);
-//        doImage(imageDetected, -114, -62, -90);
-//        glyphAutoClose(imageDetected, -110, -62, -88);
     }
 }

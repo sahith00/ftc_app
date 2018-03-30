@@ -25,6 +25,8 @@ public class autoRed extends autoMethods {
         sleep(250);
         lig.setPosition(LIG_STOW);
         sleep(250);
+        stopper.setPosition(STOPPER_STOW);
+        sleep(250);
 
         zero();
 
@@ -39,12 +41,8 @@ public class autoRed extends autoMethods {
 
         jewelAuto("RED");
         imageDetected = doVuforia();
-        drive(10, 0.5);
+        driveDistance(10, 0.5);
 
 
-//        drive(23, 0.4);
-//        sleep(1000);
-//        doImage(imageDetected, -116, -65, -90);
-//        glyphAutoClose(imageDetected, -116, -65, -90);
     }
 }
