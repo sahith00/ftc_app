@@ -43,12 +43,10 @@ import org.firstinspires.ftc.robotcontroller.internal.Auto.glyphAutoTest;
 import org.firstinspires.ftc.robotcontroller.internal.Auto.jewelAutoBlue;
 import org.firstinspires.ftc.robotcontroller.internal.Auto.jewelAutoRed;
 import org.firstinspires.ftc.robotcontroller.internal.Tests.encoderCountTest;
-import org.firstinspires.ftc.robotcontroller.internal.Tests.grabberTest;
 import org.firstinspires.ftc.robotcontroller.internal.Tests.intakeTest;
 import org.firstinspires.ftc.robotcontroller.internal.Tests.jewelAutoTest;
 import org.firstinspires.ftc.robotcontroller.internal.Tests.liftTest;
 import org.firstinspires.ftc.robotcontroller.internal.Tests.revIMUTest;
-import org.firstinspires.ftc.robotcontroller.internal.Tests.revSensorTest;
 import org.firstinspires.ftc.robotcontroller.internal.Tests.sensorTest;
 import org.firstinspires.ftc.robotcontroller.internal.Tests.servoTest;
 import org.firstinspires.ftc.robotcontroller.internal.Tests.simpleEncoderCountTest;
@@ -89,7 +87,7 @@ public class FtcOpModeRegister implements OpModeRegister {
 
         manager.register(new OpModeMeta("encoder test", Flavor.AUTONOMOUS), encoderCountTest.class);
         manager.register(new OpModeMeta("simple encoder test", Flavor.AUTONOMOUS), simpleEncoderCountTest.class);
-        manager.register(new OpModeMeta("Jewel Auto (Scrim)", Flavor.AUTONOMOUS), jewelAutoTest.class);
+        manager.register(new OpModeMeta("Jewel Auto Test", Flavor.AUTONOMOUS), jewelAutoTest.class);
         manager.register(new OpModeMeta("Glyph Auto Test", Flavor.AUTONOMOUS), glyphAutoTest.class);
         manager.register(new OpModeMeta("Close Auto Red", Flavor.AUTONOMOUS), autoRed.class);
         manager.register(new OpModeMeta("Close Auto Blue", Flavor.AUTONOMOUS), autoBlue.class);
@@ -99,11 +97,9 @@ public class FtcOpModeRegister implements OpModeRegister {
         manager.register(new OpModeMeta("Jewel Auto Red", Flavor.AUTONOMOUS), jewelAutoRed.class);
         manager.register("TeleOp", teleOp.class);
         manager.register("test Tele", teleOpTest.class);
-        manager.register("grabber test", grabberTest.class);
         manager.register("servo test", servoTest.class);
-        manager.register("rev sensor test", revSensorTest.class);
+        manager.register("sensor test", sensorTest.class);
         manager.register("Rev IMU test", revIMUTest.class);
-        manager.register("drive test", teleOpTest.class);
         manager.register("intake test", intakeTest.class);
         manager.register("lift test", liftTest.class);
     }

@@ -146,7 +146,23 @@ public class teleOp extends LinearOpMode{
                     }
                 }
             }
-            mecanum(gamepad1.left_stick_y, gamepad1.left_stick_x, -(gamepad1.right_stick_x), multiplier);
+            if(!(farpid || closepid)) {
+                mecanum(gamepad1.left_stick_y, gamepad1.left_stick_x, -(gamepad1.right_stick_x), multiplier);
+            }
+            if(gamepad1.right_stick_button) {
+                closepid = true;
+                farpid = false;
+            }
+            if(gamepad1.left_stick_button) {
+                farpid = true;
+                closepid = false;
+            }
+            if(farpid) {
+                turn(FAR_ANGLE, 3.5);
+            }
+            if(closepid) {
+                turn(CLOSE_ANGLE, 3.5);
+            }
             //-----------------------------------------------------------------------------
             // GRAB RELIC AND DEPOSIT
             if(!glyphMode) {
@@ -160,18 +176,6 @@ public class teleOp extends LinearOpMode{
                 flip();
                 moveLift();
                 moveStopper();
-                if(gamepad1.right_stick_button) {
-                    farpid = true;
-                }
-                if(gamepad1.left_stick_button) {
-                    closepid = true;
-                }
-                if(farpid) {
-                    turn(FAR_ANGLE, 3.5);
-                }
-                if(closepid) {
-                    turn(CLOSE_ANGLE, 3.5);
-                }
             }
             //-----------------------------------------------------------------------------
             // TELEMETRY
@@ -422,19 +426,24 @@ public class teleOp extends LinearOpMode{
     public void moveStopper() {
         if (delayextendstopper) {
             stopper.setPosition(desired_stopper_pos);
-            if (stoppertime.milliseconds() < changeStopperT + desired_stopper_delay) {}
-            else {
-                rflip.setPosition(RFLIP_DEPOSIT); //Deposits only after both the stopper and extendstopper's been stown away
-                lflip.setPosition(LFLIP_DEPOSIT);
+            if (sleeptime.milliseconds() > changeStopperT + desired_stopper_delay) {
+                changeStopperT = sleeptime.milliseconds();
                 extendstopper.setPosition(desired_extendstopper_pos);
+                if (deposit) { //Deposit boolean is here because we want to have the stopper move but the flipper stay where it is.
+                    rflip.setPosition(RFLIP_DEPOSIT); //Deposits only after both the stopper and extendstopper's been stown away
+                    lflip.setPosition(LFLIP_DEPOSIT);
+                    if (!preflip) {
+                        bottomgrab.setPosition(BOTTOMGRAB_STOW);
+                    }
+                    deposit = false;
+                }
                 delayextendstopper = false;
             }
         }
         if (delaystopper) {
             extendstopper.setPosition(desired_extendstopper_pos);
-            if (stoppertime.milliseconds() < changeStopperT + desired_stopper_delay)
-            {}
-            else {
+            if (sleeptime.milliseconds() > changeStopperT + desired_stopper_delay) {
+                changeStopperT = sleeptime.milliseconds();
                 stopper.setPosition(desired_stopper_pos);
                 delaystopper = false;
             }

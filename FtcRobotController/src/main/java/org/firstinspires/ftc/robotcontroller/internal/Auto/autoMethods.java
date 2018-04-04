@@ -10,7 +10,6 @@ import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
-import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
@@ -241,40 +240,42 @@ public class autoMethods extends LinearOpMode {
 
         }
 
-        if (image.equals("R")) {
-            turn(rturn, 3.5);
-            driveDistance(5, 0.3);
-            sleep(500);
-            outtake();
-            sleep(500);
-            driveDistance(-5, -0.2);
-            sleep(500);
-            driveDistance(5, 0.3);
-            sleep(500);
-            driveDistance(-5, -0.2);
-        } else if (image.equals("L")) {
-            turn(lturn, 3.5);
-            driveDistance(5, 0.3);
-            sleep(500);
-            outtake();
-            sleep(500);
-            driveDistance(-5, -0.2);
-            sleep(500);
-            driveDistance(5, 0.3);
-            sleep(500);
-            driveDistance(-5, -0.2);
-        } else {
-            turn(cturn, 3.5);
-            driveDistance(4, 0.3);
-            sleep(500);
-            outtake();
-            sleep(500);
-            driveDistance(-4, -0.2);
-            sleep(500);
-            driveDistance(5, 0.3);
-            sleep(500);
-            driveDistance(-5, -0.2);
-        }
+        stow();
+
+//        if (image.equals("R")) {
+//            turn(rturn, 3.5);
+//            driveDistance(5, 0.3);
+//            sleep(500);
+//            outtake();
+//            sleep(500);
+//            driveDistance(-5, -0.2);
+//            sleep(500);
+//            driveDistance(5, 0.3);
+//            sleep(500);
+//            driveDistance(-5, -0.2);
+//        } else if (image.equals("L")) {
+//            turn(lturn, 3.5);
+//            driveDistance(5, 0.3);
+//            sleep(500);
+//            outtake();
+//            sleep(500);
+//            driveDistance(-5, -0.2);
+//            sleep(500);
+//            driveDistance(5, 0.3);
+//            sleep(500);
+//            driveDistance(-5, -0.2);
+//        } else {
+//            turn(cturn, 3.5);
+//            driveDistance(4, 0.3);
+//            sleep(500);
+//            outtake();
+//            sleep(500);
+//            driveDistance(-4, -0.2);
+//            sleep(500);
+//            driveDistance(5, 0.3);
+//            sleep(500);
+//            driveDistance(-5, -0.2);
+//        }
     }
 
     public double checkDistance() {
