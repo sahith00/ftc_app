@@ -28,7 +28,7 @@ public class teleOp extends LinearOpMode{
     DcMotor rintake, lintake;
 
     Servo cat, knock;
-    Servo rflip, lflip, stopper, extendstopper;
+    Servo rflip, lflip, stopper, extendstopper, bottomgrab, topgrab;
     Servo lig, claw;
 
     BNO055IMU imu;
@@ -37,6 +37,10 @@ public class teleOp extends LinearOpMode{
     final static double CAT_STOW = 0.85944444444444444444; // during teleop after intialization subtract 0.01
     final static double KNOCK_STOW = .42;
 
+    final static double BOTTOMGRAB_GRAB = 0;
+    final static double BOTTOMGRAB_STOW = .165;
+    final static double TOPGRAB_GRAB = 0.06;
+    final static double TOPGRAB_STOW = .215;
     final static double STOPPER_STOP = 0.5;
     final static double STOPPER_STOW = 0.0;
     final static double EXTENDSTOPPER_STOW = 0;
@@ -62,12 +66,13 @@ public class teleOp extends LinearOpMode{
     final static double LEVEL_TWO = -1140;
     final static double LEVEL_THREE = -1650;
 
-    double changeModeT = 0, changeMultiT = 0, changeClawT = 0, changeStopperT = 0;
+    double changeModeT = 0, changeMultiT = 0, changeClawT = 0, changeStopperT = 0, changePreFlipGrabberT = 0, changePreFlipModeT = 0;
     double intakep = 0;
     double multiplier = 1.0;
     double clawPos = CLAW_STOW;
     boolean glyphMode = true;
     boolean farpid = false, closepid = false;
+    boolean preflip = true, preflipgrab = false, zero = false, deposit = false;
 
     double desired_stopper_pos, desired_extendstopper_pos;
     double desired_stopper_delay;
@@ -104,6 +109,8 @@ public class teleOp extends LinearOpMode{
         lflip = hardwareMap.servo.get("lflip");
         stopper = hardwareMap.servo.get("stopper");
         extendstopper = hardwareMap.servo.get("extendstopper");
+        bottomgrab = hardwareMap.servo.get("bottomgrab");
+        topgrab = hardwareMap.servo.get("topgrab");
 
         cat = hardwareMap.servo.get("cat");
         knock = hardwareMap.servo.get("knock");
@@ -118,14 +125,14 @@ public class teleOp extends LinearOpMode{
             cat.setPosition(CAT_STOW-.01);
             knock.setPosition(KNOCK_STOW);
 
-            if (gamepad1.b && (sleeptime.milliseconds() > (changeModeT+250))) {
+            if (gamepad1.right_bumper && (sleeptime.milliseconds() > (changeModeT+250))) {
                 changeModeT = sleeptime.milliseconds();
                 glyphMode = !glyphMode;
             }
             //-----------------------------------------------------------------------------
             // DRIVE ROBOT
             if(glyphMode) {
-                multiplier = Range.clip(Math.pow(1 - gamepad1.left_trigger, 2), 0.3, 1);
+                multiplier = -Range.clip(gamepad1.left_trigger - 1, -1, -0.3);
             }
             else {
                 multiplier = 1.0;
@@ -145,18 +152,6 @@ public class teleOp extends LinearOpMode{
             if(!glyphMode) {
                 relicLift.setPower(Math.pow(gamepad1.right_trigger - gamepad1.left_trigger, 3));
                 moveRelicArm();
-                if(gamepad1.left_bumper) {
-                    farpid = true;
-                }
-                if(gamepad1.right_bumper) {
-                    closepid = true;
-                }
-                if(farpid) {
-                    turn(FAR_ANGLE, 3.5);
-                }
-                if(closepid) {
-                    turn(CLOSE_ANGLE, 3.5);
-                }
             }
             //-----------------------------------------------------------------------------
             // GRAB GLYPH AND DEPOSIT
@@ -165,6 +160,18 @@ public class teleOp extends LinearOpMode{
                 flip();
                 moveLift();
                 moveStopper();
+                if(gamepad1.right_stick_button) {
+                    farpid = true;
+                }
+                if(gamepad1.left_stick_button) {
+                    closepid = true;
+                }
+                if(farpid) {
+                    turn(FAR_ANGLE, 3.5);
+                }
+                if(closepid) {
+                    turn(CLOSE_ANGLE, 3.5);
+                }
             }
             //-----------------------------------------------------------------------------
             // TELEMETRY
@@ -183,7 +190,11 @@ public class teleOp extends LinearOpMode{
         if (gamepad2.left_bumper) {
             intakep = .0;
         }
-        if (gamepad2.right_trigger > 0.85 || gamepad2.left_trigger > 0.85 || gamepad1.right_trigger > 0.1) {
+        if (gamepad1.right_trigger > 0.1) {
+            runIntake(-1.0 * Math.signum(gamepad1.right_trigger)
+                    , -1.0 * Math.signum(gamepad1.right_trigger));
+        }
+        else if (gamepad2.right_trigger > 0.85 || gamepad2.left_trigger > 0.85) {
             runIntake(-1.0 * Math.signum(gamepad2.right_trigger)
                     , -1.0 * Math.signum(gamepad2.left_trigger));
         }
@@ -206,6 +217,19 @@ public class teleOp extends LinearOpMode{
         if (gamepad1.y || gamepad2.dpad_up) { //deposit position, when we're depositing cubes
             deposit();
         }
+        if (gamepad1.b && sleeptime.milliseconds() > changePreFlipGrabberT + 250) {
+            changePreFlipGrabberT = sleeptime.milliseconds();
+            preflipgrab = !preflipgrab;
+            if (preflipgrab) {
+                preFlipGrab();
+            } else {
+                preFlipStow();
+            }
+        }
+        if (gamepad1.left_bumper && sleeptime.milliseconds() > changePreFlipModeT + 250) { //toggle to switch between PreFlip and Regular Flipper
+            changePreFlipModeT = sleeptime.milliseconds();
+            preflip = !preflip;
+        }
     }
 
     public void runIntake(double rpower, double lpower) {
@@ -214,18 +238,57 @@ public class teleOp extends LinearOpMode{
     }
 
     public void grab() {
+        preFlipStow();
         rflip.setPosition(RFLIP_GRAB);
         lflip.setPosition(LFLIP_GRAB);
-        stopperStopWithDelay();
+        //  stopperStopWithDelay();
+        if (zero) {
+            stopper.setPosition(STOPPER_STOP);
+            zero = false;
+        } else {
+            stopperStopWithDelay();
+        }
     }
     public void zero() {
+        zero = true;
+        preFlipGrab();
         rflip.setPosition(RFLIP_ZERO);
         lflip.setPosition(LFLIP_ZERO);
+        if (Math.abs(extendstopper.getPosition() - EXTENDSTOPPER_STOP) < 0.03) {//desired_extendstopper_pos == EXTENDSTOPPER_STOP
+            stopper.setPosition(STOPPER_STOW);
+        } else {
+            extendstopper.setPosition(EXTENDSTOPPER_STOP);
+        }
     }
     public void deposit() {
         // rflip.setPosition(RFLIP_DEPOSIT);
         // lflip.setPosition(LFLIP_DEPOSIT);
-        stopperStowWithDelay();
+        deposit = true;
+        preflipgrab = true;
+        preFlipGrab();
+        // stopperStowWithDelay();
+        if (zero) {
+            extendstopper.setPosition(EXTENDSTOPPER_STOW);
+            rflip.setPosition(RFLIP_DEPOSIT); //Deposits only after both the stopper and extendstopper's been stown away
+            lflip.setPosition(LFLIP_DEPOSIT);
+            zero = false;
+        } else {
+            stopperStowWithDelay();
+        }
+    }
+
+    public void preFlipGrab() {
+        if (preflip) {
+            bottomgrab.setPosition(BOTTOMGRAB_GRAB);
+            topgrab.setPosition(TOPGRAB_GRAB);
+        } else {
+            bottomgrab.setPosition(BOTTOMGRAB_GRAB);
+            topgrab.setPosition(TOPGRAB_STOW);
+        }
+    }
+    public void preFlipStow() {
+        bottomgrab.setPosition(BOTTOMGRAB_STOW);
+        topgrab.setPosition(TOPGRAB_STOW);
     }
 
     public void moveRelicArm() {
@@ -359,12 +422,11 @@ public class teleOp extends LinearOpMode{
     public void moveStopper() {
         if (delayextendstopper) {
             stopper.setPosition(desired_stopper_pos);
-            if (stoppertime.milliseconds() < changeStopperT + desired_stopper_delay)
-            {}
+            if (stoppertime.milliseconds() < changeStopperT + desired_stopper_delay) {}
             else {
-                extendstopper.setPosition(desired_extendstopper_pos);
                 rflip.setPosition(RFLIP_DEPOSIT); //Deposits only after both the stopper and extendstopper's been stown away
                 lflip.setPosition(LFLIP_DEPOSIT);
+                extendstopper.setPosition(desired_extendstopper_pos);
                 delayextendstopper = false;
             }
         }
@@ -455,5 +517,7 @@ public class teleOp extends LinearOpMode{
         knock.setPosition(KNOCK_STOW);
         lig.setPosition(LIG_HALF_STOW);
         claw.setPosition(CLAW_STOW);
+
+        startDegreeController();
     }
 }

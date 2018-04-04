@@ -43,6 +43,7 @@ public class autoBlue extends autoMethods {
         imageDetected = doVuforia();
         driveDistance(-10, -0.5);
         //drive up to cryptobox with touch sensor
+        doImageClose("BLUE", imageDetected, 94, 140, 120);
 
 
     }
