@@ -51,6 +51,7 @@ import org.firstinspires.ftc.robotcontroller.internal.Tests.sensorTest;
 import org.firstinspires.ftc.robotcontroller.internal.Tests.servoTest;
 import org.firstinspires.ftc.robotcontroller.internal.Tests.simpleEncoderCountTest;
 import org.firstinspires.ftc.robotcontroller.internal.Tests.teleOpTest;
+import org.firstinspires.ftc.robotcontroller.internal.Tests.turnTest;
 import org.firstinspires.ftc.robotcore.internal.opmode.OpModeMeta;
 import org.firstinspires.ftc.robotcore.internal.opmode.OpModeMeta.Flavor;
 
@@ -102,5 +103,6 @@ public class FtcOpModeRegister implements OpModeRegister {
         manager.register("Rev IMU test", revIMUTest.class);
         manager.register("intake test", intakeTest.class);
         manager.register("lift test", liftTest.class);
+        manager.register("Turn test", turnTest.class);
     }
 }

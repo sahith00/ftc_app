@@ -34,23 +34,23 @@ public class teleOp extends LinearOpMode{
     BNO055IMU imu;
     Orientation lastAngles;
 
-    final static double CAT_STOW = 0.85944444444444444444; // during teleop after intialization subtract 0.01
-    final static double KNOCK_STOW = .42;
+    final static double CAT_STOW = 0.619444444444444444445;
+    final static double KNOCK_CENTER = 0.60000000000000001;
 
-    final static double BOTTOMGRAB_GRAB = 0;
-    final static double BOTTOMGRAB_STOW = .165;
-    final static double TOPGRAB_GRAB = 0.06;
+    final static double BOTTOMGRAB_GRAB = 0.0;
+    final static double BOTTOMGRAB_STOW = .215;
+    final static double TOPGRAB_GRAB = 0.0;
     final static double TOPGRAB_STOW = .215;
     final static double STOPPER_STOP = 0.5;
     final static double STOPPER_STOW = 0.0;
     final static double EXTENDSTOPPER_STOW = 0;
     final static double EXTENDSTOPPER_STOP = 0.5;
-    final static double RFLIP_DEPOSIT = 0.069444444444444448;//new grab positions were tested so that the edge of the flipper towards the intake was in line with the top edge of the ramp
-    final static double RFLIP_ZERO = 0.629444444444444444445;
-    final static double RFLIP_GRAB = 0.659444444444444445;//0.679444444444444444445;
-    final static double LFLIP_DEPOSIT = 0.93;
-    final static double LFLIP_ZERO = 0.359444444444444444445;
-    final static double LFLIP_GRAB = 0.32;//0.299444444444444444446;
+    final static double RFLIP_DEPOSIT = 0.159444444444444444;//new grab positions were tested so that the edge of the flipper towards the intake was in line with the top edge of the ramp
+    final static double RFLIP_ZERO = 0.679444444444444444445;
+    final static double RFLIP_GRAB = 0.759444444444444446;//0.679444444444444444445;
+    final static double LFLIP_DEPOSIT = 0.859444444444444445;
+    final static double LFLIP_ZERO = 0.269444444444444444443;
+    final static double LFLIP_GRAB = 0.209444444444444445;//0.299444444444444444446;
 
     final static double LIG_STOW = .01999999999999994;
     final static double LIG_GRAB = .8094444444444444444 + 0.04;//.899444444444444444445;
@@ -66,13 +66,15 @@ public class teleOp extends LinearOpMode{
     final static double LEVEL_TWO = -1140;
     final static double LEVEL_THREE = -1650;
 
-    double changeModeT = 0, changeMultiT = 0, changeClawT = 0, changeStopperT = 0, changePreFlipGrabberT = 0, changePreFlipModeT = 0;
+    double changeModeT = 0, changeMultiT = 0, changeClawT = 0, changeStopperT = 0,
+            changePreFlipGrabberT = 0, changePreFlipModeT = 0, changeIntakeModeT = 0;
     double intakep = 0;
     double multiplier = 1.0;
     double clawPos = CLAW_STOW;
     boolean glyphMode = true;
     boolean farpid = false, closepid = false;
     boolean preflip = true, preflipgrab = false, zero = false, deposit = false;
+    boolean autointake = true;
 
     double desired_stopper_pos, desired_extendstopper_pos;
     double desired_stopper_delay;
@@ -122,8 +124,8 @@ public class teleOp extends LinearOpMode{
         waitForStart();
 
         while(opModeIsActive()) {
-            cat.setPosition(CAT_STOW-.01);
-            knock.setPosition(KNOCK_STOW);
+            cat.setPosition(CAT_STOW);
+            knock.setPosition(KNOCK_CENTER);
 
             if (gamepad1.right_bumper && (sleeptime.milliseconds() > (changeModeT+250))) {
                 changeModeT = sleeptime.milliseconds();
@@ -132,7 +134,7 @@ public class teleOp extends LinearOpMode{
             //-----------------------------------------------------------------------------
             // DRIVE ROBOT
             if(glyphMode) {
-                multiplier = -Range.clip(gamepad1.left_trigger - 1, -1, -0.3);
+                multiplier = -Range.clip(gamepad1.left_trigger - 1, -1, -0.4);
             }
             else {
                 multiplier = 1.0;
@@ -147,7 +149,7 @@ public class teleOp extends LinearOpMode{
                 }
             }
             if(!(farpid || closepid)) {
-                mecanum(gamepad1.left_stick_y, gamepad1.left_stick_x, -(gamepad1.right_stick_x), multiplier);
+                mecanum(gamepad1.left_stick_y, -gamepad1.left_stick_x, -(gamepad1.right_stick_x), multiplier);
             }
             if(gamepad1.right_stick_button) {
                 closepid = true;
@@ -176,9 +178,16 @@ public class teleOp extends LinearOpMode{
                 flip();
                 moveLift();
                 moveStopper();
+                if(autointake) {
+                    runAutoIntake();
+                }
+                if(gamepad2.left_stick_button) {
+                    autointake = true;
+                }
             }
             //-----------------------------------------------------------------------------
             // TELEMETRY
+            telemetry.addData("Drive Encoder Count: ", fr.getCurrentPosition());
             telemetry.addData("Lift Encoder Count: ", lift.getCurrentPosition());
             telemetry.addData("Lift Power", lift.getPower());
             telemetry.addData("Intake power", intakep);
@@ -190,24 +199,31 @@ public class teleOp extends LinearOpMode{
     public void grabGlyph() {
         if (gamepad2.right_bumper) {
             intakep = 1.0;
+            autointake = false;
         }
         if (gamepad2.left_bumper) {
             intakep = .0;
+            autointake = false;
         }
         if (gamepad1.right_trigger > 0.1) {
             runIntake(-1.0 * Math.signum(gamepad1.right_trigger)
                     , -1.0 * Math.signum(gamepad1.right_trigger));
+            autointake = false;
         }
         else if (gamepad2.right_trigger > 0.85 || gamepad2.left_trigger > 0.85) {
             runIntake(-1.0 * Math.signum(gamepad2.right_trigger)
                     , -1.0 * Math.signum(gamepad2.left_trigger));
+            autointake = false;
         }
         else if (gamepad2.right_trigger > 0 || gamepad2.left_trigger > 0) {
             runIntake(-0.5 * Math.signum(gamepad2.right_trigger)
                     , -0.5 * Math.signum(gamepad2.left_trigger));
+            autointake = false;
         }
         else {
-            runIntake(intakep, intakep);
+            if(!autointake) {
+                runIntake(intakep, intakep);
+            }
         }
     }
 
@@ -221,7 +237,10 @@ public class teleOp extends LinearOpMode{
         if (gamepad1.y || gamepad2.dpad_up) { //deposit position, when we're depositing cubes
             deposit();
         }
-        if (gamepad1.b && sleeptime.milliseconds() > changePreFlipGrabberT + 250) {
+        if (gamepad2.b) {
+            preFlipGrab();
+        }
+        if ((gamepad1.b && sleeptime.milliseconds() > changePreFlipGrabberT + 250)) {
             changePreFlipGrabberT = sleeptime.milliseconds();
             preflipgrab = !preflipgrab;
             if (preflipgrab) {
@@ -239,6 +258,15 @@ public class teleOp extends LinearOpMode{
     public void runIntake(double rpower, double lpower) {
         rintake.setPower(rpower);
         lintake.setPower(lpower);
+    }
+
+    public void runAutoIntake() {
+        if(lift.getCurrentPosition() > LEVEL_ONE || deposit) {
+            runIntake(-1.0, -1.0);
+        }
+        else {
+            runIntake(1.0, 1.0);
+        }
     }
 
     public void grab() {
@@ -275,6 +303,9 @@ public class teleOp extends LinearOpMode{
             extendstopper.setPosition(EXTENDSTOPPER_STOW);
             rflip.setPosition(RFLIP_DEPOSIT); //Deposits only after both the stopper and extendstopper's been stown away
             lflip.setPosition(LFLIP_DEPOSIT);
+            if (!preflip) {
+                topgrab.setPosition(TOPGRAB_STOW);
+            }
             zero = false;
         } else {
             stopperStowWithDelay();
@@ -286,8 +317,8 @@ public class teleOp extends LinearOpMode{
             bottomgrab.setPosition(BOTTOMGRAB_GRAB);
             topgrab.setPosition(TOPGRAB_GRAB);
         } else {
-            bottomgrab.setPosition(BOTTOMGRAB_GRAB);
-            topgrab.setPosition(TOPGRAB_STOW);
+            bottomgrab.setPosition(BOTTOMGRAB_STOW);
+            topgrab.setPosition(TOPGRAB_GRAB);
         }
     }
     public void preFlipStow() {
@@ -326,16 +357,21 @@ public class teleOp extends LinearOpMode{
         double temp_max = Math.max(Math.abs(v1), Math.abs(v2));
         double temp_max2 = Math.max(temp_max, Math.abs(v3));
         double max = Math.max(temp_max2, Math.abs(v4));
+        if((v1 > 0 && v2 > 0 && v3 > 0 && v4 > 0) || (v1 < 0 && v2 < 0 && v3 < 0 && v4 < 0)) {
+            if(multiplier < 0.5) {
+                multiplier = 0.5;
+            }
+        }
         if (max > 1) {
-            fl.setPower(multiplier * (Math.pow(v1/max, 3.0)));
-            fr.setPower(multiplier * (Math.pow(v2/max, 3.0)));
-            bl.setPower(multiplier * (Math.pow(v3/max, 3.0)));
-            br.setPower(multiplier * (Math.pow(v4/max, 3.0)));
+            fl.setPower(multiplier * v1/max);
+            fr.setPower(multiplier * v2/max);
+            bl.setPower(multiplier * v3/max);
+            br.setPower(multiplier * v4/max);
         } else {
-            fl.setPower(multiplier*(Math.pow(v1, 3.0)));
-            fr.setPower(multiplier*(Math.pow(v2, 3.0)));
-            bl.setPower(multiplier*(Math.pow(v3, 3.0)));
-            br.setPower(multiplier*(Math.pow(v4, 3.0)));
+            fl.setPower(multiplier * v1);
+            fr.setPower(multiplier * v2);
+            bl.setPower(multiplier * v3);
+            br.setPower(multiplier * v4);
         }
     }
 
@@ -352,15 +388,15 @@ public class teleOp extends LinearOpMode{
             double forwardPower = Range.clip(change, -1, 1);
             double backPower = Range.clip(-change, -1, 1);
             if (getDifference(lastAngles.firstAngle, degree) > 0) {
-                mecanum(gamepad1.left_stick_y, gamepad1.left_stick_x, -forwardPower, 0.5);
+                mecanum(gamepad1.left_stick_y, -gamepad1.left_stick_x, -forwardPower, 0.5);
             } else {
-                mecanum(gamepad1.left_stick_y, gamepad1.left_stick_x, -backPower, 0.5);
+                mecanum(gamepad1.left_stick_y, -gamepad1.left_stick_x, -backPower, 0.5);
             }
             pYaw = lastAngles.firstAngle;
             resetAngles();
         }
         else {
-            mecanum(gamepad1.left_stick_y, gamepad1.left_stick_x, -gamepad1.right_stick_x, 0.5);
+            mecanum(gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, 0.5);
             farpid = false;
             closepid = false;
         }
@@ -489,6 +525,7 @@ public class teleOp extends LinearOpMode{
     }
 
     public void initialize() {
+        fr.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         fl.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         fr.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         fl.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -499,7 +536,7 @@ public class teleOp extends LinearOpMode{
         lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE); //so that lift can hold its position
-        lift.setDirection(DcMotorSimple.Direction.FORWARD);
+        lift.setDirection(DcMotorSimple.Direction.REVERSE);
         rintake.setDirection(DcMotorSimple.Direction.REVERSE);
         lintake.setDirection(DcMotorSimple.Direction.FORWARD);
 
@@ -523,9 +560,11 @@ public class teleOp extends LinearOpMode{
         rintake.setPower(0);
         lintake.setPower(0);
         cat.setPosition(CAT_STOW);
-        knock.setPosition(KNOCK_STOW);
+        knock.setPosition(KNOCK_CENTER);
         lig.setPosition(LIG_HALF_STOW);
         claw.setPosition(CLAW_STOW);
+        stopper.setPosition(STOPPER_STOW);
+        extendstopper.setPosition(EXTENDSTOPPER_STOP);
 
         startDegreeController();
     }

@@ -16,19 +16,19 @@ public class teleOpTest extends LinearOpMode {
     Servo stopper, extendstopper;
     Servo bottomgrab, topgrab;
     final static double BOTTOMGRAB_GRAB = 0;
-    final static double BOTTOMGRAB_STOW = .165;
+    final static double BOTTOMGRAB_STOW = .215;
     final static double TOPGRAB_GRAB = 0.06;
-    final static double TOPGRAB_STOW = .215;
-    final static double STOPPER_STOP = 0.43;
+    final static double TOPGRAB_STOW = .209;
+    final static double STOPPER_STOP = 0.5;
     final static double STOPPER_STOW = 0.0;
     final static double EXTENDSTOPPER_STOW = 0;
     final static double EXTENDSTOPPER_STOP = 0.5;
-    final static double RFLIP_DEPOSIT = 0.83944444444444444;//0.069444444444444448;
-    final static double RFLIP_ZERO = 0.27944444444444444444;//0.629444444444444444445;
-    final static double RFLIP_GRAB = 0.23;//0.659444444444444445;
-    final static double LFLIP_DEPOSIT = 0.16;//0.93;
-    final static double LFLIP_ZERO = .69944444444444444445;//0.359444444444444444445;
-    final static double LFLIP_GRAB = 0.7294444444444444446;//0.32;
+    final static double RFLIP_DEPOSIT = 0.159444444444444444;//new grab positions were tested so that the edge of the flipper towards the intake was in line with the top edge of the ramp
+    final static double RFLIP_ZERO = 0.679444444444444444445;
+    final static double RFLIP_GRAB = 0.759444444444444446;//0.679444444444444444445;
+    final static double LFLIP_DEPOSIT = 0.859444444444444445;
+    final static double LFLIP_ZERO = 0.269444444444444444443;
+    final static double LFLIP_GRAB = 0.209444444444444445;//0.299444444444444444446;
     final static double LIFT_INIT = 0;
     final static double LIFT_TWO = 1140;
     final static double LIFT_THREE = 1650;

@@ -19,11 +19,13 @@ public class autoRed extends autoMethods {
         rintake.setPower(0);
         lintake.setPower(0);
 
-        knock.setPosition(KNOCK_STOW);
+        knock.setPosition(KNOCK_CENTER);
         sleep(250);
         cat.setPosition(CAT_STOW);
         sleep(250);
         lig.setPosition(LIG_STOW);
+        sleep(250);
+        extendstopper.setPosition(EXTENDSTOPPER_STOW);
         sleep(250);
         stopper.setPosition(STOPPER_STOW);
         sleep(250);
@@ -38,10 +40,15 @@ public class autoRed extends autoMethods {
 
         lig.setPosition(LIG_HALF_STOW);
         sleep(250);
+        extendstopper.setPosition(EXTENDSTOPPER_STOP);
+        sleep(250);
+        stopper.setPosition(STOPPER_STOP);
+        sleep(250);
 
         jewelAuto("RED");
-        imageDetected = doVuforia();
-        driveDistance(10, 0.5);
+        //imageDetected = doVuforia();
+        //drive up to cryptobox with ir sensor
+        doImage("RED", "C", -80, -50, -65);
 
 
     }
