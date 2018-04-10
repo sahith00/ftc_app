@@ -42,6 +42,7 @@ import org.firstinspires.ftc.robotcontroller.internal.Auto.autoRed2;
 import org.firstinspires.ftc.robotcontroller.internal.Auto.glyphAutoTest;
 import org.firstinspires.ftc.robotcontroller.internal.Auto.jewelAutoBlue;
 import org.firstinspires.ftc.robotcontroller.internal.Auto.jewelAutoRed;
+import org.firstinspires.ftc.robotcontroller.internal.Tests.drivePIDTest;
 import org.firstinspires.ftc.robotcontroller.internal.Tests.encoderCountTest;
 import org.firstinspires.ftc.robotcontroller.internal.Tests.intakeTest;
 import org.firstinspires.ftc.robotcontroller.internal.Tests.jewelAutoTest;
@@ -49,7 +50,6 @@ import org.firstinspires.ftc.robotcontroller.internal.Tests.liftTest;
 import org.firstinspires.ftc.robotcontroller.internal.Tests.revIMUTest;
 import org.firstinspires.ftc.robotcontroller.internal.Tests.sensorTest;
 import org.firstinspires.ftc.robotcontroller.internal.Tests.servoTest;
-import org.firstinspires.ftc.robotcontroller.internal.Tests.simpleEncoderCountTest;
 import org.firstinspires.ftc.robotcontroller.internal.Tests.teleOpTest;
 import org.firstinspires.ftc.robotcontroller.internal.Tests.turnTest;
 import org.firstinspires.ftc.robotcore.internal.opmode.OpModeMeta;
@@ -87,7 +87,6 @@ public class FtcOpModeRegister implements OpModeRegister {
          */
 
         manager.register(new OpModeMeta("encoder test", Flavor.AUTONOMOUS), encoderCountTest.class);
-        manager.register(new OpModeMeta("simple encoder test", Flavor.AUTONOMOUS), simpleEncoderCountTest.class);
         manager.register(new OpModeMeta("Jewel Auto Test", Flavor.AUTONOMOUS), jewelAutoTest.class);
         manager.register(new OpModeMeta("Glyph Auto Test", Flavor.AUTONOMOUS), glyphAutoTest.class);
         manager.register(new OpModeMeta("Close Auto Red", Flavor.AUTONOMOUS), autoRed.class);
@@ -104,5 +103,6 @@ public class FtcOpModeRegister implements OpModeRegister {
         manager.register("intake test", intakeTest.class);
         manager.register("lift test", liftTest.class);
         manager.register("Turn test", turnTest.class);
+        manager.register("PID test", drivePIDTest.class);
     }
 }

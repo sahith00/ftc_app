@@ -3,7 +3,6 @@ package org.firstinspires.ftc.robotcontroller.internal.Tests;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
 /**
  * Created by sahith on 11/2/17.
@@ -12,8 +11,8 @@ public class encoderCountTest extends LinearOpMode{
     DcMotor frdrive, fldrive, brdrive, bldrive;
 
     final static double FORWARD_POWER = 0.28;
-    int ENCODER_TICKS = 2500;
-    ElapsedTime t = new ElapsedTime();
+    int ENCODER_TICKS = 1500;
+    double maxpower = 0.5;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -21,7 +20,7 @@ public class encoderCountTest extends LinearOpMode{
         frdrive = hardwareMap.dcMotor.get("frdrive");
         bldrive = hardwareMap.dcMotor.get("bldrive");
         brdrive = hardwareMap.dcMotor.get("brdrive");
-        fldrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        bldrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         fldrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         frdrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         bldrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -34,8 +33,10 @@ public class encoderCountTest extends LinearOpMode{
         frdrive.setPower(0.0);
         bldrive.setPower(0.0);
         brdrive.setPower(0.0);
+        brdrive.setTargetPosition(4);
 
-        int change = 10;
+        int change = 100;
+        double powerchange = 0.05;
 
 
 
@@ -53,12 +54,31 @@ public class encoderCountTest extends LinearOpMode{
             if (gamepad1.b) {
                 sleep(250);
                 ENCODER_TICKS = -ENCODER_TICKS;
+                maxpower = -maxpower;
             }
-            if (gamepad1.a) {
+            if(gamepad1.y) {
+                sleep(250);
+                maxpower+=powerchange;
+                if(maxpower > 1.0) {
+                    maxpower = 1.0;
+                }
+            }
+            if(gamepad1.a) {
+                sleep(250);
+                maxpower-=powerchange;
+                if(maxpower < 0.0) {
+                    maxpower = 0.0;
+                }
+            }
+            if (gamepad1.x) {
                 sleep(1000);
-                testSideTicks(frdrive, fldrive, brdrive, bldrive);
+                driveDistance(.5*ENCODER_TICKS, maxpower/1);
+                driveDistance(.3*ENCODER_TICKS, maxpower/2);
+                driveDistance(.2*ENCODER_TICKS, maxpower/3);
             }
-            telemetry.addData("Encoder count:", frdrive.getCurrentPosition());
+            telemetry.addData("Encoder count:", bldrive.getCurrentPosition());
+            telemetry.addData("Encoder ticks:", ENCODER_TICKS);
+            telemetry.addData("power", maxpower);
             telemetry.update();
         }
 
@@ -125,6 +145,45 @@ public class encoderCountTest extends LinearOpMode{
         telemetry.addData("blmotorp", bldrive.getPower());
         telemetry.addData("brmotorp", brdrive.getPower());
         telemetry.update();
+    }
+
+    public void driveDistance(double distance, double maxpower) {
+        if (distance > 0) {
+            int ticks;
+            int old_ticks = bldrive.getCurrentPosition();
+            ticks = (int) (distance);
+            frdrive.setPower(maxpower);
+            fldrive.setPower(maxpower);
+            brdrive.setPower(maxpower);
+            bldrive.setPower(maxpower);
+            while (bldrive.getCurrentPosition() < (ticks + old_ticks)) {
+            }
+            frdrive.setPower(0);
+            fldrive.setPower(0);
+            brdrive.setPower(0);
+            bldrive.setPower(0);
+            telemetry.addData("Encoder count:", bldrive.getCurrentPosition());
+            telemetry.addData("Encoder ticks:", ENCODER_TICKS);
+            telemetry.update();
+        }
+        else if (distance < 0) {
+            int ticks;
+            int old_ticks = bldrive.getCurrentPosition();
+            ticks = (int) (distance);
+            frdrive.setPower(maxpower);
+            fldrive.setPower(maxpower);
+            brdrive.setPower(maxpower);
+            bldrive.setPower(maxpower);
+            while (bldrive.getCurrentPosition() > (ticks + old_ticks)) {
+            }
+            frdrive.setPower(0);
+            fldrive.setPower(0);
+            brdrive.setPower(0);
+            bldrive.setPower(0);
+            telemetry.addData("Encoder count:", bldrive.getCurrentPosition());
+            telemetry.addData("Encoder ticks:", ENCODER_TICKS);
+            telemetry.update();
+        }
     }
 
 }
