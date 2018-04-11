@@ -69,7 +69,7 @@ public class autoMethods extends LinearOpMode {
     final static double CAT_STOW = 0.619444444444444444445;
     final static double CAT_EXTEND = 0.1894444444444444445;
     final static double KNOCK_RIGHT = .2400000000000000005; //0.56
-    final static double KNOCK_LEFT = .85944444444444444445;  //0.18
+    final static double KNOCK_LEFT = .68944444444444444445;  //0.18
     final static double KNOCK_CENTER = 0.60000000000000001;
     final static double LIG_STOW = .01999999999999994;
     final static double LIG_HALF_STOW = 0.35944444444444445;
@@ -97,6 +97,11 @@ public class autoMethods extends LinearOpMode {
     public double tE = 0;
 
     public double autoT = 0;
+
+    public double knockJewel = 70;
+    public boolean pushJewel = false;
+    public double motorpTurn = 0;
+    public boolean stuckTurn = true;
 
     public ElapsedTime runtime = new ElapsedTime();
 
@@ -179,6 +184,7 @@ public class autoMethods extends LinearOpMode {
                 telemetry.addData("Red", jewelSensor.red());
                 telemetry.update();
                 left();
+                pushJewel = true;
                 center();
                 colorExtend();
             }
@@ -187,6 +193,7 @@ public class autoMethods extends LinearOpMode {
                 telemetry.addData("Red", jewelSensor.red());
                 telemetry.update();
                 right();
+                pushJewel = false;
                 center();
                 colorExtend();
             }
@@ -200,6 +207,7 @@ public class autoMethods extends LinearOpMode {
                 telemetry.addData("Red", jewelSensor.red());
                 telemetry.update();
                 left();
+                pushJewel = true;
                 center();
                 colorExtend();
             }
@@ -208,6 +216,7 @@ public class autoMethods extends LinearOpMode {
                 telemetry.addData("Red", jewelSensor.red());
                 telemetry.update();
                 right();
+                pushJewel = false;
                 center();
                 colorExtend();
             }
@@ -246,8 +255,9 @@ public class autoMethods extends LinearOpMode {
     }
 
     public void left() {
-        knock.setPosition(KNOCK_LEFT);
-        sleep(200);
+       /* knock.setPosition(KNOCK_LEFT);
+        sleep(200);*/
+        driveDistance(2.5, .5);
     }
 
     public void center() {
@@ -293,21 +303,27 @@ public class autoMethods extends LinearOpMode {
         sleep(250);
         extendstopper.setPosition(EXTENDSTOPPER_STOW);
         sleep(250);
+       /* if (pushJewel) {
+            turn(knockJewel, 15);
+          //  driveDistance(5, 0.5);
+          //  driveDistance(-5, -0.5);
+            pushJewel = false;
+        }*/
 
         if (image.equals("R")) {
-            turn(rturn, 2.5);
+            turn(rturn, .5);
             outtake();
             driveDistance(13, 0.5);
             sleep(500);
             dropGlyph();
         } else if (image.equals("L")) {
-            turn(lturn, 2.5);
+            turn(lturn, .5);
             outtake();
             driveDistance(17, 0.5);
             sleep(500);
             dropGlyph();
         } else {
-            turn(cturn, 2.5);
+            turn(cturn, .5);
             outtake();
             driveDistance(15, 0.5);
             sleep(500);
@@ -625,6 +641,7 @@ public class autoMethods extends LinearOpMode {
 
     public void turn(double degree, double margin) {
         startDegreeController();
+        stuckTurn = true;
         double pYaw = lastAngles.firstAngle;
         while ((Math.abs(getDifference(lastAngles.firstAngle, degree)) > margin ||
                 Math.abs(pYaw - lastAngles.firstAngle) > .05) && opModeIsActive()) {
@@ -632,21 +649,24 @@ public class autoMethods extends LinearOpMode {
             double forwardPower = Range.clip(change, -1, 1);
             double backPower = Range.clip(-change, -1, 1);
             if (getDifference(lastAngles.firstAngle, degree) > 0) {
-                fr.setPower(0.8 * backPower);
-                br.setPower(0.8 * backPower);
-                fl.setPower(0.8 * forwardPower);
-                bl.setPower(0.8 * forwardPower);
+                fr.setPower(0.65 * backPower);
+                br.setPower(0.65 * backPower);
+                fl.setPower(0.65 * forwardPower);
+                bl.setPower(0.65 * forwardPower);
             } else {
-                fr.setPower(0.8 * forwardPower);
-                br.setPower(0.8 * forwardPower);
-                fl.setPower(0.8 * backPower);
-                bl.setPower(0.8 * backPower);
+                fr.setPower(0.65 * forwardPower);
+                br.setPower(0.65 * forwardPower);
+                fl.setPower(0.65 * backPower);
+                bl.setPower(0.65 * backPower);
             }
             pYaw = lastAngles.firstAngle;
             resetAngles();
             if(autoT + 28000 < runtime.milliseconds()) {
                 end();
             }
+            telemetry.addData("Current Yaw: ", pYaw);
+            telemetry.addData("Desired Yaw: ", degree);
+            telemetry.update();
         }
         fr.setPower(0);
         br.setPower(0);
@@ -675,6 +695,22 @@ public class autoMethods extends LinearOpMode {
         tE += e*dT;
         tE = Range.clip(tE * i_turn, -.15, 0.15);///i_turn;
         ans = Range.clip(ans, 0, .7);
+        telemetry.addData("PID turn", "e: " + e);
+        telemetry.addData("PID Turn", "i: " + i_turn * tE);
+        telemetry.addData("PID Turn", "d: " + d_turn * dE / dT);
+        telemetry.addData("PID Turn", "p: " + p_turn * e);
+        if ((dE/dT) == 0.0) {
+            if (stuckTurn) {
+                motorpTurn = ans;
+                stuckTurn = false;
+            }
+            if (motorpTurn > 0) {
+                motorpTurn += .015;
+            } else {
+                motorpTurn -= .015;
+            }
+            ans = motorpTurn;
+        }
         return ans;
     }
 

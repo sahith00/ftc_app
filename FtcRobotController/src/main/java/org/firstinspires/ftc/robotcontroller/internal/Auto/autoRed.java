@@ -6,7 +6,7 @@ package org.firstinspires.ftc.robotcontroller.internal.Auto;
 
 public class autoRed extends autoMethods {
 
-    @Override
+        @Override
     public void runOpMode() throws InterruptedException {
         super.runOpMode();
 
@@ -26,8 +26,9 @@ public class autoRed extends autoMethods {
         jewelAuto("RED");
         imageDetected = doVuforia();
         //drive up to cryptobox with ir sensor
-        doImage("RED", imageDetected, -80, -48, -61);
-
+        doImage("RED", imageDetected, -81.7, -50.5, -64);
+        while (opModeIsActive()) {
+        }
 
     }
 }
