@@ -42,6 +42,7 @@ import org.firstinspires.ftc.robotcontroller.internal.Auto.autoRed2;
 import org.firstinspires.ftc.robotcontroller.internal.Auto.glyphAutoTest;
 import org.firstinspires.ftc.robotcontroller.internal.Auto.jewelAutoBlue;
 import org.firstinspires.ftc.robotcontroller.internal.Auto.jewelAutoRed;
+import org.firstinspires.ftc.robotcontroller.internal.Tests.distanceSensorTest;
 import org.firstinspires.ftc.robotcontroller.internal.Tests.drivePIDTest;
 import org.firstinspires.ftc.robotcontroller.internal.Tests.encoderCountTest;
 import org.firstinspires.ftc.robotcontroller.internal.Tests.intakeTest;
@@ -104,5 +105,6 @@ public class FtcOpModeRegister implements OpModeRegister {
         manager.register("lift test", liftTest.class);
         manager.register("Turn test", turnTest.class);
         manager.register("PID test", drivePIDTest.class);
+        manager.register("Distance test", distanceSensorTest.class);
     }
 }

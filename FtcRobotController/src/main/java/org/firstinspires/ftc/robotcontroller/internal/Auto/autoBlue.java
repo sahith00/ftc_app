@@ -23,11 +23,12 @@ public class autoBlue extends autoMethods {
         stopper.setPosition(STOPPER_STOW);
         sleep(250);
 
-        jewelAuto("BLUE");
-        //imageDetected = doVuforia();
+        jewelAuto();
+        imageDetected = doVuforia();
+        colorExtendClose();
+        driveDist(-2.5, -.4, false);
         //drive up to cryptobox with ir sensor
-        doImage("BLUE", "C", -80, -48, -61);
-
-
+        doImage("BLUE", imageDetected, -124, -96, -112, true);
+        while(opModeIsActive()){}
     }
 }

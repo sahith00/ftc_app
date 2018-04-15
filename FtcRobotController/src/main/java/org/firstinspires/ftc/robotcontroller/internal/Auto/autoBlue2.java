@@ -15,20 +15,24 @@ public class autoBlue2 extends autoMethods {
         autoT = runtime.milliseconds();
 
         knock.setPosition(KNOCK_CENTER);
-        sleep(200);
         lig.setPosition(LIG_HALF_STOW);
-        sleep(200);
         extendstopper.setPosition(EXTENDSTOPPER_STOP);
-        sleep(250);
         stopper.setPosition(STOPPER_STOW);
-        sleep(250);
 
-        jewelAuto("BLUE");
-        //imageDetected = doVuforia();
+        jewelAuto();
+        imageDetected = doVuforia();
 
-        driveDistance(15, 0.5);
-        turn(90, 2.5);
+        stow();
+        driveDist(-15, -0.4, false);
+       /* turn(-90, 2.5);
+        driveDist(4, 0.3, false);*/
+        // sleep(1000);
         sleep(500);
-        doImage("BLUE", "L", 10, 42, 29);
+        strafeDist(-5.5, -0.5);
+        turn(-90, 1);
+        colorDistExtendFar();
+        doImage("BLUE", imageDetected, 133.5-0.5, 168-0.5, 149-0.5, false);
+        glyphAutoFar(imageDetected, "BLUE", -165, 168-0.5, 133.5-0.5);
+        while (opModeIsActive()) {}
     }
 }

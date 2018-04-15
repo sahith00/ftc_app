@@ -23,12 +23,12 @@ public class autoRed extends autoMethods {
         stopper.setPosition(STOPPER_STOW);
         sleep(250);
 
-        jewelAuto("RED");
+        jewelAuto();
         imageDetected = doVuforia();
+        colorExtendClose();
+        driveDist(2.5, .4, false);
         //drive up to cryptobox with ir sensor
-        doImage("RED", imageDetected, -81.7, -50.5, -64);
-        while (opModeIsActive()) {
-        }
-
+        doImage("RED", imageDetected, -78, -50.5, -64, true);
+        while (opModeIsActive()) {}
     }
 }

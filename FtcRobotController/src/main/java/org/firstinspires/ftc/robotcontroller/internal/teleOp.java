@@ -28,7 +28,7 @@ public class teleOp extends LinearOpMode{
     DcMotor rintake, lintake;
 
     Servo cat, knock;
-    Servo rflip, lflip, stopper, extendstopper, bottomgrab, topgrab;
+    Servo rflip, lflip, stopper, extendstopper, intakestopper, bottomgrab, topgrab;
     Servo lig, claw;
 
     BNO055IMU imu;
@@ -45,6 +45,8 @@ public class teleOp extends LinearOpMode{
     final static double STOPPER_STOW = 0.0;
     final static double EXTENDSTOPPER_STOW = 0;
     final static double EXTENDSTOPPER_STOP = 0.5;
+    final static double INTAKESTOPPER_STOW = 0;
+    final static double INTAKESTOPPER_STOP = 0.5;
     final static double RFLIP_DEPOSIT = 0.159444444444444444;//new grab positions were tested so that the edge of the flipper towards the intake was in line with the top edge of the ramp
     final static double RFLIP_ZERO = 0.679444444444444444445;
     final static double RFLIP_GRAB = 0.759444444444444446;//0.679444444444444444445;
@@ -74,7 +76,7 @@ public class teleOp extends LinearOpMode{
     boolean glyphMode = true;
     boolean farpid = false, closepid = false;
     boolean preflip = true, preflipgrab = false, zero = false, deposit = false;
-    boolean autointake = true;
+    boolean autointake = false;
 
     double desired_stopper_pos, desired_extendstopper_pos;
     double desired_stopper_delay;
@@ -111,6 +113,7 @@ public class teleOp extends LinearOpMode{
         lflip = hardwareMap.servo.get("lflip");
         stopper = hardwareMap.servo.get("stopper");
         extendstopper = hardwareMap.servo.get("extendstopper");
+        intakestopper = hardwareMap.servo.get("intakestopper");
         bottomgrab = hardwareMap.servo.get("bottomgrab");
         topgrab = hardwareMap.servo.get("topgrab");
 
@@ -149,7 +152,7 @@ public class teleOp extends LinearOpMode{
                 }
             }
             if(!(farpid || closepid)) {
-                mecanum(gamepad1.left_stick_y, -gamepad1.left_stick_x, -(gamepad1.right_stick_x), multiplier);
+                mecanum(gamepad1.left_stick_y, gamepad1.left_stick_x, -gamepad1.right_stick_x, multiplier);
             }
             if(gamepad1.right_stick_button) {
                 closepid = true;
@@ -178,16 +181,9 @@ public class teleOp extends LinearOpMode{
                 flip();
                 moveLift();
                 moveStopper();
-                if(autointake) {
-                    runAutoIntake();
-                }
-                if(gamepad2.left_stick_button) {
-                    autointake = true;
-                }
             }
             //-----------------------------------------------------------------------------
             // TELEMETRY
-            telemetry.addData("Drive Encoder Count: ", fr.getCurrentPosition());
             telemetry.addData("Lift Encoder Count: ", lift.getCurrentPosition());
             telemetry.addData("Lift Power", lift.getPower());
             telemetry.addData("Intake power", intakep);
@@ -197,33 +193,31 @@ public class teleOp extends LinearOpMode{
     }
 
     public void grabGlyph() {
-        if (gamepad2.right_bumper) {
-            intakep = 1.0;
-            autointake = false;
-        }
-        if (gamepad2.left_bumper) {
-            intakep = .0;
-            autointake = false;
-        }
-        if (gamepad1.right_trigger > 0.1) {
-            runIntake(-1.0 * Math.signum(gamepad1.right_trigger)
-                    , -1.0 * Math.signum(gamepad1.right_trigger));
-            autointake = false;
-        }
-        else if (gamepad2.right_trigger > 0.85 || gamepad2.left_trigger > 0.85) {
-            runIntake(-1.0 * Math.signum(gamepad2.right_trigger)
-                    , -1.0 * Math.signum(gamepad2.left_trigger));
-            autointake = false;
-        }
-        else if (gamepad2.right_trigger > 0 || gamepad2.left_trigger > 0) {
-            runIntake(-0.5 * Math.signum(gamepad2.right_trigger)
-                    , -0.5 * Math.signum(gamepad2.left_trigger));
-            autointake = false;
-        }
-        else {
-            if(!autointake) {
+        if(gamepad2.right_bumper || gamepad2.left_bumper || (gamepad1.right_trigger != 0) ||
+                (gamepad2.right_trigger != 0) || (gamepad2.left_trigger != 0)) {
+            if (gamepad2.right_bumper) {
+                intakep = 1.0;
+                intakestopper.setPosition(INTAKESTOPPER_STOP);
+            }
+            if (gamepad2.left_bumper) {
+                intakep = .0;
+            }
+            if (gamepad1.right_trigger > 0.1) {
+                runIntake(-1.0 * Math.signum(gamepad1.right_trigger)
+                        , -1.0 * Math.signum(gamepad1.right_trigger));
+            } else if (gamepad2.right_trigger > 0.85 || gamepad2.left_trigger > 0.85) {
+                runIntake(-1.0 * Math.signum(gamepad2.right_trigger)
+                        , -1.0 * Math.signum(gamepad2.left_trigger));
+            } else if (gamepad2.right_trigger > 0 || gamepad2.left_trigger > 0) {
+                runIntake(-0.5 * Math.signum(gamepad2.right_trigger)
+                        , -0.5 * Math.signum(gamepad2.left_trigger));
+            } else {
                 runIntake(intakep, intakep);
             }
+            autointake = true;
+        }
+        else {
+            runAutoIntake();
         }
     }
 
@@ -258,14 +252,23 @@ public class teleOp extends LinearOpMode{
     public void runIntake(double rpower, double lpower) {
         rintake.setPower(rpower);
         lintake.setPower(lpower);
+        if(rpower < 0 && lpower < 0) {
+            intakestopper.setPosition(INTAKESTOPPER_STOW);
+        }
+        else {
+            intakestopper.setPosition(INTAKESTOPPER_STOP);
+        }
     }
 
     public void runAutoIntake() {
-        if(lift.getCurrentPosition() > LEVEL_ONE || deposit) {
-            runIntake(-1.0, -1.0);
-        }
-        else {
-            runIntake(1.0, 1.0);
+        if(autointake) {
+            if ((lift.getCurrentPosition() > LEVEL_ONE) || deposit) {
+                runIntake(-1.0, -1.0);
+                intakestopper.setPosition(INTAKESTOPPER_STOW);
+            } else {
+                runIntake(1.0, 1.0);
+                intakestopper.setPosition(INTAKESTOPPER_STOP);
+            }
         }
     }
 
@@ -350,9 +353,9 @@ public class teleOp extends LinearOpMode{
         double theta = Math.atan2(joyly, joylx);
         double v0 = joyrx;
         //v0 = bumpers;
-        double v1 = vd*Math.sin(theta+(Math.PI/4))+v0; //fl
+        double v1 = vd*Math.sin(theta + (Math.PI/4))+v0; //fl
         double v2 = vd*Math.cos(theta + (Math.PI / 4))+v0; //fr
-        double v3 = vd*Math.cos(theta+(Math.PI/4))-v0; //bl
+        double v3 = vd*Math.cos(theta + (Math.PI/4))-v0; //bl
         double v4 = vd*Math.sin(theta + (Math.PI / 4))-v0; //br
         double temp_max = Math.max(Math.abs(v1), Math.abs(v2));
         double temp_max2 = Math.max(temp_max, Math.abs(v3));
@@ -369,8 +372,8 @@ public class teleOp extends LinearOpMode{
             br.setPower(multiplier * v4/max);
         } else {
             fl.setPower(multiplier * v1);
-            fr.setPower(multiplier * v2);
-            bl.setPower(multiplier * v3);
+            fr.setPower(-multiplier * v2);
+            bl.setPower(-multiplier * v3);
             br.setPower(multiplier * v4);
         }
     }
@@ -388,15 +391,15 @@ public class teleOp extends LinearOpMode{
             double forwardPower = Range.clip(change, -1, 1);
             double backPower = Range.clip(-change, -1, 1);
             if (getDifference(lastAngles.firstAngle, degree) > 0) {
-                mecanum(gamepad1.left_stick_y, -gamepad1.left_stick_x, -forwardPower, 0.5);
+                mecanum(gamepad1.left_stick_y, gamepad1.left_stick_x, -forwardPower, 0.5);
             } else {
-                mecanum(gamepad1.left_stick_y, -gamepad1.left_stick_x, -backPower, 0.5);
+                mecanum(gamepad1.left_stick_y, gamepad1.left_stick_x, -backPower, 0.5);
             }
             pYaw = lastAngles.firstAngle;
             resetAngles();
         }
         else {
-            mecanum(gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, 0.5);
+            mecanum(gamepad1.left_stick_y, gamepad1.left_stick_x, -gamepad1.right_stick_x, 0.5);
             farpid = false;
             closepid = false;
         }
@@ -525,11 +528,10 @@ public class teleOp extends LinearOpMode{
     }
 
     public void initialize() {
-        fr.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         fl.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         fr.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         fl.setDirection(DcMotorSimple.Direction.REVERSE);
-        fr.setDirection(DcMotorSimple.Direction.REVERSE);
+        bl.setDirection(DcMotorSimple.Direction.REVERSE);
         bl.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         br.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         relicLift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);

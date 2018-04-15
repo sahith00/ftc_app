@@ -23,12 +23,18 @@ public class autoRed2 extends autoMethods {
         stopper.setPosition(STOPPER_STOW);
         sleep(250);
 
-        jewelAuto("RED");
+        jewelAuto();
         imageDetected = doVuforia();
 
-        driveDistance(10, 0.5);
-        turn(90, 2.5);
+        stow();
+        driveDist(14, 0.4, false);
         sleep(500);
-        doImage("RED", imageDetected, 10, 40, 25);
+        /*turn(90, 5);
+        driveDist(-4, -0.3, false);*/
+        strafeDist(-3.5, -0.5);
+        turn(90, .5);
+        colorDistExtendFar();
+        doImage("RED", imageDetected, 8.5,46.5, 31, false);
+        while (opModeIsActive()) {}
     }
 }
