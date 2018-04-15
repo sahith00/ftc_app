@@ -72,8 +72,12 @@ public class autoMethods extends LinearOpMode {
     final static double KNOCK_RIGHT = .2400000000000000005; //0.56
     final static double KNOCK_LEFT = 1;  //0.18
     final static double KNOCK_CENTER = 0.60000000000000001;
-    final static double LIG_STOW = .01999999999999994;
-    final static double LIG_HALF_STOW = 0.35944444444444445;
+    final static double LIG_STOW = .9094444444444444444;
+    final static double LIG_GRAB = .0494444444444444444;//.899444444444444444445;
+    final static double LIG_HALF_STOW = .7294444444444444444;
+    final static double CLAW_STOW = .209444444444444444;
+    final static double CLAW_OPEN = .779444444444444444;
+    final static double CLAW_GRAB = .209444444444444444;
 
     final static double BOTTOMGRAB_GRAB = 0.0;
     final static double BOTTOMGRAB_STOW = .215;

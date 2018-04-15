@@ -45,8 +45,8 @@ public class teleOp extends LinearOpMode{
     final static double STOPPER_STOW = 0.0;
     final static double EXTENDSTOPPER_STOW = 0;
     final static double EXTENDSTOPPER_STOP = 0.5;
-    final static double INTAKESTOPPER_STOW = 0;
-    final static double INTAKESTOPPER_STOP = 0.5;
+    final static double INTAKESTOPPER_STOW = 0.65;
+    final static double INTAKESTOPPER_STOP = 0;
     final static double RFLIP_DEPOSIT = 0.159444444444444444;//new grab positions were tested so that the edge of the flipper towards the intake was in line with the top edge of the ramp
     final static double RFLIP_ZERO = 0.679444444444444444445;
     final static double RFLIP_GRAB = 0.759444444444444446;//0.679444444444444444445;
@@ -54,12 +54,12 @@ public class teleOp extends LinearOpMode{
     final static double LFLIP_ZERO = 0.269444444444444444443;
     final static double LFLIP_GRAB = 0.209444444444444445;//0.299444444444444444446;
 
-    final static double LIG_STOW = .01999999999999994;
-    final static double LIG_GRAB = .8094444444444444444 + 0.04;//.899444444444444444445;
-    final static double LIG_HALF_STOW = 0.35944444444444445;
-    final static double CLAW_STOW = 0.279999999999999999997;
-    final static double CLAW_OPEN = .799444444444444444444;
-    final static double CLAW_GRAB = .249444444444444444;
+    final static double LIG_STOW = .9094444444444444444;
+    final static double LIG_GRAB = .0494444444444444444;//.899444444444444444445;
+    final static double LIG_HALF_STOW = .7294444444444444444;
+    final static double CLAW_STOW = .209444444444444444;
+    final static double CLAW_OPEN = .779444444444444444;
+    final static double CLAW_GRAB = .209444444444444444;
 
     final static double FAR_ANGLE = 90;
     final static double CLOSE_ANGLE = 0;
@@ -187,6 +187,7 @@ public class teleOp extends LinearOpMode{
             telemetry.addData("Lift Encoder Count: ", lift.getCurrentPosition());
             telemetry.addData("Lift Power", lift.getPower());
             telemetry.addData("Intake power", intakep);
+            telemetry.addData("Glyph mode", glyphMode);
             telemetry.update();
             //-----------------------------------------------------------------------------
         }
