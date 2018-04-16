@@ -32,7 +32,7 @@ public class autoBlue2 extends autoMethods {
         turn(-90, 1);
         colorDistExtendFar();
         doImage("BLUE", imageDetected, 133.5-0.5, 168-0.5, 149-0.5, false);
-        glyphAutoFar(imageDetected, "BLUE", -165, 168-0.5, 133.5-0.5);
+        glyphAutoFar(imageDetected, "BLUE",-165);
         while (opModeIsActive()) {}
     }
 }

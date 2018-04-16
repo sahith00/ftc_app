@@ -29,6 +29,7 @@ public class autoBlue extends autoMethods {
         driveDist(-2.5, -.4, false);
         //drive up to cryptobox with ir sensor
         doImage("BLUE", imageDetected, -124, -96, -112, true);
+        glyphAutoClose("L", "BLUE", -124, -96, -112, -90);
         while(opModeIsActive()){}
     }
 }

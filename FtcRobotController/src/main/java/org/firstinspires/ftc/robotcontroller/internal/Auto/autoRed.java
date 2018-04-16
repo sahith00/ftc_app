@@ -29,6 +29,7 @@ public class autoRed extends autoMethods {
         driveDist(2.5, .4, false);
         //drive up to cryptobox with ir sensor
         doImage("RED", imageDetected, -78, -50.5, -64, true);
+        glyphAutoClose("R", "RED", -78, -50.5, -64, -90);
         while (opModeIsActive()) {}
     }
 }

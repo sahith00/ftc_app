@@ -73,11 +73,7 @@ public class autoMethods extends LinearOpMode {
     final static double KNOCK_LEFT = 1;  //0.18
     final static double KNOCK_CENTER = 0.60000000000000001;
     final static double LIG_STOW = .9094444444444444444;
-    final static double LIG_GRAB = .0494444444444444444;//.899444444444444444445;
     final static double LIG_HALF_STOW = .7294444444444444444;
-    final static double CLAW_STOW = .209444444444444444;
-    final static double CLAW_OPEN = .779444444444444444;
-    final static double CLAW_GRAB = .209444444444444444;
 
     final static double BOTTOMGRAB_GRAB = 0.0;
     final static double BOTTOMGRAB_STOW = .215;
@@ -85,6 +81,7 @@ public class autoMethods extends LinearOpMode {
     final static double TOPGRAB_STOW = .209;
     final static double STOPPER_STOP = 0.5;
     final static double STOPPER_STOW = 0.0;
+    final static double INTAKESTOPPER_INIT = 0.65;
     final static double EXTENDSTOPPER_STOW = 0;
     final static double EXTENDSTOPPER_STOP = 0.5;
     final static double RFLIP_DEPOSIT = 0.159444444444444444;//new grab positions were tested so that the edge of the flipper towards the intake was in line with the top edge of the ramp
@@ -318,12 +315,6 @@ public class autoMethods extends LinearOpMode {
         sleep(250);
         extendstopper.setPosition(EXTENDSTOPPER_STOW);
         sleep(250);
-       /* if (pushJewel) {
-            turn(knockJewel, 15);
-          //  driveDistance(5, 0.5);
-          //  driveDistance(-5, -0.5);
-            pushJewel = false;
-        }*/
 
         if (image.equals("R")) {
             if(team.equals("BLUE")&&close) {
@@ -397,72 +388,33 @@ public class autoMethods extends LinearOpMode {
         return image;
     }
 
-    public void glyphAutoClose(String image, double rturn, double lturn, double cturn, double cryptoturn) {
-        double init_ticks;
+    public void glyphAutoClose(String image, String team, double rturn, double lturn, double cturn, double glyphturn) {
         driveDistance(-5, -0.4, false);
         grab();
-        turn(cryptoturn, 2.5); //with flipper towards cryptobox
-        init_ticks = bl.getCurrentPosition();
+        turn(glyphturn, 0.5); //with flipper towards cryptobox
         grabGlyph(1.0);
-        drive(-0.4);
-        sleep(3000);
-        drive(0);
+        double init_ticks = bl.getCurrentPosition();
+        drive(-0.6);
+        sleep(1500);
+        drive(0.0);
+        sleep(750);
         turnForGlyph();
-        grabGlyph(-1.0);
-        sleep(1000);
         grabGlyph(0.0);
-        turn(cryptoturn, 2.5);
-        driveDistance((init_ticks - bl.getCurrentPosition()) / STRAIGHT_TICKS_PER_INCH, 0.5, false);
-        extend();
-        if(image.equals("R") || image.equals("C")) {
-            if(checkDistance() == 0) {
-                while(checkDistance() == 0) {
-                    strafe(0.4);
-                }
-                strafe(0.0);
-                sleep(500);
-                stow();
-                strafe(-0.2);
-                sleep(1000);
-                strafe(0.0);
-            }
-            else {
-                stow();
-                strafe(-0.2);
-                sleep(1000);
-                strafe(0.0);
-            }
-        }
-        else {
-            if(checkDistance() == 0) {
-                while(checkDistance() == 0) {
-                    strafe(-0.4);
-                }
-                strafe(0.0);
-                sleep(500);
-                stow();
-                strafe(0.2);
-                sleep(1000);
-                strafe(0.0);
-            }
-            else {
-                stow();
-                strafe(0.2);
-                sleep(1000);
-                strafe(0.0);
-            }
-        }
-        driveDistance(-5, -0.4, false);
-        outtake();
+        double new_ticks = bl.getCurrentPosition();
+        turn(glyphturn, 0.5);
+        lift.setPower(.7);
+        lift.setTargetPosition(-500);
+        driveDistance(((new_ticks-init_ticks)/STRAIGHT_TICKS_PER_INCH), 0.4, false);
         sleep(500);
-        driveDistance(5, 0.4, true);
-        dropGlyph();
+        turn(0, 0.5);
+        driveDist(-4, 0.4, false);
+        doImage(team, image, rturn, lturn, cturn, true);
     }
 
-    public void glyphAutoFar(String image, String team, double glyphturn, double lturn, double rturn) {
+    public void glyphAutoFar(String image, String team, double glyphturn) {
         extendstopper.setPosition(EXTENDSTOPPER_STOP);
         turn(-90, 3);
-        if (image.equals("R")) {
+        if ((image.equals("R") && team.equals("BLUE")) || (image.equals("L") && team.equals("RED"))) {
             strafeDist(3, 0.5);
             driveDist(-9.5, -0.4, false);
             colorDistExtend(.17);
@@ -470,24 +422,30 @@ public class autoMethods extends LinearOpMode {
             driveDist(-11.5, -0.4, false);
             colorDistExtend(.17);
         }
-        while (jewelSensor.blue() < 100 && opModeIsActive()) {
-            drive(-0.2);
-            telemetry.addData("Motor power", fl.getPower());
-            telemetry.addData("distance", String.format(Locale.US, "%.02f", distanceSensor.getDistance(DistanceUnit.CM)));
-            telemetry.update();
+        if(team.equals("BLUE")) {
+            while (jewelSensor.blue() < 100 && opModeIsActive()) {
+                drive(-0.2);
+                telemetry.addData("Motor power", fl.getPower());
+                telemetry.addData("distance", String.format(Locale.US, "%.02f", distanceSensor.getDistance(DistanceUnit.CM)));
+                telemetry.update();
+            }
+        }
+        else if(team.equals("RED")) {
+            while (jewelSensor.red() < 100 && opModeIsActive()) {
+                drive(-0.2);
+                telemetry.addData("Motor power", fl.getPower());
+                telemetry.addData("distance", String.format(Locale.US, "%.02f", distanceSensor.getDistance(DistanceUnit.CM)));
+                telemetry.update();
+            }
         }
         drive(0.0);
-        double rdistance = 0, ldistance = 0;
-        if(team.equals("RED")) {
-            rdistance = 5;
-            ldistance = 10.5;
-        }
-        else if(team.equals("BLUE")) {
-            rdistance = 10.5;
-            ldistance = 5.75;
-        }
+        double ldistance = 5.75;
+        doGlyphAuto(ldistance, glyphturn);
+    }
+
+    public void doGlyphAuto(double distance, double angle) {
         stow();
-        turn(glyphturn, 4);
+        turn(angle, 4);
         grab();
         grabGlyph(1.0);
         double init_ticks = bl.getCurrentPosition();
@@ -496,11 +454,12 @@ public class autoMethods extends LinearOpMode {
         drive(0.0);
         sleep(750);
         turnForGlyph();
-        turn(glyphturn, 1);
+        turn(angle, 1);
+        grabGlyph(0.0);
         double new_ticks = bl.getCurrentPosition();
         lift.setPower(.7);
-        lift.setTargetPosition(500);
-        driveDistance(((new_ticks-init_ticks)/STRAIGHT_TICKS_PER_INCH) + ldistance, 0.4, false);
+        lift.setTargetPosition(-500);
+        driveDistance(((new_ticks-init_ticks)/STRAIGHT_TICKS_PER_INCH) + distance, 0.4, false);
         sleep(500);
         dropGlyph();
     }

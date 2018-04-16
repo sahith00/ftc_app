@@ -35,6 +35,7 @@ public class autoRed2 extends autoMethods {
         turn(90, .5);
         colorDistExtendFar();
         doImage("RED", imageDetected, 8.5,46.5, 31, false);
+        glyphAutoFar(imageDetected, "RED", -25);
         while (opModeIsActive()) {}
     }
 }
