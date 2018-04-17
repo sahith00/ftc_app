@@ -31,9 +31,6 @@ public class teleOp extends LinearOpMode{
     Servo rflip, lflip, stopper, extendstopper, intakestopper, bottomgrab, topgrab;
     Servo lig, claw;
 
-    BNO055IMU imu;
-    Orientation lastAngles;
-
     final static double CAT_STOW = 0.619444444444444444445;
     final static double KNOCK_CENTER = 0.60000000000000001;
 
@@ -45,14 +42,14 @@ public class teleOp extends LinearOpMode{
     final static double STOPPER_STOW = 0.0;
     final static double EXTENDSTOPPER_STOW = 0;
     final static double EXTENDSTOPPER_STOP = 0.5;
-    final static double INTAKESTOPPER_STOW = 0.5;
-    final static double INTAKESTOPPER_STOP = 0;
-    final static double RFLIP_DEPOSIT = 0.159444444444444444;//new grab positions were tested so that the edge of the flipper towards the intake was in line with the top edge of the ramp
-    final static double RFLIP_ZERO = 0.679444444444444444445;
-    final static double RFLIP_GRAB = 0.759444444444444446;//0.679444444444444444445;
-    final static double LFLIP_DEPOSIT = 0.83;
-    final static double LFLIP_ZERO = 0.27;
-    final static double LFLIP_GRAB = 0.18;//0.299444444444444444446;
+    final static double INTAKESTOPPER_STOW = 0;
+    final static double INTAKESTOPPER_STOP = 0.6594444444445;
+    final static double RFLIP_DEPOSIT = 0.139444444444444444;
+    final static double RFLIP_ZERO = 0.669444444444444444445;
+    final static double RFLIP_GRAB = 0.719444444444444446;
+    final static double LFLIP_DEPOSIT = 0.78;
+    final static double LFLIP_ZERO = 0.19;
+    final static double LFLIP_GRAB = 0.15;
 
     final static double LIG_GRAB = .0494444444444444444;//.899444444444444444445;
     final static double LIG_HALF_STOW = .3294444444444444444;
@@ -61,24 +58,17 @@ public class teleOp extends LinearOpMode{
     final static double CLAW_OPEN = .779444444444444444;
     final static double CLAW_GRAB = .209444444444444444;
 
-    final static double LEVEL_ONE = 0;
-    final static double LEVEL_THREE = -1690;
-
     double changeModeT = 0, changeMultiT = 0, changeClawT = 0, changeStopperT = 0,
             changePreFlipGrabberT = 0, changePreFlipModeT = 0, changeIntakeStopperT = 0;
     double multiplier = 1.0;
     double clawPos = CLAW_GRAB;
     double intakeStopperPos = INTAKESTOPPER_STOP;
-    boolean autointakestopper = true;
     boolean glyphMode = true;
-    boolean farpid = false, closepid = false;
-    boolean preflip = true, preflipgrab = false, zero = false, deposit = false;
+    boolean preflip = true, preflipgrab = false, zero = false, deposit = false, deposit2 = false;
     boolean autointake = false;
 
     double desired_stopper_pos, desired_extendstopper_pos;
     double desired_stopper_delay;
-    double desired_lift_pos;
-    boolean moveliftpreset;
     boolean delayextendstopper = false, delaystopper = false;
 
     ElapsedTime sleeptime = new ElapsedTime();
@@ -126,7 +116,7 @@ public class teleOp extends LinearOpMode{
             // DRIVE ROBOT
             if(glyphMode) {
                 multiplier = -Range.clip(gamepad1.left_trigger - 1, -1, -0.4);
-                lig.setPosition(LIG_STOW);
+                lig.setPosition(LIG_INIT);
             }
             else {
                 multiplier = 1.0;
@@ -140,9 +130,7 @@ public class teleOp extends LinearOpMode{
                     }
                 }
             }
-            if(!(farpid || closepid)) {
-                mecanum(gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, multiplier);
-            }
+            mecanum(gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, multiplier);
             //-----------------------------------------------------------------------------
             // GRAB RELIC AND DEPOSIT
             if(!glyphMode) {
@@ -155,9 +143,8 @@ public class teleOp extends LinearOpMode{
             if(glyphMode) {
                 flip();
                 moveStopper();
-                if(gamepad2.x && (changeIntakeStopperT + 250 < sleeptime.milliseconds())) {
+                if(gamepad2.a && (changeIntakeStopperT + 250 < sleeptime.milliseconds())) {
                     changeIntakeStopperT = sleeptime.milliseconds();
-                    autointakestopper = false;
                     if(intakeStopperPos == INTAKESTOPPER_STOP) {
                         intakeStopperPos = INTAKESTOPPER_STOW;
                     }
@@ -165,17 +152,12 @@ public class teleOp extends LinearOpMode{
                         intakeStopperPos = INTAKESTOPPER_STOP;
                     }
                 }
+                intakestopper.setPosition(intakeStopperPos);
             }
-            if(gamepad2.right_stick_y > 0 ) {
-                lift.setPower(Range.clip(gamepad2.right_stick_y, .1, 1));
-            } else if (gamepad2.right_stick_y < 0) {
-                lift.setPower(Range.clip(gamepad2.right_stick_y, -1, -.1));
-            }
+            lift.setPower(Range.clip(gamepad2.right_stick_y, -1, 0.5));
             grabGlyph();
             //-----------------------------------------------------------------------------
             // TELEMETRY
-            telemetry.addData("Lift Encoder Count: ", lift.getCurrentPosition());
-            telemetry.addData("Lift Power", lift.getPower());
             telemetry.addData("Glyph mode", glyphMode);
             telemetry.update();
             //-----------------------------------------------------------------------------
@@ -218,7 +200,7 @@ public class teleOp extends LinearOpMode{
         if (gamepad1.y || gamepad2.dpad_up) { //deposit position, when we're depositing cubes
             deposit();
         }
-        if (gamepad2.b) {
+        if (gamepad2.x) {
             preFlipGrab();
         }
         if ((gamepad1.b && sleeptime.milliseconds() > changePreFlipGrabberT + 250)) {
@@ -239,25 +221,20 @@ public class teleOp extends LinearOpMode{
     public void runIntake(double rpower, double lpower) {
         rintake.setPower(rpower);
         lintake.setPower(lpower);
-        if(rpower < 0 && lpower < 0 && glyphMode) {
-            intakestopper.setPosition(INTAKESTOPPER_STOW);
-        }
-        else if (glyphMode){
-            intakestopper.setPosition(INTAKESTOPPER_STOP);
-        }
     }
 
     public void runAutoIntake() {
         double power;
-        if (deposit) {
+        if (deposit2) {
             power = 0;
         } else {
             power = 1.0;
         }
-        runIntake(1.0, 1.0);
+        runIntake(power, power);
     }
 
     public void grab() {
+        deposit2 = false;
         preFlipStow();
         rflip.setPosition(RFLIP_GRAB);
         lflip.setPosition(LFLIP_GRAB);
@@ -270,6 +247,7 @@ public class teleOp extends LinearOpMode{
         }
     }
     public void zero() {
+        deposit2 = false;
         zero = true;
         preFlipGrab();
         rflip.setPosition(RFLIP_ZERO);
@@ -281,6 +259,7 @@ public class teleOp extends LinearOpMode{
         }
     }
     public void deposit() {
+        deposit2 = true;
         // rflip.setPosition(RFLIP_DEPOSIT);
         // lflip.setPosition(LFLIP_DEPOSIT);
         deposit = true;
@@ -430,16 +409,6 @@ public class teleOp extends LinearOpMode{
         lintake.setDirection(DcMotorSimple.Direction.FORWARD);
 
         lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE); //so that lift can hold its position
-
-        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
-        parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-        parameters.calibrationDataFile = "BNO055IMUCalibration.json";
-        parameters.loggingEnabled = true;
-        parameters.loggingTag     = "IMU";
-        parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
-        imu = hardwareMap.get(BNO055IMU.class, "imu");
-        imu.initialize(parameters);
 
         grab(); //inits flipper to grab position to prepare for grabbing
         fl.setPower(0);

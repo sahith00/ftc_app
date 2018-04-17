@@ -41,7 +41,7 @@ public class autoMethods extends LinearOpMode {
     Servo cat, knock;
     ColorSensor jewelSensor;
     DistanceSensor distanceSensor;
-    Servo rflip, lflip, extendstopper, stopper, bottomgrab, topgrab;
+    Servo rflip, lflip, extendstopper, stopper, bottomgrab, topgrab, intakestopper;
 
     BNO055IMU imu;
     Orientation lastAngles;
@@ -81,7 +81,7 @@ public class autoMethods extends LinearOpMode {
     final static double TOPGRAB_STOW = .209;
     final static double STOPPER_STOP = 0.5;
     final static double STOPPER_STOW = 0.0;
-    final static double INTAKESTOPPER_INIT = 0.65;
+    final static double INTAKESTOPPER_INIT = 0;
     final static double EXTENDSTOPPER_STOW = 0;
     final static double EXTENDSTOPPER_STOP = 0.5;
     final static double RFLIP_DEPOSIT = 0.159444444444444444;//new grab positions were tested so that the edge of the flipper towards the intake was in line with the top edge of the ramp
@@ -127,6 +127,7 @@ public class autoMethods extends LinearOpMode {
         topgrab = hardwareMap.servo.get("topgrab");
         stopper = hardwareMap.servo.get("stopper");
         extendstopper = hardwareMap.servo.get("extendstopper");
+        intakestopper = hardwareMap.servo.get("intakestopper");
 
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
@@ -174,6 +175,7 @@ public class autoMethods extends LinearOpMode {
         sleep(250);
         extendstopper.setPosition(EXTENDSTOPPER_STOW);
         sleep(250);
+        intakestopper.setPosition(INTAKESTOPPER_INIT);
         lift.setPower(.5);
         lift.setTargetPosition(0);
         lift.setPower(.0);
