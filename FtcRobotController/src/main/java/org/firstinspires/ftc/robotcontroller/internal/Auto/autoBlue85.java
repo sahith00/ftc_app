@@ -1,10 +1,10 @@
 package org.firstinspires.ftc.robotcontroller.internal.Auto;
 
 /**
- * Created by sahith on 12/10/17.
+ * Created by vulcanrobotics8375 on 4/18/18.
  */
 
-public class autoRed extends autoMethods {
+public class autoBlue85 extends autoMethods{
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -24,10 +24,8 @@ public class autoRed extends autoMethods {
         jewelAuto();
         imageDetected = doVuforia();
         colorExtendClose();
-        driveDist(2.5, .4, false);
+        driveDist(-2.5, -.4, false);
         //drive up to cryptobox with ir sensor
-        doImage("RED", imageDetected, -78, -50.5, -64, true);
-        glyphAutoClose("R", "RED", -78, -50.5, -64, -90);
-        while (opModeIsActive()) {}
+        doImage("BLUE", imageDetected, -124, -96, -112, true);
     }
 }

@@ -16,8 +16,6 @@ public class autoRed2 extends autoMethods {
 
         knock.setPosition(KNOCK_CENTER);
         sleep(200);
-        lig.setPosition(LIG_HALF_STOW);
-        sleep(200);
         extendstopper.setPosition(EXTENDSTOPPER_STOP);
         sleep(250);
         stopper.setPosition(STOPPER_STOW);
@@ -27,15 +25,15 @@ public class autoRed2 extends autoMethods {
         imageDetected = doVuforia();
 
         stow();
-        driveDist(14, 0.4, false);
+        driveDist(16, 0.4, false);
         sleep(500);
         /*turn(90, 5);
         driveDist(-4, -0.3, false);*/
         strafeDist(-3.5, -0.5);
-        turn(90, .5);
+        turn(90, 1);
         colorDistExtendFar();
         doImage("RED", imageDetected, 8.5,46.5, 31, false);
-        glyphAutoFar(imageDetected, "RED", -25);
+        glyphAutoFar(imageDetected, -25);
         while (opModeIsActive()) {}
     }
 }

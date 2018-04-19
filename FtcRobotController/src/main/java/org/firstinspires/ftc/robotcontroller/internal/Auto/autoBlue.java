@@ -16,8 +16,6 @@ public class autoBlue extends autoMethods {
 
         knock.setPosition(KNOCK_CENTER);
         sleep(200);
-        lig.setPosition(LIG_HALF_STOW);
-        sleep(200);
         extendstopper.setPosition(EXTENDSTOPPER_STOP);
         sleep(250);
         stopper.setPosition(STOPPER_STOW);

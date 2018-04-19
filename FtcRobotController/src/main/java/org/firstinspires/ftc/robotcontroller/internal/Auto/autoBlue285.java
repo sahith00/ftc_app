@@ -1,10 +1,10 @@
 package org.firstinspires.ftc.robotcontroller.internal.Auto;
 
 /**
- * Created by sahith on 12/10/17.
+ * Created by vulcanrobotics8375 on 4/18/18.
  */
 
-public class autoRed extends autoMethods {
+public class autoBlue285 extends autoMethods {
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -15,19 +15,21 @@ public class autoRed extends autoMethods {
         autoT = runtime.milliseconds();
 
         knock.setPosition(KNOCK_CENTER);
-        sleep(200);
         extendstopper.setPosition(EXTENDSTOPPER_STOP);
-        sleep(250);
         stopper.setPosition(STOPPER_STOW);
-        sleep(250);
 
         jewelAuto();
         imageDetected = doVuforia();
-        colorExtendClose();
-        driveDist(2.5, .4, false);
-        //drive up to cryptobox with ir sensor
-        doImage("RED", imageDetected, -78, -50.5, -64, true);
-        glyphAutoClose("R", "RED", -78, -50.5, -64, -90);
-        while (opModeIsActive()) {}
+
+        stow();
+        driveDistance(-12, -0.5, false);
+       /* turn(-90, 2.5);
+        driveDist(4, 0.3, false);*/
+        // sleep(1000);
+        sleep(500);
+        strafeDist(-5.5, -0.5);
+        turn(-90, 1);
+        colorDistExtendFar();
+        doImage("BLUE", imageDetected, 133.5 - 0.5 - 1.5, 168 - 0.5 - 1.5, 149 - 0.5 - 1.5, false);
     }
 }
