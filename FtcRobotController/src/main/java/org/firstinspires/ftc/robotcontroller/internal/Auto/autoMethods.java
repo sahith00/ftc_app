@@ -510,7 +510,7 @@ public class autoMethods extends LinearOpMode {
     public void dropGlyph() {
         topgrab.setPosition(TOPGRAB_STOW);
         bottomgrab.setPosition(BOTTOMGRAB_STOW);
-        //  sleep(500);
+        sleep(500);
         driveDistance(-5, -0.4, true);
         /*sleep(500);
         driveDistance(6.5, 0.4, true);
