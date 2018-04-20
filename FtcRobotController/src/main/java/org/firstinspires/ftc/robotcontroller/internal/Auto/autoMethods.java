@@ -83,7 +83,7 @@ public class autoMethods extends LinearOpMode {
     final static double EXTENDSTOPPER_STOW = 0;
     final static double EXTENDSTOPPER_STOP = 0.5;
     final static double INTAKESTOPPER_STOW = 0;
-    final static double INTAKESTOPPER_STOP = 0.6594444444445;
+    final static double INTAKESTOPPER_STOP = 0.6594444444445-0.025;
     final static double RFLIP_DEPOSIT = 0.139444444444444444;
     final static double RFLIP_ZERO = 0.669444444444444444445;
     final static double RFLIP_GRAB = 0.719444444444444446;
@@ -258,18 +258,18 @@ public class autoMethods extends LinearOpMode {
         double rdistance = 0, ldistance = 0, cdistance = 0;
         if (close) {
             if(team.equals("RED")) {
-                rdistance = 13;
+                rdistance = 11;
                 ldistance = 17;
-                cdistance = 15;
+                cdistance = 14;
             }
             else if(team.equals("BLUE")) {
                 rdistance = 17;
-                ldistance = 13;
+                ldistance = 12;
                 cdistance = 15;
             }
         } else {
             if(team.equals("RED")) {
-                rdistance = 6.25;
+                rdistance = 7.75;
                 ldistance = 12.25;
                 cdistance = 8.25;
             }
@@ -399,28 +399,38 @@ public class autoMethods extends LinearOpMode {
 
     public void glyphAutoClose(String image, String team, double rturn, double lturn, double cturn, double glyphturn) {
         driveDistance(-5, -0.4, false);
-        grab();
-        turn(glyphturn, 0.5); //with flipper towards cryptobox
+        extendstopper.setPosition(EXTENDSTOPPER_STOP);
+        sleep(250);
+        stopper.setPosition(STOPPER_STOP);
+        rflip.setPosition(RFLIP_GRAB);
+        lflip.setPosition(LFLIP_GRAB);
+        bottomgrab.setPosition(BOTTOMGRAB_STOW);
+        topgrab.setPosition(TOPGRAB_STOW);
+        intakestopper.setPosition(INTAKESTOPPER_STOP);
+        turn(glyphturn, 3); //with flipper towards cryptobox
         grabGlyph(1.0);
         double init_ticks = bl.getCurrentPosition();
         drive(-0.6);
-        sleep(1500);
+        driveDist(-11.5, -0.4,  false);
         drive(0.0);
         sleep(750);
         turnForGlyph();
         grabGlyph(0.0);
+        zero();
         double new_ticks = bl.getCurrentPosition();
-        turn(glyphturn, 0.5);
+        turn(glyphturn, 3);
         lift.setPower(.7);
-        lift.setTargetPosition(-500);
-        driveDistance(((new_ticks-init_ticks)/STRAIGHT_TICKS_PER_INCH), 0.4, false);
+        lift.setTargetPosition(500);
+        double targetTicks = -(new_ticks-init_ticks)/STRAIGHT_TICKS_PER_INCH;
+        driveDistance(targetTicks, Math.signum(targetTicks)*0.5, false);
         sleep(500);
-        turn(0, 0.5);
-        driveDist(-4, 0.4, false);
+        turn(0, 3);
+       // driveDist(-4, 0.4, false);
+        colorExtendClose();
         doImage(team, image, rturn, lturn, cturn, true);
     }
 
-    public void glyphAutoFar(String image, double glyphturn) {
+    public void glyphAutoFarBlue(String image, double glyphturn) {
         extendstopper.setPosition(EXTENDSTOPPER_STOP);
         turn(-90, 3);
         if (image.equals("R")) {
@@ -447,7 +457,7 @@ public class autoMethods extends LinearOpMode {
         turn(90, 3);
         if (image.equals("L")) {
             strafeDist(3, 0.5);
-            driveDist(9.5, 0.4, false);
+            driveDist(11.5, 0.4, false);
             colorDistExtend(.17);
         } else {
             driveDist(14, 0.4, false);
@@ -460,7 +470,7 @@ public class autoMethods extends LinearOpMode {
             telemetry.update();
         }
         drive(0.0);
-        double ldistance = 5.75;
+        double ldistance = 5;
         doGlyphAuto(ldistance, glyphturn);
     }
 
@@ -470,7 +480,7 @@ public class autoMethods extends LinearOpMode {
         grab();
         grabGlyph(1.0);
         double init_ticks = bl.getCurrentPosition();
-        driveDist(-39, -.5, false);
+        driveDist(-37, -.5, false);
         sleep(750);
         turnForGlyph();
         turn(angle, 1);
@@ -479,8 +489,8 @@ public class autoMethods extends LinearOpMode {
         lift.setPower(.7);
         lift.setTargetPosition(500);
         deposit();
-        driveDistance(((new_ticks-init_ticks)/STRAIGHT_TICKS_PER_INCH) + distance, 0.4, false);
-        sleep(500);
+        double targetTicks = -((new_ticks-init_ticks)/STRAIGHT_TICKS_PER_INCH) + distance;
+        driveDistance(targetTicks, Math.signum(targetTicks)*0.4, false);
         dropGlyph();
     }
 
@@ -575,7 +585,7 @@ public class autoMethods extends LinearOpMode {
             bl.setPower(maxpower);
             while ((bl.getCurrentPosition() < (ticks + old_ticks)) && opModeIsActive()) {
                 if(timer) {
-                    if(tempTime + 5000 < runtime.milliseconds()) {
+                    if(tempTime + 3000 < runtime.milliseconds()) {
                         break;
                     }
                 }
@@ -598,7 +608,7 @@ public class autoMethods extends LinearOpMode {
             bl.setPower(maxpower);
             while ((bl.getCurrentPosition() > (ticks + old_ticks)) && opModeIsActive()) {
                 if(timer) {
-                    if(tempTime + 5000 < runtime.milliseconds()) {
+                    if(tempTime + 3000 < runtime.milliseconds()) {
                         break;
                     }
                 }

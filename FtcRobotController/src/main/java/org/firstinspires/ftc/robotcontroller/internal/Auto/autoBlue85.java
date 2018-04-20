@@ -27,5 +27,9 @@ public class autoBlue85 extends autoMethods{
         driveDist(-2.5, -.4, false);
         //drive up to cryptobox with ir sensor
         doImage("BLUE", imageDetected, -124, -96, -112, true);
+        sleep(500);
+        driveDistance(6.5, 0.4, true);
+        sleep(500);
+        driveDistance(-5, -0.4, true);
     }
 }

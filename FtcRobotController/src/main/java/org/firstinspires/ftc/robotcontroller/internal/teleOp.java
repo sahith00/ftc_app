@@ -43,7 +43,7 @@ public class teleOp extends LinearOpMode {
     final static double EXTENDSTOPPER_STOW = 0;
     final static double EXTENDSTOPPER_STOP = 0.5;
     final static double INTAKESTOPPER_STOW = 0;
-    final static double INTAKESTOPPER_STOP = 0.6594444444445;
+    final static double INTAKESTOPPER_STOP = 0.6594444444445-0.025;
     final static double RFLIP_DEPOSIT = 0.139444444444444444;
     final static double RFLIP_ZERO = 0.669444444444444444445;
     final static double RFLIP_GRAB = 0.719444444444444446;
@@ -115,14 +115,14 @@ public class teleOp extends LinearOpMode {
             //-----------------------------------------------------------------------------
             // DRIVE ROBOT
             if (glyphMode) {
-                multiplier = -Range.clip(gamepad1.left_trigger - 1, -1, -0.4);
+                multiplier = -Range.clip(gamepad1.left_trigger - 1, -1, -0.5);
                 lig.setPosition(LIG_INIT);
             } else {
                 multiplier = 1.0;
                 if (gamepad1.left_bumper && (sleeptime.milliseconds() > (changeMultiT + 250))) {
                     changeMultiT = sleeptime.milliseconds();
                     if (multiplier == 1.0) {
-                        multiplier = 0.3;
+                        multiplier = 0.5;
                     } else {
                         multiplier = 1.0;
                     }
@@ -323,8 +323,8 @@ public class teleOp extends LinearOpMode {
         double temp_max2 = Math.max(temp_max, Math.abs(v3));
         double max = Math.max(temp_max2, Math.abs(v4));
         if ((v1 > 0 && v2 > 0 && v3 > 0 && v4 > 0) || (v1 < 0 && v2 < 0 && v3 < 0 && v4 < 0)) {
-            if (multiplier < 0.5) {
-                multiplier = 0.5;
+            if (multiplier < 0.6) {
+                multiplier = 0.6;
             }
         }
         if (max > 1) {
