@@ -334,19 +334,19 @@ public class autoMethods extends LinearOpMode {
                 turn(rturn, 1);
             }
             outtake();
-            driveDistance(rdistance, 0.5, true);
+            driveDistTimer(rdistance, .4, 1.5,true);
             sleep(500);
             dropGlyph();
         } else if (image.equals("L")) {
             turn(lturn, 1);
             outtake();
-            driveDistance(ldistance, 0.5, true);
+            driveDistTimer(ldistance, .4, 1.5,true);
             sleep(500);
             dropGlyph();
         } else {
             turn(cturn, 1);
             outtake();
-            driveDistance(cdistance, 0.5, true);
+            driveDistTimer(cdistance, .4, 1.5,true);
             sleep(500);
             dropGlyph();
         }
@@ -627,6 +627,57 @@ public class autoMethods extends LinearOpMode {
         driveDist(0.5 * distance, maxpower/1, timer);
         driveDist(0.3 * distance, maxpower/2, timer);
         driveDist(0.2 * distance, maxpower/3, timer);
+    }
+
+    public void driveDistTimer(double distance, double maxpower, double seconds, boolean endtimer) {
+        double tempTime = runtime.milliseconds();
+        if (distance > 0) {
+            int ticks;
+            int old_ticks = bl.getCurrentPosition();
+            ticks = (int) (STRAIGHT_TICKS_PER_INCH * distance);
+            fr.setPower(maxpower);
+            fl.setPower(maxpower);
+            br.setPower(maxpower);
+            bl.setPower(maxpower);
+            while ((bl.getCurrentPosition() < (ticks + old_ticks)) && opModeIsActive()) {
+                if(tempTime + seconds*1000 < runtime.milliseconds()) {
+                        break;
+
+                }
+                if (endtimer) {
+                    if (autoT + 28000 < runtime.milliseconds()) {
+                        end();
+                    }
+                }
+            }
+            fr.setPower(0);
+            fl.setPower(0);
+            br.setPower(0);
+            bl.setPower(0);
+        }
+        else if (distance < 0){
+            int ticks;
+            int old_ticks = bl.getCurrentPosition();
+            ticks = (int) (STRAIGHT_TICKS_PER_INCH * distance);
+            fr.setPower(maxpower);
+            fl.setPower(maxpower);
+            br.setPower(maxpower);
+            bl.setPower(maxpower);
+            while ((bl.getCurrentPosition() > (ticks + old_ticks)) && opModeIsActive()) {
+                if(tempTime + seconds*1000 < runtime.milliseconds()) {
+                        break;
+                }
+                if (endtimer) {
+                    if (autoT + 28000 < runtime.milliseconds()) {
+                        end();
+                    }
+                }
+            }
+            fr.setPower(0);
+            fl.setPower(0);
+            br.setPower(0);
+            bl.setPower(0);
+        }
     }
 
     public void drive(double maxpower) {

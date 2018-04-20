@@ -32,9 +32,9 @@ public class autoRed285 extends autoMethods {
         strafeDist(-3.5, -0.5);
         turn(90, .5);
         colorDistExtendFar();
-        doImage("RED", imageDetected, 8.5+2, 46.5+2, 31+2, false);
+        doImage("RED", imageDetected, 8.5+4, 46.5+2, 31+2, false);
         sleep(500);
-        driveDistance(6.5, 0.4, true);
+        driveDistTimer(6.5, 0.4, 3, true);
         sleep(500);
         driveDistance(-5, -0.4, true);
     }

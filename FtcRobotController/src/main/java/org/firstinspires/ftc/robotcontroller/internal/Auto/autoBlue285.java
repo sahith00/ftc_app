@@ -32,7 +32,7 @@ public class autoBlue285 extends autoMethods {
         colorDistExtendFar();
         doImage("BLUE", imageDetected, 133.5 - 0.5 - 1.5, 168 - 0.5 - 1.5, 149 - 0.5 - 1.5, false);
         sleep(500);
-        driveDistance(6.5, 0.4, true);
+        driveDistTimer(6.5, 0.4, 3, true);
         sleep(500);
         driveDistance(-5, -0.4, true);
     }
