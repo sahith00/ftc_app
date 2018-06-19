@@ -281,9 +281,9 @@ public class autoMethods extends LinearOpMode {
         }
         double tempTime = runtime.milliseconds();
         if(team.equals("BLUE")) {
-            while ((jewelSensor.blue() < 100) && opModeIsActive()) {
+            while ((jewelSensor.blue() < 200) && opModeIsActive()) {//original threshold was 100, changed for makerfaire
                 drive(-0.2);
-                if (tempTime + 4000 < runtime.milliseconds()) {
+                if (tempTime + 3000 < runtime.milliseconds()) {
                     end();
                 }
                 telemetry.addData("Motor power", fl.getPower());
@@ -300,9 +300,9 @@ public class autoMethods extends LinearOpMode {
             strafe(0.0);
         }
         else if(team.equals("RED")) {
-            while ((jewelSensor.red() < 100) && opModeIsActive()) {
+            while ((jewelSensor.red() < 450) && opModeIsActive()) {//original threshold was 100, changed for makerfaire
                 drive(0.2);
-                if (tempTime + 4000 < runtime.milliseconds()) {
+                if (tempTime + 3000 < runtime.milliseconds()) {
                     end();
                 }
                 telemetry.addData("Motor power", fl.getPower());
@@ -333,19 +333,22 @@ public class autoMethods extends LinearOpMode {
             else {
                 turn(rturn, 1);
             }
-            outtake();
+            deposit();
+            sleep(500);
             driveDistTimer(rdistance, .4, 1.5,true);
             sleep(500);
             dropGlyph();
         } else if (image.equals("L")) {
             turn(lturn, 1);
-            outtake();
+            deposit();
+            sleep(500);
             driveDistTimer(ldistance, .4, 1.5,true);
             sleep(500);
             dropGlyph();
         } else {
             turn(cturn, 1);
-            outtake();
+            deposit();
+            sleep(500);
             driveDistTimer(cdistance, .4, 1.5,true);
             sleep(500);
             dropGlyph();
@@ -411,7 +414,7 @@ public class autoMethods extends LinearOpMode {
         grabGlyph(1.0);
         double init_ticks = bl.getCurrentPosition();
         drive(-0.6);
-        driveDist(-11.5, -0.4,  false);
+        driveDist(-13.5, -0.4,  false);
         drive(0.0);
         sleep(750);
         turnForGlyph();
@@ -441,7 +444,7 @@ public class autoMethods extends LinearOpMode {
             driveDist(-14, -0.4, false);
             colorDistExtend(.17);
         }
-        while (jewelSensor.blue() < 100 && opModeIsActive()) {
+        while (jewelSensor.blue() < 200 && opModeIsActive()) {
             drive(-0.2);
             telemetry.addData("Motor power", fl.getPower());
             telemetry.addData("distance", String.format(Locale.US, "%.02f", distanceSensor.getDistance(DistanceUnit.CM)));
@@ -457,13 +460,13 @@ public class autoMethods extends LinearOpMode {
         turn(90, 3);
         if (image.equals("L")) {
             strafeDist(3, 0.5);
-            driveDist(11.5, 0.4, false);
+            driveDist(9, 0.4, false);
             colorDistExtend(.17);
         } else {
             driveDist(14, 0.4, false);
             colorDistExtend(.17);
         }
-        while (jewelSensor.red() < 100 && opModeIsActive()) {
+        while (jewelSensor.red() < 450 && opModeIsActive()) {
             drive(0.2);
             telemetry.addData("Motor power", fl.getPower());
             telemetry.addData("distance", String.format(Locale.US, "%.02f", distanceSensor.getDistance(DistanceUnit.CM)));
@@ -476,22 +479,29 @@ public class autoMethods extends LinearOpMode {
 
     public void doGlyphAuto(double distance, double angle) {
         stow();
-        turn(angle, 4);
+        turn(angle, 1);
         grab();
+        intakestopper.setPosition(INTAKESTOPPER_STOP);
         grabGlyph(1.0);
         double init_ticks = bl.getCurrentPosition();
-        driveDist(-37, -.5, false);
+        driveDist(-36, -.5, false);
         sleep(750);
         turnForGlyph();
         turn(angle, 1);
         grabGlyph(0.0);
         double new_ticks = bl.getCurrentPosition();
+        zero();
         lift.setPower(.7);
         lift.setTargetPosition(500);
-        deposit();
         double targetTicks = -((new_ticks-init_ticks)/STRAIGHT_TICKS_PER_INCH) + distance;
-        driveDistance(targetTicks, Math.signum(targetTicks)*0.4, false);
+        driveDist(targetTicks*.8, Math.signum(targetTicks)*0.4, false);
+        deposit();
+        bottomgrab.setPosition(BOTTOMGRAB_STOW);
+        topgrab.setPosition(TOPGRAB_STOW);
+        driveDistance((targetTicks*.2) - 0.5, Math.signum(targetTicks)*0.4,true);
         dropGlyph();
+        driveDistTimer(6.5, 0.4, 1.3, false);
+        driveDistTimer(-5, -0.4, 1.3, true);
     }
 
     public OpenGLMatrix createMatrix(float x, float y, float z, float u, float v, float w){
@@ -519,18 +529,14 @@ public class autoMethods extends LinearOpMode {
 
     public void dropGlyph() {
         topgrab.setPosition(TOPGRAB_STOW);
+        sleep(200);
         bottomgrab.setPosition(BOTTOMGRAB_STOW);
-        sleep(500);
-        driveDistance(-5, -0.4, true);
+        sleep(200);
+        driveDistTimer(-5, -0.4, 1.5, true);
         /*sleep(500);
         driveDistance(6.5, 0.4, true);
         sleep(500);
         driveDistance(-5, -0.4, true);*/
-    }
-
-    public void outtake() {
-        deposit();
-        sleep(750);
     }
 
     public void grab() {
@@ -818,16 +824,48 @@ public class autoMethods extends LinearOpMode {
     }
 
     public void end() {
-        outtake();
-        fr.setPower(-0.2);
-        br.setPower(-0.2);
-        fl.setPower(-0.2);
-        bl.setPower(-0.2);
-        sleep(500);
-        fr.setPower(0);
-        br.setPower(0);
-        fl.setPower(0);
-        bl.setPower(0);
+        deposit();
+        topgrab.setPosition(TOPGRAB_STOW);
+        sleep(200);
+        bottomgrab.setPosition(BOTTOMGRAB_STOW);
+        sleep(200);
+        driveDistTimer(-3, -0.25, 1.5, false);
         while(opModeIsActive()){}
+    }
+
+    public void farAutoRed85() {
+        stow();
+        driveDistance(15.5, 0.4, false);
+        sleep(500);
+        /*turn(90, 5);
+        driveDist(-4, -0.3, false);*/
+        strafeDist(-3.5, -0.5);
+        turn(90, .5);
+        colorDistExtendFar();
+        doImage("RED", imageDetected, 8.5+4, 46.5+2, 31+2, false);
+    }
+    public void farAutoBlue85() {
+        stow();
+        driveDistance(-18, -0.5, false); //-14 previous distance value
+       /* turn(-90, 2.5);
+        driveDist(4, 0.3, false);*/
+        // sleep(1000);
+        sleep(500);
+        strafeDist(-5.5, -0.5);
+        turn(-90, 1);
+        colorDistExtendFar();
+        doImage("BLUE", imageDetected, 133.5 - 0.5 - 1.5, 168 - 0.5 - 1.5, 149 - 0.5 - 1.5, false);
+    }
+    public void closeAutoRed85() {
+        colorExtendClose();
+        driveDist(1.5, .4, false);
+        //drive up to cryptobox with ir sensor
+        doImage("RED", imageDetected, -80.5, -50, -64, true);
+    }
+    public void closeAutoBlue85() {
+        colorExtendClose();
+        driveDist(-1.5, -.4, false);
+        //drive up to cryptobox with ir sensor
+        doImage("BLUE", imageDetected, -124, -96, -112, true);
     }
 }

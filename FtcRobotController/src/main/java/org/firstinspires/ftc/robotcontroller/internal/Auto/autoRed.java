@@ -23,11 +23,9 @@ public class autoRed extends autoMethods {
 
         jewelAuto();
         imageDetected = doVuforia();
-        colorExtendClose();
-        driveDist(2.5, .4, false);
-        //drive up to cryptobox with ir sensor
-        doImage("RED", imageDetected, -82, -50, -64, true);
-        glyphAutoClose("R", "RED", -81, -47.5, -64, -90);
+
+        closeAutoRed85();
+        glyphAutoClose("C", "RED", -75, -47.5, -61, -90);
 //        drive(.6);
 //        sleep(500);
 //        drive(-0.4);

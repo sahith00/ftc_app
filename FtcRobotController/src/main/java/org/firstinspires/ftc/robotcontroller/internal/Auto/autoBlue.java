@@ -18,15 +18,12 @@ public class autoBlue extends autoMethods {
         sleep(200);
         extendstopper.setPosition(EXTENDSTOPPER_STOP);
         sleep(250);
-        stopper.setPosition(STOPPER_STOW);
-        sleep(250);
+
 
         jewelAuto();
         imageDetected = doVuforia();
-        colorExtendClose();
-        driveDist(-2.5, -.4, false);
-        //drive up to cryptobox with ir sensor
-        doImage("BLUE", imageDetected, -124, -96, -112, true);
+
+        closeAutoBlue85();
         glyphAutoClose("L", "BLUE", -124, -96, -112, -90);
         while(opModeIsActive()){}
     }

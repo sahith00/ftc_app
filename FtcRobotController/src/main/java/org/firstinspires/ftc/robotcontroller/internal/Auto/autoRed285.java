@@ -24,15 +24,7 @@ public class autoRed285 extends autoMethods {
         jewelAuto();
         imageDetected = doVuforia();
 
-        stow();
-        driveDist(15.5, 0.4, false);
-        sleep(500);
-        /*turn(90, 5);
-        driveDist(-4, -0.3, false);*/
-        strafeDist(-3.5, -0.5);
-        turn(90, .5);
-        colorDistExtendFar();
-        doImage("RED", imageDetected, 8.5+4, 46.5+2, 31+2, false);
+        farAutoRed85();
         sleep(500);
         driveDistTimer(6.5, 0.4, 3, true);
         sleep(500);

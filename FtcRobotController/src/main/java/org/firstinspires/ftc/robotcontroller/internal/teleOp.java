@@ -44,12 +44,12 @@ public class teleOp extends LinearOpMode {
     final static double EXTENDSTOPPER_STOP = 0.5;
     final static double INTAKESTOPPER_STOW = 0;
     final static double INTAKESTOPPER_STOP = 0.6594444444445-0.025;
-    final static double RFLIP_DEPOSIT = 0.139444444444444444;
+    final static double RFLIP_DEPOSIT = 0.0794444;//0.139444444444444444;
     final static double RFLIP_ZERO = 0.669444444444444444445;
     final static double RFLIP_GRAB = 0.719444444444444446;
-    final static double LFLIP_DEPOSIT = 0.78;
-    final static double LFLIP_ZERO = 0.19;
-    final static double LFLIP_GRAB = 0.15;
+    final static double LFLIP_DEPOSIT = .82;//0.78;
+    final static double LFLIP_ZERO = .26;//.23;//0.19;
+    final static double LFLIP_GRAB = .23;//.19;//0.15;
 
     final static double LIG_GRAB = .0494444444444444444;//.899444444444444444445;
     final static double LIG_HALF_STOW = .3294444444444444444;
@@ -107,11 +107,15 @@ public class teleOp extends LinearOpMode {
         while (opModeIsActive()) {
             cat.setPosition(CAT_STOW);
             knock.setPosition(KNOCK_CENTER);
+            if (gamepad1.left_stick_button) {
+                cat.setPosition(CAT_STOW);
+                knock.setPosition(KNOCK_CENTER);
+            }
 
-            if (gamepad1.right_bumper && (sleeptime.milliseconds() > (changeModeT + 250))) {
+            /*if (gamepad1.right_bumper && (sleeptime.milliseconds() > (changeModeT + 250))) {
                 changeModeT = sleeptime.milliseconds();
                 glyphMode = !glyphMode;
-            }
+            }*/
             //-----------------------------------------------------------------------------
             // DRIVE ROBOT
             if (glyphMode) {
@@ -141,15 +145,23 @@ public class teleOp extends LinearOpMode {
             if (glyphMode) {
                 flip();
                 moveStopper();
-                if (gamepad2.a && (changeIntakeStopperT + 250 < sleeptime.milliseconds())) {
+                if (gamepad1.left_bumper && (sleeptime.milliseconds() > (changeIntakeStopperT + 250))) {
                     changeIntakeStopperT = sleeptime.milliseconds();
                     if (intakeStopperPos == INTAKESTOPPER_STOP) {
                         intakeStopperPos = INTAKESTOPPER_STOW;
                     } else {
                         intakeStopperPos = INTAKESTOPPER_STOP;
                     }
+                    intakestopper.setPosition(intakeStopperPos);
                 }
-                intakestopper.setPosition(intakeStopperPos);
+                /*if (gamepad1.right_stick_button && (changeIntakeStopperT + 250 < sleeptime.milliseconds())) {
+                    changeIntakeStopperT = sleeptime.milliseconds();
+                    if (intakeStopperPos == INTAKESTOPPER_STOP) {
+                        intakeStopperPos = INTAKESTOPPER_STOW;
+                    } else {
+                        intakeStopperPos = INTAKESTOPPER_STOP;
+                    }
+                }*/
             }
             lift.setPower(Range.clip(gamepad2.right_stick_y, -1, 1));
             grabGlyph();
@@ -208,10 +220,10 @@ public class teleOp extends LinearOpMode {
                 preFlipStow();
             }
         }
-        if (gamepad1.left_bumper && sleeptime.milliseconds() > changePreFlipModeT + 250) { //toggle to switch between PreFlip and Regular Flipper
+       /* if (gamepad1.left_bumper && sleeptime.milliseconds() > changePreFlipModeT + 250) { //toggle to switch between PreFlip and Regular Flipper
             changePreFlipModeT = sleeptime.milliseconds();
             preflip = !preflip;
-        }
+        }*/
     }
 
     public void runIntake(double rpower, double lpower) {

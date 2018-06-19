@@ -23,10 +23,8 @@ public class autoBlue85 extends autoMethods{
 
         jewelAuto();
         imageDetected = doVuforia();
-        colorExtendClose();
-        driveDist(-2.5, -.4, false);
-        //drive up to cryptobox with ir sensor
-        doImage("BLUE", imageDetected, -124, -96, -112, true);
+
+        closeAutoBlue85();
         sleep(500);
         driveDistTimer(6.5, 0.4, 3, true);
         sleep(500);
